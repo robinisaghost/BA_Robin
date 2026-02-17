@@ -12,6 +12,10 @@ venv/
 data/raw/
 data/processed/
 
+# experiment outputs
+reports/results/
+reports/figures/
+
 # Outputs
 runs/
 checkpoints/
@@ -22,3 +26,4 @@ checkpoints/
 # OS
 .DS_Store
 Thumbs.db
+

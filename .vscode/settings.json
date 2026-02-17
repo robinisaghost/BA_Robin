@@ -1,10 +1,20 @@
-﻿{
-  "python.defaultInterpreterPath": "\\\\.venv\\\\Scripts\\\\python.exe",
-  "python.analysis.extraPaths": ["/src"],
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/src"
+  ],
   "python.terminal.activateEnvironment": true,
+  "editor.formatOnSave": true,
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
   "search.exclude": {
     "data/**": true,
     "**/__pycache__/**": true,
     "**/.ipynb_checkpoints/**": true
+  },
+  "terminal.integrated.env.windows": {
+    "KMP_DUPLICATE_LIB_OK": "TRUE",
+    "PYTHONPATH": "src"
   }
 }
