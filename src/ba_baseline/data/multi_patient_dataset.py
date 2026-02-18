@@ -12,7 +12,15 @@ class MultiPatientWindowDataset(Dataset):
       y: (horizon,)
     """
 
-    def __init__(self, series_by_patient: dict, patient_ids, lookback: int, horizon: int, mean=None, std=None):
+    def __init__(
+        self,
+        series_by_patient: dict,
+        patient_ids,
+        lookback: int,
+        horizon: int,
+        mean=None,
+        std=None,
+    ):
         self.mean = float(mean) if mean is not None else None
         self.std = float(std) if std is not None else None
         self.lookback = int(lookback)
@@ -47,9 +55,9 @@ class MultiPatientWindowDataset(Dataset):
         y = s[i + self.lookback : i + self.lookback + self.horizon]  # (horizon,)
 
         if self.mean is not None and self.std is not None:
-        x = (x - self.mean) / (self.std + 1e-8)
-        y = (y - self.mean) / (self.std + 1e-8)
-        
+            x = (x - self.mean) / (self.std + 1e-8)
+            y = (y - self.mean) / (self.std + 1e-8)
+
         x = torch.from_numpy(x).unsqueeze(-1)  # (lookback, 1)
         y = torch.from_numpy(y)  # (horizon,)
         return x, y
