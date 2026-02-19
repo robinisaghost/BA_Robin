@@ -94,3 +94,48 @@ def event_metrics(
         "recall": float(recall),
         "fbeta": float(fbeta),
     }
+
+
+def shift_1d(x: np.ndarray, k: int) -> np.ndarray:
+    """
+    Shift 1D array by k steps.
+    k > 0: shift right (delay)  -> first k become NaN
+    k < 0: shift left  (advance)-> last -k become NaN
+    """
+    x = np.asarray(x)
+    y = x.astype(float).copy()
+
+    if k > 0:
+        y[:k] = np.nan
+        y[k:] = x[:-k]
+    elif k < 0:
+        kk = -k
+        y[-kk:] = np.nan
+        y[:-kk] = x[kk:]
+    # k == 0: unchanged
+    return y
+
+
+def best_lag_rmse(true: np.ndarray, pred: np.ndarray, max_lag: int = 24) -> int:
+    """
+    Find lag k in [-max_lag, max_lag] that minimizes RMSE(true, shift_1d(pred, k)).
+    This returns the *correction lag* to apply to pred.
+    """
+    true = np.asarray(true).astype(float)
+    pred = np.asarray(pred).astype(float)
+
+    best_k = 0
+    best_val = float("inf")
+
+    for k in range(-max_lag, max_lag + 1):
+        p = shift_1d(pred, k)
+        mask = ~np.isnan(p)
+        if mask.sum() < 10:
+            continue
+        err = true[mask] - p[mask]
+        rmse_k = float(np.sqrt(np.mean(err * err)))
+        if rmse_k < best_val:
+            best_val = rmse_k
+            best_k = k
+
+    return best_k

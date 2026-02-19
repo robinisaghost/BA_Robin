@@ -8,7 +8,13 @@ from ba_baseline.data.patient_loader import load_patient_series
 from ba_baseline.data.split import split_patients
 from ba_baseline.data.multi_patient_dataset import MultiPatientWindowDataset
 from ba_baseline.models.lstm import LSTMForecaster
-from ba_baseline.metrics.metrics import rmse, mae, best_lag_crosscorr, event_metrics
+from ba_baseline.metrics.metrics import (
+    rmse,
+    mae,
+    best_lag_crosscorr,
+    best_lag_rmse,
+    event_metrics,
+)
 
 
 def set_seed(seed=42):
@@ -200,7 +206,7 @@ def main():
     for pid, (t, p) in traces_60.items():
         rmses60.append(rmse(t, p))
         maes60.append(mae(t, p))
-        lags60.append(best_lag_crosscorr(t, p, max_lag=24))
+        lags60.append(best_lag_rmse(t, p, max_lag=24))
 
     print("=== TEST 60-min ahead (macro over patients) ===")
     print(

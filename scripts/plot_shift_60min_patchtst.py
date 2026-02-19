@@ -23,13 +23,13 @@ def main():
     os.makedirs("reports/figures", exist_ok=True)
 
     # --- load summary ---
-    with open("reports/results/lstm_60min_summary.json", "r", encoding="utf8") as f:
+    with open("reports/results/patchtst_60min_summary.json", "r", encoding="utf8") as f:
         summary = json.load(f)
 
     # --- load lags ---
     lags = []
     pids = []
-    with open("reports/results/lstm_60min_lags.csv", "r", encoding="utf8") as f:
+    with open("reports/results/patchtst_60min_lags.csv", "r", encoding="utf8") as f:
         next(f)
         for line in f:
             pid, lag = line.strip().split(",")
@@ -41,15 +41,15 @@ def main():
     plt.figure()
     bins = np.arange(lags.min() - 0.5, lags.max() + 1.5, 1)
     plt.hist(lags, bins=bins)
-    plt.title("LSTM: best-lag distribution (1-step, per patient)")
+    plt.title("PatchTST: best-lag distribution (1-step, per patient)")
     plt.xlabel("lag (steps)")
     plt.ylabel("number of patients")
     plt.tight_layout()
-    plt.savefig("reports/figures/lstm_lag_hist_60min.png", dpi=200)
+    plt.savefig("reports/figures/patchtst_lag_hist_60min.png", dpi=200)
     plt.close()
 
     # 2) Example overlay plots
-    data = np.load("reports/results/lstm_60min_traces_examples.npz")
+    data = np.load("reports/results/patchtst_60min_traces_examples.npz")
     example_pids = sorted({k.split("_")[0] for k in data.keys()})
 
     for pid in example_pids:
@@ -61,7 +61,7 @@ def main():
         t = t[:N]
         p = p[:N]
 
-        lag = best_lag_rmse(t, p, max_lag=24)  # lag ist die Korrektur, die wir anwenden
+        lag = best_lag_rmse(t, p, max_lag=24)  # lag is the correction to apply
         p_shift = shift_1d(p, lag)
         print(
             pid,
@@ -80,16 +80,18 @@ def main():
         )
         plt.plot(p, label="pred (raw)", linewidth=2, alpha=0.8, linestyle="--")
 
-        plt.title(f"LSTM overlay (1-step trace) | patient {pid}")
+        plt.title(f"PatchTST overlay (1-step trace) | patient {pid}")
         plt.xlabel("time index (5-min steps, relative)")
         plt.ylabel("glucose")
         plt.legend()
         plt.tight_layout()
-        plt.savefig(f"reports/figures/lstm_overlay_patient_{pid}_60min.png", dpi=200)
+        plt.savefig(
+            f"reports/figures/patchtst_overlay_patient_{pid}_60min.png", dpi=200
+        )
         plt.close()
 
     # 3) Save a small text summary for easy copy into report
-    with open("reports/figures/lstm_60min_summary.txt", "w", encoding="utf8") as f:
+    with open("reports/figures/patchtst_60min_summary.txt", "w", encoding="utf8") as f:
         for k, v in summary.items():
             f.write(f"{k}: {v}\n")
 
