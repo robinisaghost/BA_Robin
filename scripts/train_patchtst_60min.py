@@ -109,7 +109,7 @@ def main():
     opt = torch.optim.AdamW(model.parameters(), lr=5e-4)
     loss_fn = torch.nn.MSELoss()
 
-    for epoch in range(1, 4):
+    for epoch in range(1, 2):
         model.train()
         total = 0.0
         n = 0
@@ -141,10 +141,11 @@ def main():
         print(f"epoch {epoch} | train_mse={train_mse:.4f} | val_mse={val_mse:.4f}")
 
     # --- 60-min ahead traces ---
+    all_ids = sorted(d.keys())
     traces_60 = eval_hstep_trace_per_patient(
         model,
         d,
-        test_ids,
+        all_ids,
         lookback,
         horizon,
         device,
@@ -170,13 +171,29 @@ def main():
 
     # --- save artifacts (60-min only) ---
     os.makedirs("reports/results", exist_ok=True)
+    with open(
+        "reports/results/patchtst_60min_per_patient_metrics_all.csv",
+        "w",
+        encoding="utf8",
+    ) as f:
+        f.write("patient_id,model,rmse,mae,best_lag_steps\n")
+        for pid, (t, p) in traces_60.items():
+            f.write(
+                f"{pid},patchtst,{rmse(t, p):.6f},{mae(t, p):.6f},{best_lag_rmse(t, p, max_lag=24)}\n"
+            )
+
+    np.savez(
+        "reports/results/patchtst_60min_traces_all_patients.npz",
+        **{f"{pid}_true": traces_60[pid][0] for pid in traces_60.keys()},
+        **{f"{pid}_pred": traces_60[pid][1] for pid in traces_60.keys()},
+    )
 
     summary60 = {
         "rmse_mean": float(np.mean(rmses60)),
         "mae_mean": float(np.mean(maes60)),
         "lag_mean_steps": float(np.mean(lags60)),
         "lag_median_steps": float(np.median(lags60)),
-        "test_patient_ids": list(traces_60.keys()),
+        "patient_ids": list(traces_60.keys()),
         "horizon_steps": horizon,
         "target_index": int(target_index),
         "target_minutes": 60,
@@ -196,13 +213,6 @@ def main():
         f.write("patient_id,lag_steps\n")
         for pid, lag in zip(traces_60.keys(), lags60):
             f.write(f"{pid},{lag}\n")
-
-    example_pids = sorted(traces_60.keys())[:3]
-    np.savez(
-        "reports/results/patchtst_60min_traces_examples.npz",
-        **{f"{pid}_true": traces_60[pid][0] for pid in example_pids},
-        **{f"{pid}_pred": traces_60[pid][1] for pid in example_pids},
-    )
 
     print("Saved PATCHTST 60-min artifacts to reports/results/")
 

@@ -114,7 +114,7 @@ def main():
     loss_fn = torch.nn.MSELoss()
 
     # training: few epochs
-    for epoch in range(1, 3):
+    for epoch in range(1, 2):
         model.train()
         total = 0.0
         n = 0
@@ -146,8 +146,9 @@ def main():
         print(f"epoch {epoch} | train_mse={train_mse:.4f} | val_mse={val_mse:.4f}")
 
     # --- 60-min ahead trace (horizon=12 => index 11) ---
+    all_ids = sorted(d.keys())
     traces_60 = eval_hstep_trace_per_patient(
-        model, d, test_ids, lookback, horizon, device, g_mean, g_std, h_index=11
+        model, d, all_ids, lookback, horizon, device, g_mean, g_std, h_index=11
     )
 
     lags60 = []
@@ -171,7 +172,7 @@ def main():
 
     # Save full per-patient 60-min metrics
     with open(
-        "reports/results/lstm_60min_per_patient_metrics.csv", "w", encoding="utf8"
+        "reports/results/lstm_60min_per_patient_metrics_all.csv", "w", encoding="utf8"
     ) as f:
         f.write("patient_id,model,rmse,mae,best_lag_steps\n")
         for pid, (t, p) in traces_60.items():
@@ -181,7 +182,7 @@ def main():
 
     # Save full traces for all patients
     np.savez(
-        "reports/results/lstm_60min_traces_all.npz",
+        "reports/results/lstm_60min_traces_all_patients.npz",
         **{f"{pid}_true": traces_60[pid][0] for pid in traces_60.keys()},
         **{f"{pid}_pred": traces_60[pid][1] for pid in traces_60.keys()},
     )
@@ -193,7 +194,7 @@ def main():
         "mae_mean": float(np.mean(maes60)),
         "lag_mean_steps": float(np.mean(lags60)),
         "lag_median_steps": float(np.median(lags60)),
-        "test_patient_ids": list(traces_60.keys()),
+        "patient_ids": list(traces_60.keys()),
         "horizon_steps": horizon,
         "target_index": 11,
         "target_minutes": 60,
@@ -206,8 +207,6 @@ def main():
         f.write("patient_id,lag_steps\n")
         for pid, lag in zip(traces_60.keys(), lags60):
             f.write(f"{pid},{lag}\n")
-
-    print("Saved 60-min artifacts to reports/results/")
 
 
 if __name__ == "__main__":
