@@ -14,7 +14,6 @@ pivot = pivot.reset_index()
 
 pivot["rmse_diff"] = pivot["patchtst_rmse"] - pivot["lstm_rmse"]
 pivot["mae_diff"] = pivot["patchtst_mae"] - pivot["lstm_mae"]
-pivot["lag_diff"] = pivot["patchtst_best_lag_steps"] - pivot["lstm_best_lag_steps"]
 
 pivot = pivot[
     [
@@ -25,9 +24,6 @@ pivot = pivot[
         "lstm_mae",
         "patchtst_mae",
         "mae_diff",
-        "lstm_best_lag_steps",
-        "patchtst_best_lag_steps",
-        "lag_diff",
     ]
 ].sort_values("patient_id")
 
@@ -41,6 +37,6 @@ print("Summary:")
 print("LSTM better on RMSE:", int((pivot["rmse_diff"] < 0).sum()))
 print("PatchTST better on RMSE:", int((pivot["rmse_diff"] > 0).sum()))
 print("Equal RMSE:", int((pivot["rmse_diff"] == 0).sum()))
-print("LSTM better on MAE:", int((pivot["mae_diff"] < 0).sum()))
+print("LSTM better on MAE:    ", int((pivot["mae_diff"] < 0).sum()))
 print("PatchTST better on MAE:", int((pivot["mae_diff"] > 0).sum()))
-print("Equal MAE:", int((pivot["mae_diff"] == 0).sum()))
+print("Equal MAE:             ", int((pivot["mae_diff"] == 0).sum()))

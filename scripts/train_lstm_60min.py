@@ -8,11 +8,7 @@ from ba_baseline.data.patient_loader import load_patient_series
 from ba_baseline.data.split import split_patients
 from ba_baseline.data.multi_patient_dataset import MultiPatientWindowDataset
 from ba_baseline.models.lstm import LSTMForecaster
-from ba_baseline.metrics.metrics import (
-    rmse,
-    mae,
-    best_lag_rmse,
-)
+from ba_baseline.metrics.metrics import rmse, mae
 
 
 def set_seed(seed=42):
@@ -33,6 +29,7 @@ def eval_hstep_trace_per_patient(
     mean,
     std,
     h_index,
+    batch_size=2048,
 ):
     """
     Build h-step-ahead trace for each patient:
@@ -47,28 +44,25 @@ def eval_hstep_trace_per_patient(
         if len(s) < lookback + horizon + 1:
             continue
 
-        xs = []
-        ys = []
-        max_start = len(s) - (lookback + horizon)
-        for i in range(max_start):
-            x = ((s[i : i + lookback] - mean) / (std + 1e-8)).astype(np.float32)
-            y = (
-                (s[i + lookback : i + lookback + horizon] - mean) / (std + 1e-8)
-            ).astype(np.float32)
-            xs.append(x)
-            ys.append(y)
+        N = len(s) - lookback - horizon
+        s_norm = ((s - mean) / (std + 1e-8)).astype(np.float32)
 
-        xs = torch.tensor(np.stack(xs)).unsqueeze(-1).to(device)  # (N, lookback, 1)
-        ys = np.stack(ys)  # (N, horizon) normalized
+        # Vectorized window creation (no Python loop)
+        xs_np = np.lib.stride_tricks.sliding_window_view(s_norm, lookback)[:N]       # (N, lookback)
+        ys_np = np.lib.stride_tricks.sliding_window_view(s_norm, horizon)[lookback:lookback + N]  # (N, horizon)
 
-        yhat = model(xs).detach().cpu().numpy()  # normalized
+        # Batched inference to avoid large single tensors on CPU
+        yhats = []
+        for start in range(0, N, batch_size):
+            xb = torch.tensor(xs_np[start : start + batch_size]).unsqueeze(-1).to(device)
+            yhats.append(model(xb).cpu().numpy())
+        yhat = np.concatenate(yhats, axis=0)  # (N, horizon) normalized
+
         # back to mg/dL
         yhat = yhat * (std + 1e-8) + mean
-        ys = ys * (std + 1e-8) + mean
+        ys = ys_np * (std + 1e-8) + mean
 
-        true_h = ys[:, h_index]
-        pred_h = yhat[:, h_index]
-        out[str(pid)] = (true_h, pred_h)
+        out[str(pid)] = (ys[:, h_index], yhat[:, h_index])
 
     return out
 
@@ -108,13 +102,13 @@ def main():
     )
 
     model = LSTMForecaster(
-        input_size=1, hidden_size=128, num_layers=2, dropout=0.1, horizon=horizon
+        input_size=1, hidden_size=128, num_layers=1, dropout=0.0, horizon=horizon
     ).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=1e-3)
     loss_fn = torch.nn.MSELoss()
 
     # training: few epochs
-    for epoch in range(1, 2):
+    for epoch in range(1, 16):
         model.train()
         total = 0.0
         n = 0
@@ -134,13 +128,14 @@ def main():
         model.eval()
         total = 0.0
         n = 0
-        for x, y in val_loader:
-            x = x.to(device)
-            y = y.to(device)
-            yhat = model(x)
-            loss = loss_fn(yhat, y)
-            total += float(loss.item()) * x.size(0)
-            n += x.size(0)
+        with torch.no_grad():
+            for x, y in val_loader:
+                x = x.to(device)
+                y = y.to(device)
+                yhat = model(x)
+                loss = loss_fn(yhat, y)
+                total += float(loss.item()) * x.size(0)
+                n += x.size(0)
         val_mse = total / max(n, 1)
 
         print(f"epoch {epoch} | train_mse={train_mse:.4f} | val_mse={val_mse:.4f}")
@@ -151,21 +146,16 @@ def main():
         model, d, all_ids, lookback, horizon, device, g_mean, g_std, h_index=11
     )
 
-    lags60 = []
     rmses60 = []
     maes60 = []
 
     for pid, (t, p) in traces_60.items():
         rmses60.append(rmse(t, p))
         maes60.append(mae(t, p))
-        lags60.append(best_lag_rmse(t, p, max_lag=24))
 
-    print("=== TEST 60-min ahead (macro over patients) ===")
+    print("=== LSTM 60-min ahead (macro over patients) ===")
     print(
         f"RMSE mean={float(np.mean(rmses60)):.3f} | MAE mean={float(np.mean(maes60)):.3f}"
-    )
-    print(
-        f"best_lag mean={float(np.mean(lags60)):.2f} steps | median={float(np.median(lags60)):.2f} steps"
     )
 
     os.makedirs("reports/results", exist_ok=True)
@@ -174,11 +164,9 @@ def main():
     with open(
         "reports/results/lstm_60min_per_patient_metrics_all.csv", "w", encoding="utf8"
     ) as f:
-        f.write("patient_id,model,rmse,mae,best_lag_steps\n")
-        for pid, (t, p) in traces_60.items():
-            f.write(
-                f"{pid},lstm,{rmse(t, p):.6f},{mae(t, p):.6f},{best_lag_rmse(t, p, max_lag=24)}\n"
-            )
+        f.write("patient_id,model,rmse,mae\n")
+        for pid, r, m in zip(traces_60.keys(), rmses60, maes60):
+            f.write(f"{pid},lstm,{r:.6f},{m:.6f}\n")
 
     # Save full traces for all patients
     np.savez(
@@ -192,8 +180,6 @@ def main():
     summary60 = {
         "rmse_mean": float(np.mean(rmses60)),
         "mae_mean": float(np.mean(maes60)),
-        "lag_mean_steps": float(np.mean(lags60)),
-        "lag_median_steps": float(np.median(lags60)),
         "patient_ids": list(traces_60.keys()),
         "horizon_steps": horizon,
         "target_index": 11,
@@ -202,11 +188,6 @@ def main():
 
     with open("reports/results/lstm_60min_summary.json", "w", encoding="utf8") as f:
         json.dump(summary60, f, indent=2)
-
-    with open("reports/results/lstm_60min_lags.csv", "w", encoding="utf8") as f:
-        f.write("patient_id,lag_steps\n")
-        for pid, lag in zip(traces_60.keys(), lags60):
-            f.write(f"{pid},{lag}\n")
 
 
 if __name__ == "__main__":

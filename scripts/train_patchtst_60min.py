@@ -8,7 +8,7 @@ from ba_baseline.data.patient_loader import load_patient_series
 from ba_baseline.data.split import split_patients
 from ba_baseline.data.multi_patient_dataset import MultiPatientWindowDataset
 from ba_baseline.models.patchtst import PatchTST
-from ba_baseline.metrics.metrics import rmse, mae, best_lag_rmse
+from ba_baseline.metrics.metrics import rmse, mae
 
 
 def set_seed(seed=42):
@@ -20,7 +20,8 @@ def set_seed(seed=42):
 
 @torch.no_grad()
 def eval_hstep_trace_per_patient(
-    model, series_by_patient, patient_ids, lookback, horizon, device, mean, std, h_index
+    model, series_by_patient, patient_ids, lookback, horizon, device, mean, std, h_index,
+    batch_size=2048,
 ):
     """
     Returns dict pid -> (true_h, pred_h) for a fixed horizon index.
@@ -33,25 +34,23 @@ def eval_hstep_trace_per_patient(
         if len(s) < lookback + horizon + 1:
             continue
 
-        xs = []
-        ys = []
-        max_start = len(s) - (lookback + horizon)
-        for i in range(max_start):
-            x = ((s[i : i + lookback] - mean) / (std + 1e-8)).astype(np.float32)
-            y = (
-                (s[i + lookback : i + lookback + horizon] - mean) / (std + 1e-8)
-            ).astype(np.float32)
-            xs.append(x)
-            ys.append(y)
+        N = len(s) - lookback - horizon
+        s_norm = ((s - mean) / (std + 1e-8)).astype(np.float32)
 
-        xs = torch.tensor(np.stack(xs)).unsqueeze(-1).to(device)  # (N, lookback, 1)
-        ys = np.stack(ys)  # (N, horizon) normalized
+        # Vectorized window creation (no Python loop)
+        xs_np = np.lib.stride_tricks.sliding_window_view(s_norm, lookback)[:N]       # (N, lookback)
+        ys_np = np.lib.stride_tricks.sliding_window_view(s_norm, horizon)[lookback:lookback + N]  # (N, horizon)
 
-        yhat = model(xs).detach().cpu().numpy()  # normalized
+        # Batched inference to avoid large single tensors on CPU
+        yhats = []
+        for start in range(0, N, batch_size):
+            xb = torch.tensor(xs_np[start : start + batch_size]).unsqueeze(-1).to(device)
+            yhats.append(model(xb).cpu().numpy())
+        yhat = np.concatenate(yhats, axis=0)  # (N, horizon) normalized
 
         # back to mg/dL
         yhat = yhat * (std + 1e-8) + mean
-        ys = ys * (std + 1e-8) + mean
+        ys = ys_np * (std + 1e-8) + mean
 
         out[str(pid)] = (ys[:, h_index], yhat[:, h_index])
 
@@ -109,7 +108,7 @@ def main():
     opt = torch.optim.AdamW(model.parameters(), lr=5e-4)
     loss_fn = torch.nn.MSELoss()
 
-    for epoch in range(1, 2):
+    for epoch in range(1, 16):
         model.train()
         total = 0.0
         n = 0
@@ -129,13 +128,14 @@ def main():
         model.eval()
         total = 0.0
         n = 0
-        for x, y in val_loader:
-            x = x.to(device)
-            y = y.to(device)
-            yhat = model(x)
-            loss = loss_fn(yhat, y)
-            total += float(loss.item()) * x.size(0)
-            n += x.size(0)
+        with torch.no_grad():
+            for x, y in val_loader:
+                x = x.to(device)
+                y = y.to(device)
+                yhat = model(x)
+                loss = loss_fn(yhat, y)
+                total += float(loss.item()) * x.size(0)
+                n += x.size(0)
         val_mse = total / max(n, 1)
 
         print(f"epoch {epoch} | train_mse={train_mse:.4f} | val_mse={val_mse:.4f}")
@@ -155,18 +155,14 @@ def main():
     )
     print("60-min traces patients:", len(traces_60), sorted(traces_60.keys()))
 
-    lags60, rmses60, maes60 = [], [], []
+    rmses60, maes60 = [], []
     for _, (t, p) in traces_60.items():
         rmses60.append(rmse(t, p))
         maes60.append(mae(t, p))
-        lags60.append(best_lag_rmse(t, p, max_lag=24))
 
-    print("=== PATCHTST TEST 60-min ahead (macro over patients) ===")
+    print("=== PATCHTST 60-min ahead (macro over patients) ===")
     print(
         f"RMSE mean={float(np.mean(rmses60)):.3f} | MAE mean={float(np.mean(maes60)):.3f}"
-    )
-    print(
-        f"best_lag mean={float(np.mean(lags60)):.2f} steps | median={float(np.median(lags60)):.2f} steps"
     )
 
     # --- save artifacts (60-min only) ---
@@ -176,11 +172,9 @@ def main():
         "w",
         encoding="utf8",
     ) as f:
-        f.write("patient_id,model,rmse,mae,best_lag_steps\n")
-        for pid, (t, p) in traces_60.items():
-            f.write(
-                f"{pid},patchtst,{rmse(t, p):.6f},{mae(t, p):.6f},{best_lag_rmse(t, p, max_lag=24)}\n"
-            )
+        f.write("patient_id,model,rmse,mae\n")
+        for pid, r, m in zip(traces_60.keys(), rmses60, maes60):
+            f.write(f"{pid},patchtst,{r:.6f},{m:.6f}\n")
 
     np.savez(
         "reports/results/patchtst_60min_traces_all_patients.npz",
@@ -191,8 +185,6 @@ def main():
     summary60 = {
         "rmse_mean": float(np.mean(rmses60)),
         "mae_mean": float(np.mean(maes60)),
-        "lag_mean_steps": float(np.mean(lags60)),
-        "lag_median_steps": float(np.median(lags60)),
         "patient_ids": list(traces_60.keys()),
         "horizon_steps": horizon,
         "target_index": int(target_index),
@@ -208,11 +200,6 @@ def main():
 
     with open("reports/results/patchtst_60min_summary.json", "w", encoding="utf8") as f:
         json.dump(summary60, f, indent=2)
-
-    with open("reports/results/patchtst_60min_lags.csv", "w", encoding="utf8") as f:
-        f.write("patient_id,lag_steps\n")
-        for pid, lag in zip(traces_60.keys(), lags60):
-            f.write(f"{pid},{lag}\n")
 
     print("Saved PATCHTST 60-min artifacts to reports/results/")
 
