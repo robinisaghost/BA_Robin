@@ -18,25 +18,24 @@ pivot["mae_diff"] = pivot["patchtst_mae"] - pivot["lstm_mae"]
 pivot = pivot[
     [
         "patient_id",
-        "lstm_rmse",
-        "patchtst_rmse",
-        "rmse_diff",
-        "lstm_mae",
-        "patchtst_mae",
-        "mae_diff",
+        "lstm_rmse",           "patchtst_rmse",           "rmse_diff",
+        "lstm_mae",            "patchtst_mae",            "mae_diff",
+        "lstm_hypo_precision", "patchtst_hypo_precision",
+        "lstm_hypo_recall",    "patchtst_hypo_recall",
+        "lstm_hypo_f1",        "patchtst_hypo_f1",
     ]
 ].sort_values("patient_id")
 
 pivot.to_csv(out_path, index=False)
 
 print(f"Saved comparison table to {out_path}")
-print(pivot)
+print(pivot.to_string())
 
 print()
 print("Summary:")
-print("LSTM better on RMSE:", int((pivot["rmse_diff"] < 0).sum()))
+print("LSTM better on RMSE:   ", int((pivot["rmse_diff"] < 0).sum()))
 print("PatchTST better on RMSE:", int((pivot["rmse_diff"] > 0).sum()))
-print("Equal RMSE:", int((pivot["rmse_diff"] == 0).sum()))
+print("Equal RMSE:            ", int((pivot["rmse_diff"] == 0).sum()))
 print("LSTM better on MAE:    ", int((pivot["mae_diff"] < 0).sum()))
 print("PatchTST better on MAE:", int((pivot["mae_diff"] > 0).sum()))
 print("Equal MAE:             ", int((pivot["mae_diff"] == 0).sum()))

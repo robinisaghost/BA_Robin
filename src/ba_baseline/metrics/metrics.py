@@ -47,12 +47,21 @@ def best_lag_crosscorr(y_true: np.ndarray, y_pred: np.ndarray, max_lag: int) -> 
     return int(best_lag)
 
 
-def crossing_times(series: np.ndarray, threshold: float):
+def crossing_times(series: np.ndarray, threshold: float, direction: str = "below"):
+    """
+    Detect threshold crossings.
+    direction='below': series goes from >= threshold to < threshold  (hypoglycemia)
+    direction='above': series goes from <= threshold to > threshold  (hyperglycemia)
+    """
     s = np.asarray(series)
     events = []
     for t in range(1, len(s)):
-        if s[t - 1] >= threshold and s[t] < threshold:
-            events.append(t)
+        if direction == "below":
+            if s[t - 1] >= threshold and s[t] < threshold:
+                events.append(t)
+        else:
+            if s[t - 1] <= threshold and s[t] > threshold:
+                events.append(t)
     return events
 
 
@@ -62,9 +71,10 @@ def event_metrics(
     threshold: float,
     tol: int,
     beta: float = 1.0,
+    direction: str = "below",
 ):
-    true_events = crossing_times(true_series, threshold)
-    pred_events = crossing_times(pred_series, threshold)
+    true_events = crossing_times(true_series, threshold, direction=direction)
+    pred_events = crossing_times(pred_series, threshold, direction=direction)
 
     matched_pred = set()
     tp = 0
