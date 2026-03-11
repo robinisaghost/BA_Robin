@@ -19,7 +19,9 @@ def set_seed(seed=42):
 
 
 @torch.no_grad()
-def eval_hstep_trace(model, series, lookback, horizon, device, mean, std, h_index, batch_size=2048):
+def eval_hstep_trace(
+    model, series, lookback, horizon, device, mean, std, h_index, batch_size=2048
+):
     """Returns (y_true_h, y_pred_h) for a single patient series."""
     model.eval()
     n = len(series) - lookback - horizon
@@ -28,11 +30,13 @@ def eval_hstep_trace(model, series, lookback, horizon, device, mean, std, h_inde
 
     s_norm = ((series - mean) / (std + 1e-8)).astype(np.float32)
     xs = np.lib.stride_tricks.sliding_window_view(s_norm, lookback)[:n]
-    ys = np.lib.stride_tricks.sliding_window_view(s_norm, horizon)[lookback:lookback + n]
+    ys = np.lib.stride_tricks.sliding_window_view(s_norm, horizon)[
+        lookback : lookback + n
+    ]
 
     yhats = []
     for start in range(0, n, batch_size):
-        xb = torch.tensor(xs[start:start + batch_size]).unsqueeze(-1).to(device)
+        xb = torch.tensor(xs[start : start + batch_size]).unsqueeze(-1).to(device)
         yhats.append(model(xb).cpu().numpy())
     yhat = np.concatenate(yhats, axis=0)
 
@@ -41,10 +45,26 @@ def eval_hstep_trace(model, series, lookback, horizon, device, mean, std, h_inde
     return ys[:, h_index], yhat[:, h_index]
 
 
-def train_patient(pid, train_s, val_s, test_s, lookback, horizon, device,
-                  patch_len=12, stride=6, d_model=64, n_heads=4, n_layers=4,
-                  dim_ff=256, dropout=0.1, lr=5e-4,
-                  max_epochs=100, patience=10, batch_size=256):
+def train_patient(
+    pid,
+    train_s,
+    val_s,
+    test_s,
+    lookback,
+    horizon,
+    device,
+    patch_len=12,
+    stride=6,
+    d_model=64,
+    n_heads=4,
+    n_layers=4,
+    dim_ff=256,
+    dropout=0.1,
+    lr=5e-4,
+    max_epochs=100,
+    patience=10,
+    batch_size=256,
+):
     mean = float(train_s.mean())
     std = float(train_s.std())
 
@@ -55,14 +75,21 @@ def train_patient(pid, train_s, val_s, test_s, lookback, horizon, device,
         {pid: val_s}, [pid], lookback=lookback, horizon=horizon, mean=mean, std=std
     )
 
-    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=0)
+    train_loader = DataLoader(
+        train_ds, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=0
+    )
     val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, num_workers=0)
 
     model = PatchTST(
-        lookback=lookback, horizon=horizon,
-        patch_len=patch_len, stride=stride,
-        d_model=d_model, n_heads=n_heads, n_layers=n_layers,
-        dim_ff=dim_ff, dropout=dropout,
+        lookback=lookback,
+        horizon=horizon,
+        patch_len=patch_len,
+        stride=stride,
+        d_model=d_model,
+        n_heads=n_heads,
+        n_layers=n_layers,
+        dim_ff=dim_ff,
+        dropout=dropout,
     ).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=lr)
     loss_fn = torch.nn.MSELoss()
@@ -110,7 +137,9 @@ def main():
     print("device:", device)
 
     d = load_patient_series("data/raw/all_cgm.csv")
-    train_series, val_series, test_series = temporal_split_series(d, train_ratio=0.6, val_ratio=0.2)
+    train_series, val_series, test_series = temporal_split_series(
+        d, train_ratio=0.6, val_ratio=0.2
+    )
 
     lookback = 72
     horizon = 12
@@ -129,7 +158,10 @@ def main():
         val_s = val_series[pid]
         test_s = test_series[pid]
 
-        if len(train_s) < lookback + horizon + 1 or len(test_s) < lookback + horizon + 1:
+        if (
+            len(train_s) < lookback + horizon + 1
+            or len(test_s) < lookback + horizon + 1
+        ):
             print(f"  [{i+1}/{len(all_pids)}] patient {pid}: skipped (too short)")
             continue
 
@@ -137,14 +169,18 @@ def main():
             pid, train_s, val_s, test_s, lookback, horizon, device
         )
 
-        y_true, y_pred = eval_hstep_trace(model, test_s, lookback, horizon, device, mean, std, h_index)
+        y_true, y_pred = eval_hstep_trace(
+            model, test_s, lookback, horizon, device, mean, std, h_index
+        )
         if y_true is None:
             continue
 
         traces[pid] = (y_true, y_pred)
         r = rmse(y_true, y_pred)
         m = mae(y_true, y_pred)
-        h = event_metrics(y_true, y_pred, threshold=HYPO_THRESH, tol=EVENT_TOL, direction="below")
+        h = event_metrics(
+            y_true, y_pred, threshold=HYPO_THRESH, tol=EVENT_TOL, direction="below"
+        )
 
         rmses.append(r)
         maes.append(m)
@@ -160,10 +196,16 @@ def main():
         **{f"{pid}_pred": traces[pid][1] for pid in pids_done},
     )
 
-    with open("reports/results/patchtst_60min_per_patient_metrics_all.csv", "w", encoding="utf8") as f:
+    with open(
+        "reports/results/patchtst_60min_per_patient_metrics_all.csv",
+        "w",
+        encoding="utf8",
+    ) as f:
         f.write("patient_id,model,rmse,mae,hypo_precision,hypo_recall,hypo_f1\n")
         for pid, r, m, h in zip(pids_done, rmses, maes, hypo_metrics_list):
-            f.write(f"{pid},patchtst,{r:.6f},{m:.6f},{h['precision']:.6f},{h['recall']:.6f},{h['fbeta']:.6f}\n")
+            f.write(
+                f"{pid},patchtst,{r:.6f},{m:.6f},{h['precision']:.6f},{h['recall']:.6f},{h['fbeta']:.6f}\n"
+            )
 
     summary = {
         "rmse_mean": float(np.mean(rmses)),
@@ -184,7 +226,7 @@ def main():
     with open("reports/results/patchtst_60min_summary.json", "w", encoding="utf8") as f:
         json.dump(summary, f, indent=2)
 
-    print(f"\n=== PatchTST per-patient (test) ===")
+    print("\n=== PatchTST per-patient (test) ===")
     print(f"Patients: {len(pids_done)}")
     print(f"RMSE mean={float(np.mean(rmses)):.3f}  MAE mean={float(np.mean(maes)):.3f}")
     print("Saved to reports/results/")
