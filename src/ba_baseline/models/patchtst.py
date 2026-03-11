@@ -67,12 +67,9 @@ class PatchTST(nn.Module):
         self.encoder = nn.TransformerEncoder(enc_layer, num_layers=n_layers)
         self.norm = nn.LayerNorm(d_model)
 
-        self.head = nn.Sequential(
-            nn.Linear(d_model, d_model),
-            nn.GELU(),
-            nn.Dropout(dropout),
-            nn.Linear(d_model, horizon),
-        )
+        # Flatten all patch representations -> linear projection (original PatchTST head)
+        # preserves temporal ordering of patches, which produces the temporal shift effect
+        self.head = nn.Linear(n_patches * d_model, horizon)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: (B, T, 1)
@@ -87,6 +84,6 @@ class PatchTST(nn.Module):
         z = self.encoder(z)
         z = self.norm(z)
 
-        pooled = z.mean(dim=1)  # (B, d_model)
-        yhat = self.head(pooled)  # (B, horizon)
+        flat = z.reshape(z.size(0), -1)  # (B, n_patches * d_model)
+        yhat = self.head(flat)           # (B, horizon)
         return yhat
