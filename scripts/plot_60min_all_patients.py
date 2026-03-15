@@ -32,7 +32,7 @@ def main():
 
     print(f"Found {len(patient_ids)} common patients")
 
-    window_len = 300
+    window_len = 720
     start = 0
 
     for pid in patient_ids:
@@ -63,7 +63,7 @@ def main():
         end = min(start + window_len, len(y_true))
         x = np.arange(start, end)
 
-        plt.figure(figsize=(12, 5))
+        plt.figure(figsize=(20, 5))
         plt.plot(x, y_true[start:end], label="Ground truth")
         plt.plot(x, y_lstm[start:end], label="LSTM")
         plt.plot(x, y_patchtst[start:end], label="PatchTST")
