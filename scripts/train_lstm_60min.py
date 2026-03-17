@@ -1,3 +1,38 @@
+"""
+Train patient-specific LSTM baseline models for 60-minute glucose forecasting.
+
+Each patient receives an individually trained LSTM model. Training uses
+standard pointwise MSE loss. Models are evaluated at h_index=11 (60-min
+ahead, horizon=12 steps à 5 min) using RMSE, MAE, and event-based metrics
+for hypoglycemia detection (threshold 70 mg/dL, tolerance τ=3 steps=15 min).
+
+Model
+-----
+LSTM [Hochreiter & Schmidhuber, 1997]:
+    Recurrent baseline for blood glucose prediction, following Hüni (2023)
+    and the internal proposal of the Pattern Recognition Group, University
+    of Bern.
+
+References
+----------
+Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory.
+    Neural Computation, 9(8), 1735–1780.
+    https://doi.org/10.1162/NECO.1997.9.8.1735
+
+Hüni, F. (2023). Predicting events of hypoglycemia: A comparison of long
+    short-term memory and graph attention network based approaches. Bachelor
+    Thesis, University of Bern, Faculty of Science (INF).
+    Supervisor: PD Dr. Kaspar Riesen.
+
+van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
+    Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis, University
+    of Bern, Faculty of Science (INF). Supervisor: PD Dr. Kaspar Riesen.
+
+Garcia-Tirado, J., et al. (2023). Assessment of meal anticipation for
+    improving fully automated insulin delivery in adults with type 1 diabetes.
+    Diabetes Care, 46(9), 1652–1658. https://doi.org/10.2337/dc23-0119
+"""
+
 import os
 import json
 import numpy as np

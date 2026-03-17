@@ -1,14 +1,29 @@
 """
-Compute full metrics for the professor meeting.
+Compute the full evaluation metrics for all trained models.
 
-Metrics (as defined in the proposal):
-  Forecasting:  RMSE, MAE
-  Timeshift:    best_lag (cross-correlation, bounded to ±12 steps = ±60 min)
-  Event:        precision, recall, F1 (beta=1), F2 (beta=2)
-                hypoglycemia threshold = 70 mg/dL, time tolerance tau = 3 steps (15 min)
+Implements the three metric categories defined in van den Hoek (2026):
 
-Output: reports/results/meeting_metrics_full.csv
-        reports/results/meeting_metrics_summary.csv  (mean ± std per model)
+  Forecasting:  RMSE, MAE (pointwise regression metrics).
+  Timeshift:    best-lag Δ* via cross-correlation within ±12 steps (±60 min).
+  Event:        precision, recall, F1, F2 for hypoglycemia detection
+                (threshold 70 mg/dL, time tolerance τ = 3 steps = 15 min).
+
+Loads pre-computed prediction traces (.npz) produced by the training scripts
+and writes per-patient and summary CSV files to reports/results/.
+
+References
+----------
+van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
+    Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis, University
+    of Bern, Faculty of Science (INF). Supervisor: PD Dr. Kaspar Riesen.
+
+Hüni, F. (2023). Predicting events of hypoglycemia: A comparison of long
+    short-term memory and graph attention network based approaches. Bachelor
+    Thesis, University of Bern, Faculty of Science (INF).
+    Supervisor: PD Dr. Kaspar Riesen.
+
+Pattern Recognition Group, University of Bern. Glucose Prediction Proposal.
+    Internal unpublished manuscript.
 """
 
 import numpy as np
