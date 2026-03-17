@@ -1,9 +1,48 @@
+"""
+PatchTST-based glucose forecasting model.
+
+PatchTST decomposes a time series into overlapping patches which are then
+projected and processed by a standard Transformer encoder. Compared to
+point-wise attention, the patch-based approach captures local temporal
+patterns more efficiently and reduces the sequence length seen by the encoder.
+
+Instance normalisation (RevIN) is applied before the encoder and reversed
+after the head to stabilise training across patients with different glucose
+ranges.
+
+PatchTST is used as an advanced Transformer baseline alongside LSTM, following
+the internal proposal of the Pattern Recognition Group, University of Bern.
+
+References
+----------
+Nie, Y., Nguyen, N. H., Sinthong, P., & Kalagnanam, J. (2023). A time series
+    is worth 64 words: Long-term forecasting with transformers. In The Eleventh
+    International Conference on Learning Representations (ICLR 2023).
+    https://openreview.net/forum?id=Jbdc0vTOcol
+
+Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N.,
+    Kaiser, L., & Polosukhin, I. (2017). Attention is all you need. In
+    Advances in Neural Information Processing Systems (NeurIPS 2017).
+
+Pattern Recognition Group, University of Bern. Glucose Prediction Proposal.
+    Internal unpublished manuscript.
+"""
+
 import math
 import torch
 import torch.nn as nn
 
 
 class SinusoidalPositionalEncoding(nn.Module):
+    """
+    Fixed sinusoidal positional encoding following Vaswani et al. (2017).
+
+    References
+    ----------
+    Vaswani, A., et al. (2017). Attention is all you need.
+        NeurIPS 2017.
+    """
+
     def __init__(self, d_model: int, max_len: int = 2048):
         super().__init__()
         pe = torch.zeros(max_len, d_model)
@@ -23,9 +62,38 @@ class SinusoidalPositionalEncoding(nn.Module):
 
 class PatchTST(nn.Module):
     """
-    Minimal PatchTST-style forecaster for univariate series using PyTorch TransformerEncoder.
+    Minimal PatchTST-style forecaster for univariate series.
+
     Input:  (B, lookback, 1)
     Output: (B, horizon)
+
+    Parameters
+    ----------
+    lookback : int
+        Length of the input context window (in time steps).
+    horizon : int
+        Number of future time steps to predict.
+    patch_len : int
+        Length of each patch (in time steps).
+    stride : int
+        Step size between consecutive patches.
+    d_model : int
+        Transformer embedding dimension.
+    n_heads : int
+        Number of attention heads.
+    n_layers : int
+        Number of Transformer encoder layers.
+    dim_ff : int
+        Feed-forward hidden dimension inside the encoder.
+    dropout : float
+        Dropout probability.
+
+    References
+    ----------
+    Nie, Y., Nguyen, N. H., Sinthong, P., & Kalagnanam, J. (2023).
+        A time series is worth 64 words: Long-term forecasting with
+        transformers. ICLR 2023.
+        https://openreview.net/forum?id=Jbdc0vTOcol
     """
 
     def __init__(
@@ -73,16 +141,15 @@ class PatchTST(nn.Module):
         # x: (B, T, 1)
         x = x.squeeze(-1)  # (B, T)
 
-        # RevIN: normalize by instance statistics to prevent temporal shift
+        # RevIN: normalize by instance statistics to reduce distribution shift across patients
         x_mean = x.mean(dim=1, keepdim=True)          # (B, 1)
         x_std = x.std(dim=1, keepdim=True) + 1e-8     # (B, 1)
         x = (x - x_mean) / x_std
 
-        # (B, n_patches, patch_len)
+        # Patching: (B, n_patches, patch_len)
         patches = x.unfold(dimension=1, size=self.patch_len, step=self.stride)
 
-        # (B, n_patches, d_model)
-        z = self.patch_proj(patches)
+        z = self.patch_proj(patches)   # (B, n_patches, d_model)
         z = self.pos_enc(z)
         z = self.encoder(z)
         z = self.norm(z)

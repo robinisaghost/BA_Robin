@@ -1,3 +1,22 @@
+"""
+Patient data loader for CGM glucose time series.
+
+Loads continuous glucose monitoring (CGM) data from a CSV file and returns
+a per-patient dictionary of glucose time series. The data originates from
+the T1DATA dataset (Garcia-Tirado et al., 2023), a randomised crossover
+clinical trial in which 35 individuals with type 1 diabetes used Dexcom G6
+CGM devices recording glucose at 5-minute intervals over approximately 30 days.
+
+References
+----------
+Garcia-Tirado, J., Colmegna, P., Villard, O., Diaz, J. L., Esquivel-Zuniga,
+    R., Koravi, C. L. K., Barnett, C. L., Oliveri, M. C., Fuller, M.,
+    Brown, S. A., DeBoer, M. D., & Breton, M. D. (2023). Assessment of meal
+    anticipation for improving fully automated insulin delivery in adults with
+    type 1 diabetes. Diabetes Care, 46(9), 1652–1658.
+    https://doi.org/10.2337/dc23-0119
+"""
+
 import numpy as np
 import pandas as pd
 
@@ -8,8 +27,27 @@ def load_patient_series(
     patient_col: str = "patient_ID",
 ):
     """
-    Returns: dict {patient_id (str): np.ndarray of glucose values in file order}
-    Assumption: file order corresponds to time order per patient.
+    Load per-patient CGM glucose time series from a CSV file.
+
+    Parameters
+    ----------
+    csv_path : str
+        Path to the CSV file containing glucose readings and patient IDs.
+    glucose_col : str
+        Name of the column containing glucose values (mg/dL).
+    patient_col : str
+        Name of the column containing patient identifiers.
+
+    Returns
+    -------
+    dict
+        Mapping from patient ID (str) to a NumPy array of glucose values
+        in file order, which is assumed to correspond to temporal order.
+
+    References
+    ----------
+    Garcia-Tirado et al. (2023). Diabetes Care, 46(9), 1652–1658.
+        https://doi.org/10.2337/dc23-0119
     """
     df = pd.read_csv(csv_path)
 

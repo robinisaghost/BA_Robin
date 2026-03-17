@@ -1,3 +1,40 @@
+"""
+Train patient-specific PatchTST baseline models for 60-minute glucose forecasting.
+
+Each patient receives an individually trained PatchTST model. Training uses
+standard pointwise MSE loss. Models are evaluated at h_index=11 (60-min
+ahead, horizon=12 steps à 5 min) using RMSE, MAE, and event-based metrics
+for hypoglycemia detection (threshold 70 mg/dL, tolerance τ=3 steps=15 min).
+
+Model
+-----
+PatchTST [Nie et al., 2023]:
+    Transformer-based model that segments the input into overlapping patches
+    processed by a standard Transformer encoder. Used as an advanced baseline
+    alongside LSTM, following the internal proposal of the Pattern Recognition
+    Group, University of Bern.
+
+References
+----------
+Nie, Y., Nguyen, N. H., Sinthong, P., & Kalagnanam, J. (2023). A time series
+    is worth 64 words: Long-term forecasting with transformers. In The Eleventh
+    International Conference on Learning Representations (ICLR 2023).
+    https://openreview.net/forum?id=Jbdc0vTOcol
+
+Hüni, F. (2023). Predicting events of hypoglycemia: A comparison of long
+    short-term memory and graph attention network based approaches. Bachelor
+    Thesis, University of Bern, Faculty of Science (INF).
+    Supervisor: PD Dr. Kaspar Riesen.
+
+van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
+    Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis, University
+    of Bern, Faculty of Science (INF). Supervisor: PD Dr. Kaspar Riesen.
+
+Garcia-Tirado, J., et al. (2023). Assessment of meal anticipation for
+    improving fully automated insulin delivery in adults with type 1 diabetes.
+    Diabetes Care, 46(9), 1652–1658. https://doi.org/10.2337/dc23-0119
+"""
+
 import os
 import json
 import numpy as np
