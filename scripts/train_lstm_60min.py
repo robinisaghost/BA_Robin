@@ -28,9 +28,12 @@ van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
     Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis, University
     of Bern, Faculty of Science (INF). Supervisor: PD Dr. Kaspar Riesen.
 
-Garcia-Tirado, J., et al. (2023). Assessment of meal anticipation for
-    improving fully automated insulin delivery in adults with type 1 diabetes.
-    Diabetes Care, 46(9), 1652–1658. https://doi.org/10.2337/dc23-0119
+Garcia-Tirado, J., Colmegna, P., Villard, O., Diaz, J. L.,
+    Esquivel-Zuniga, R., Koravi, C. L. K., Barnett, C. L., Oliveri, M. C.,
+    Fuller, M., Brown, S. A., DeBoer, M. D., & Breton, M. D. (2023).
+    Assessment of meal anticipation for improving fully automated insulin
+    delivery in adults with type 1 diabetes. Diabetes Care, 46(9), 1652–1658.
+    https://doi.org/10.2337/dc23-0119
 """
 
 import os

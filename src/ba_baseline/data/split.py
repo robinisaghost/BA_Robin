@@ -74,8 +74,14 @@ def temporal_split_series(series_by_patient, train_ratio=0.6, val_ratio=0.2):
 
     References
     ----------
-    van den Hoek, R. (2026). Bachelor Thesis, University of Bern.
-    Hüni, F. (2023). Bachelor Thesis, University of Bern.
+    van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
+        Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis,
+        University of Bern, Faculty of Science (INF).
+        Supervisor: PD Dr. Kaspar Riesen.
+    Hüni, F. (2023). Predicting events of hypoglycemia: A comparison of long
+        short-term memory and graph attention network based approaches. Bachelor
+        Thesis, University of Bern, Faculty of Science (INF).
+        Supervisor: PD Dr. Kaspar Riesen.
     """
     train_series, val_series, test_series = {}, {}, {}
     for pid, s in series_by_patient.items():

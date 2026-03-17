@@ -39,8 +39,10 @@ class SinusoidalPositionalEncoding(nn.Module):
 
     References
     ----------
-    Vaswani, A., et al. (2017). Attention is all you need.
-        NeurIPS 2017.
+    Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L.,
+        Gomez, A. N., Kaiser, L., & Polosukhin, I. (2017). Attention is all
+        you need. In Advances in Neural Information Processing Systems
+        (NeurIPS 2017).
     """
 
     def __init__(self, d_model: int, max_len: int = 2048):
