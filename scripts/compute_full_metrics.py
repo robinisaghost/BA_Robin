@@ -80,7 +80,16 @@ def main():
         "reports/results/patchtst_60min_traces_all_patients.npz", "PatchTST"
     )
 
-    full_df = pd.concat([lstm_df, patchtst_df], ignore_index=True)
+    models = [lstm_df, patchtst_df]
+
+    lstm_bl_path = "reports/results/lstm_bounded_lag_traces_all_patients.npz"
+    patchtst_bl_path = "reports/results/patchtst_bounded_lag_traces_all_patients.npz"
+    if os.path.exists(lstm_bl_path):
+        models.append(compute_for_model(lstm_bl_path, "LSTM_bounded_lag"))
+    if os.path.exists(patchtst_bl_path):
+        models.append(compute_for_model(patchtst_bl_path, "PatchTST_bounded_lag"))
+
+    full_df = pd.concat(models, ignore_index=True)
     full_df = full_df.sort_values(["patient_id", "model"]).reset_index(drop=True)
 
     per_patient_path = os.path.join(out_dir, "meeting_metrics_full.csv")

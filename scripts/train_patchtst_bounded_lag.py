@@ -1,3 +1,50 @@
+"""
+Train patient-specific PatchTST models using the bounded-lag alignment loss.
+
+This script is identical in structure to train_patchtst_60min.py, with the
+sole difference that the training and validation loss is replaced by
+bounded_lag_mse (D = max_lag steps) instead of standard MSE. This allows
+the model to tolerate small temporal misalignments during training, addressing
+the time-shift problem described in van den Hoek (2026).
+
+Evaluation is kept pointwise (RMSE, MAE) and event-based (precision, recall,
+F1, F2) so that results are directly comparable to the MSE baseline.
+
+Model
+-----
+PatchTST [Nie et al., 2023]:
+    Transformer-based model for time series forecasting. Decomposes input into
+    patches processed by a standard Transformer encoder. Used as an advanced
+    baseline alongside LSTM following the internal proposal of the Pattern
+    Recognition Group, University of Bern.
+
+Loss
+----
+Bounded-lag MSE [van den Hoek, 2026]:
+    For each training example, the loss is evaluated after best-lag alignment
+    within ±D steps, so the model is not penalised for predictions that are
+    correct in shape but slightly shifted in time.
+
+References
+----------
+Nie, Y., Nguyen, N. H., Sinthong, P., & Kalagnanam, J. (2023). A time series
+    is worth 64 words: Long-term forecasting with transformers. In The Eleventh
+    International Conference on Learning Representations (ICLR 2023).
+    https://openreview.net/forum?id=Jbdc0vTOcol
+
+Hüni, F. (2023). Predicting events of hypoglycemia: A comparison of long
+    short-term memory and graph attention network based approaches. Bachelor
+    Thesis, University of Bern, Faculty of Science (INF).
+    Supervisor: PD Dr. Kaspar Riesen.
+
+van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
+    Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis, University
+    of Bern, Faculty of Science (INF). Supervisor: PD Dr. Kaspar Riesen.
+
+Pattern Recognition Group, University of Bern. Glucose Prediction Proposal.
+    Internal unpublished manuscript.
+"""
+
 import os
 import json
 import numpy as np
@@ -112,7 +159,7 @@ def main():
     lookback = 72
     horizon = 12
     h_index = 11  # 60-min ahead
-    max_lag = 3   # ±15 min alignment window
+    max_lag = 3   # D = ±3 steps = ±15 min alignment window (van den Hoek, 2026)
     HYPO_THRESH = 70.0
     EVENT_TOL = 3
 
