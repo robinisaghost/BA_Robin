@@ -73,7 +73,6 @@ def soft_dtw(pred: torch.Tensor, true: torch.Tensor, gamma: float = 1.0) -> torc
     # DP table R[b, i, j] = soft-DTW value for subsequences pred[0..i-1]
     # and true[0..j-1].  Rows/cols 0 are sentinels initialised to +inf,
     # with R[:,0,0] = 0 as the base case.
-    inf = torch.full((B,), float("inf"), device=pred.device, dtype=pred.dtype)
     R = torch.full((B, H + 1, H + 1), float("inf"), device=pred.device, dtype=pred.dtype)
     R[:, 0, 0] = 0.0
 
