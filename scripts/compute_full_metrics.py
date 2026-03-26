@@ -1,7 +1,7 @@
 """
 Compute the full evaluation metrics for all trained models.
 
-Implements the three metric categories defined in van den Hoek (2026):
+Implements the three metric categories defined by van den Hoek [7]:
 
   Forecasting:  RMSE, MAE (pointwise regression metrics).
   Timeshift:    best-lag Δ* via cross-correlation within ±12 steps (±60 min).
@@ -13,17 +13,18 @@ and writes per-patient and summary CSV files to reports/results/.
 
 References
 ----------
-van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
-    Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis, University
-    of Bern, Faculty of Science (INF). Supervisor: PD Dr. Kaspar Riesen.
+[7]  van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based
+     Glucose Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis,
+     University of Bern, Faculty of Science (INF).
+     Supervisor: PD Dr. Kaspar Riesen.
 
-Hüni, F. (2023). Predicting events of hypoglycemia: A comparison of long
-    short-term memory and graph attention network based approaches. Bachelor
-    Thesis, University of Bern, Faculty of Science (INF).
-    Supervisor: PD Dr. Kaspar Riesen.
+[8]  Hüni, F. (2023). Predicting events of hypoglycemia: A comparison of long
+     short-term memory and graph attention network based approaches. Bachelor
+     Thesis, University of Bern, Faculty of Science (INF).
+     Supervisor: PD Dr. Kaspar Riesen.
 
-Pattern Recognition Group, University of Bern. Glucose Prediction Proposal.
-    Internal unpublished manuscript.
+[11] Pattern Recognition Group, University of Bern. Glucose Prediction
+     Proposal. Internal unpublished manuscript.
 """
 
 import numpy as np
