@@ -7,21 +7,21 @@ via a gating mechanism (forget, input, output gates) that controls information
 flow through a cell state.
 
 LSTMs are an established baseline for blood glucose prediction from CGM data
-and serve as the primary baseline model in this work following Hüni (2023)
-and the internal proposal of the Pattern Recognition Group, University of Bern.
+and serve as the primary baseline model in this work, following Hüni [8]
+and the internal proposal of the Pattern Recognition Group [11].
 
 References
 ----------
-Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory.
+[1] Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory.
     Neural Computation, 9(8), 1735–1780.
     https://doi.org/10.1162/NECO.1997.9.8.1735
 
-Hüni, F. (2023). Predicting events of hypoglycemia: A comparison of long
+[8] Hüni, F. (2023). Predicting events of hypoglycemia: A comparison of long
     short-term memory and graph attention network based approaches. Bachelor
     Thesis, University of Bern, Faculty of Science (INF).
     Supervisor: PD Dr. Kaspar Riesen.
 
-Pattern Recognition Group, University of Bern. Glucose Prediction Proposal.
+[11] Pattern Recognition Group, University of Bern. Glucose Prediction Proposal.
     Internal unpublished manuscript.
 """
 
@@ -51,7 +51,7 @@ class LSTMForecaster(nn.Module):
 
     References
     ----------
-    Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory.
+    [1] Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory.
         Neural Computation, 9(8), 1735–1780.
         https://doi.org/10.1162/NECO.1997.9.8.1735
     """

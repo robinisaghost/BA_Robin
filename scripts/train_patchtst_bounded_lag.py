@@ -68,15 +68,20 @@ def set_seed(seed=42):
 
 
 @torch.no_grad()
-def eval_hstep_trace(model, series, lookback, horizon, device, mean, std, h_index, batch_size=2048):
+def eval_hstep_trace(model, series, lookback, horizon, device, h_index, batch_size=2048):
+    """Returns (y_true_h, y_pred_h) for a single patient series.
+
+    RevIN inside PatchTST handles per-window normalisation; raw mg/dL values
+    are passed directly and the model output is already in mg/dL.
+    """
     model.eval()
     n = len(series) - lookback - horizon
     if n <= 0:
         return None, None
 
-    s_norm = ((series - mean) / (std + 1e-8)).astype(np.float32)
-    xs = np.lib.stride_tricks.sliding_window_view(s_norm, lookback)[:n]
-    ys = np.lib.stride_tricks.sliding_window_view(s_norm, horizon)[lookback:lookback + n]
+    s = series.astype(np.float32)
+    xs = np.lib.stride_tricks.sliding_window_view(s, lookback)[:n]
+    ys = np.lib.stride_tricks.sliding_window_view(s, horizon)[lookback:lookback + n]
 
     yhats = []
     for start in range(0, n, batch_size):
@@ -84,8 +89,7 @@ def eval_hstep_trace(model, series, lookback, horizon, device, mean, std, h_inde
         yhats.append(model(xb).cpu().numpy())
     yhat = np.concatenate(yhats, axis=0)
 
-    yhat = yhat * (std + 1e-8) + mean
-    ys = ys * (std + 1e-8) + mean
+    # Model output is already in mg/dL (RevIN denormalises internally).
     return ys[:, h_index], yhat[:, h_index]
 
 
@@ -93,14 +97,13 @@ def train_patient(pid, train_s, val_s, lookback, horizon, device,
                   max_lag=3, patch_len=12, stride=6, d_model=64, n_heads=4,
                   n_layers=4, dim_ff=256, dropout=0.1, lr=5e-4,
                   max_epochs=100, patience=10, batch_size=256):
-    mean = float(train_s.mean())
-    std = float(train_s.std())
-
+    # No global z-score normalisation: RevIN inside PatchTST handles per-window
+    # instance normalisation on raw mg/dL data, as intended by Nie et al. [2].
     train_ds = MultiPatientWindowDataset(
-        {pid: train_s}, [pid], lookback=lookback, horizon=horizon, mean=mean, std=std
+        {pid: train_s}, [pid], lookback=lookback, horizon=horizon
     )
     val_ds = MultiPatientWindowDataset(
-        {pid: val_s}, [pid], lookback=lookback, horizon=horizon, mean=mean, std=std
+        {pid: val_s}, [pid], lookback=lookback, horizon=horizon
     )
 
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=0)
@@ -146,7 +149,7 @@ def train_patient(pid, train_s, val_s, lookback, horizon, device,
                 break
 
     model.load_state_dict(best_state)
-    return model, mean, std
+    return model
 
 
 def main():
@@ -183,11 +186,11 @@ def main():
             print(f"  [{i+1}/{len(all_pids)}] patient {pid}: skipped (too short)")
             continue
 
-        model, mean, std = train_patient(
+        model = train_patient(
             pid, train_s, val_s, lookback, horizon, device, max_lag=max_lag
         )
 
-        y_true, y_pred = eval_hstep_trace(model, test_s, lookback, horizon, device, mean, std, h_index)
+        y_true, y_pred = eval_hstep_trace(model, test_s, lookback, horizon, device, h_index)
         if y_true is None:
             continue
 
