@@ -6,21 +6,18 @@ shape but shifted in time. This module implements a loss that tolerates small
 temporal misalignments within a bounded window D, so that a model is not
 penalised for a prediction that is merely shifted by a few steps.
 
-The approach and motivation are described in:
-    van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
-    Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis, University
-    of Bern, Faculty of Science (INF). Supervisor: PD Dr. Kaspar Riesen.
-
-The time-shift phenomenon that motivates this loss was observed in:
-    Pattern Recognition Group, University of Bern. Glucose Prediction Proposal.
-    Internal unpublished manuscript.
+The approach and motivation are described by van den Hoek [7]. The time-shift
+phenomenon that motivates this loss was observed in the PRG Proposal [11].
 
 References
 ----------
-van den Hoek (2026)
-    Bachelor Thesis Proposal, University of Bern.
-Pattern Recognition Group, University of Bern
-    Internal glucose prediction proposal.
+[7]  van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based
+     Glucose Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis,
+     University of Bern, Faculty of Science (INF).
+     Supervisor: PD Dr. Kaspar Riesen.
+
+[11] Pattern Recognition Group, University of Bern. Glucose Prediction
+     Proposal. Internal unpublished manuscript.
 """
 
 import torch
@@ -40,7 +37,7 @@ def bounded_lag_mse(
 
     The alignment window D = max_lag should be chosen to cover clinically
     plausible timing offsets. For a 60-minute horizon (12 steps à 5 min),
-    D = 3 (±15 min) is used as the default, following van den Hoek (2026).
+    D = 3 (±15 min) is used as the default, following van den Hoek [7].
 
     Parameters
     ----------
@@ -58,9 +55,10 @@ def bounded_lag_mse(
 
     References
     ----------
-    van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
-    Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis, University
-    of Bern, Faculty of Science (INF). Supervisor: PD Dr. Kaspar Riesen.
+    [7] van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based
+    Glucose Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis,
+    University of Bern, Faculty of Science (INF).
+    Supervisor: PD Dr. Kaspar Riesen.
     """
     H = pred.shape[1]
     best_mse = None  # shape: (batch,)

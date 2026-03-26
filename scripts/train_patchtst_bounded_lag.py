@@ -12,37 +12,38 @@ F1, F2) so that results are directly comparable to the MSE baseline.
 
 Model
 -----
-PatchTST [Nie et al., 2023]:
+PatchTST [2]:
     Transformer-based model for time series forecasting. Decomposes input into
     patches processed by a standard Transformer encoder. Used as an advanced
-    baseline alongside LSTM following the internal proposal of the Pattern
-    Recognition Group, University of Bern.
+    baseline alongside LSTM, following the internal proposal of the Pattern
+    Recognition Group [11].
 
 Loss
 ----
-Bounded-lag MSE [van den Hoek, 2026]:
+Bounded-lag MSE [7]:
     For each training example, the loss is evaluated after best-lag alignment
     within ±D steps, so the model is not penalised for predictions that are
     correct in shape but slightly shifted in time.
 
 References
 ----------
-Nie, Y., Nguyen, N. H., Sinthong, P., & Kalagnanam, J. (2023). A time series
-    is worth 64 words: Long-term forecasting with transformers. In The Eleventh
-    International Conference on Learning Representations (ICLR 2023).
-    https://openreview.net/forum?id=Jbdc0vTOcol
+[2]  Nie, Y., Nguyen, N. H., Sinthong, P., & Kalagnanam, J. (2023). A time
+     series is worth 64 words: Long-term forecasting with transformers. In
+     The Eleventh International Conference on Learning Representations
+     (ICLR 2023). https://openreview.net/forum?id=Jbdc0vTOcol
 
-Hüni, F. (2023). Predicting events of hypoglycemia: A comparison of long
-    short-term memory and graph attention network based approaches. Bachelor
-    Thesis, University of Bern, Faculty of Science (INF).
-    Supervisor: PD Dr. Kaspar Riesen.
+[7]  van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based
+     Glucose Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis,
+     University of Bern, Faculty of Science (INF).
+     Supervisor: PD Dr. Kaspar Riesen.
 
-van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
-    Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis, University
-    of Bern, Faculty of Science (INF). Supervisor: PD Dr. Kaspar Riesen.
+[8]  Hüni, F. (2023). Predicting events of hypoglycemia: A comparison of long
+     short-term memory and graph attention network based approaches. Bachelor
+     Thesis, University of Bern, Faculty of Science (INF).
+     Supervisor: PD Dr. Kaspar Riesen.
 
-Pattern Recognition Group, University of Bern. Glucose Prediction Proposal.
-    Internal unpublished manuscript.
+[11] Pattern Recognition Group, University of Bern. Glucose Prediction
+     Proposal. Internal unpublished manuscript.
 """
 
 import os
@@ -88,7 +89,7 @@ def eval_hstep_trace(model, series, lookback, horizon, device, mean, std, h_inde
     return ys[:, h_index], yhat[:, h_index]
 
 
-def train_patient(pid, train_s, val_s, test_s, lookback, horizon, device,
+def train_patient(pid, train_s, val_s, lookback, horizon, device,
                   max_lag=3, patch_len=12, stride=6, d_model=64, n_heads=4,
                   n_layers=4, dim_ff=256, dropout=0.1, lr=5e-4,
                   max_epochs=100, patience=10, batch_size=256):
@@ -156,10 +157,10 @@ def main():
     d = load_patient_series("data/raw/all_cgm.csv")
     train_series, val_series, test_series = temporal_split_series(d, train_ratio=0.6, val_ratio=0.2)
 
-    lookback = 72
+    lookback = 24  # 2-hour context, consistent with baseline [7]
     horizon = 12
     h_index = 11  # 60-min ahead
-    max_lag = 3   # D = ±3 steps = ±15 min alignment window (van den Hoek, 2026)
+    max_lag = 3   # D = ±3 steps = ±15 min alignment window [7]
     HYPO_THRESH = 70.0
     EVENT_TOL = 3
 
@@ -174,12 +175,16 @@ def main():
         val_s = val_series[pid]
         test_s = test_series[pid]
 
-        if len(train_s) < lookback + horizon + 1 or len(test_s) < lookback + horizon + 1:
+        if (
+            len(train_s) < lookback + horizon + 1
+            or len(val_s) < lookback + horizon + 1
+            or len(test_s) < lookback + horizon + 1
+        ):
             print(f"  [{i+1}/{len(all_pids)}] patient {pid}: skipped (too short)")
             continue
 
         model, mean, std = train_patient(
-            pid, train_s, val_s, test_s, lookback, horizon, device, max_lag=max_lag
+            pid, train_s, val_s, lookback, horizon, device, max_lag=max_lag
         )
 
         y_true, y_pred = eval_hstep_trace(model, test_s, lookback, horizon, device, mean, std, h_index)
