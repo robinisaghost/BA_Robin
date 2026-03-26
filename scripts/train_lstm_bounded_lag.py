@@ -88,8 +88,9 @@ def eval_hstep_trace(model, series, lookback, horizon, device, mean, std, h_inde
 
 
 def train_patient(pid, train_s, val_s, lookback, horizon, device,
-                  max_lag=3, hidden_size=128, num_layers=1, lr=1e-3,
-                  max_epochs=100, patience=10, batch_size=256):
+                  max_lag=3, hidden_size=256, num_layers=2,
+                  dropout=0.1585, lr=9.611e-4,
+                  max_epochs=100, patience=10, batch_size=128):
     mean = float(train_s.mean())
     std = float(train_s.std())
 
@@ -105,7 +106,7 @@ def train_patient(pid, train_s, val_s, lookback, horizon, device,
 
     model = LSTMForecaster(
         input_size=1, hidden_size=hidden_size, num_layers=num_layers,
-        dropout=0.0, horizon=horizon
+        dropout=dropout, horizon=horizon
     ).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=lr)
 
