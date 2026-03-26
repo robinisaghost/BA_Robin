@@ -2,34 +2,38 @@
 Soft-DTW loss function for time-series alignment.
 
 Dynamic Time Warping (DTW) measures the similarity between two sequences by
-finding the optimal non-linear alignment path between them. Unlike standard
-MSE, DTW does not require point-wise correspondence: each step in the
-prediction can be matched to a different step in the ground truth, allowing
-the loss to be invariant to local temporal distortions.
+finding the optimal non-linear alignment path between them [13]. Unlike
+standard MSE, DTW does not require point-wise correspondence: each step in
+the prediction can be matched to a different step in the ground truth,
+allowing the loss to be invariant to local temporal distortions.
 
-Soft-DTW replaces the hard minimum in the DTW dynamic programming recursion
-with a differentiable soft-minimum (log-sum-exp), making the loss function
-fully differentiable and suitable for gradient-based optimisation.
+Soft-DTW [12] replaces the hard minimum in the DTW dynamic programming
+recursion with a differentiable soft-minimum (log-sum-exp), making the loss
+function fully differentiable and suitable for gradient-based optimisation.
 
-The smoothing parameter γ controls the approximation:
-  - γ → 0 recovers hard DTW (non-differentiable)
-  - γ → ∞ approaches a sum over all alignment paths (MSE-like)
-  - γ = 1.0 is the standard value used in Cuturi & Blondel (2017)
+The smoothing parameter gamma controls the approximation:
+  - gamma -> 0 recovers hard DTW (non-differentiable)
+  - gamma -> inf approaches a sum over all alignment paths (MSE-like)
+  - gamma = 1.0 is the standard value used in Cuturi & Blondel [12]
+
+The objective is applied to this project following the thesis proposal by
+van den Hoek [7].
 
 References
 ----------
-Cuturi, M., & Blondel, M. (2017). Soft-DTW: a differentiable loss function
-    for time-series. In Proceedings of the 34th International Conference on
-    Machine Learning (ICML 2017), pp. 894–903.
-    http://proceedings.mlr.press/v70/cuturi17a.html
+[7]  van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based
+     Glucose Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis,
+     University of Bern, Faculty of Science (INF).
+     Supervisor: PD Dr. Kaspar Riesen.
 
-Berndt, D. J., & Clifford, J. (1994). Using dynamic time warping to find
-    patterns in time series. In Proceedings of the AAAI Workshop on Knowledge
-    Discovery in Databases (KDD 1994), pp. 359–370.
+[12] Cuturi, M., & Blondel, M. (2017). Soft-DTW: a differentiable loss
+     function for time-series. In Proceedings of the 34th International
+     Conference on Machine Learning (ICML 2017), vol. 70, pp. 894-903. PMLR.
+     https://proceedings.mlr.press/v70/cuturi17a.html
 
-van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
-    Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis, University
-    of Bern, Faculty of Science (INF). Supervisor: PD Dr. Kaspar Riesen.
+[13] Berndt, D. J., & Clifford, J. (1994). Using dynamic time warping to
+     find patterns in time series. In Proceedings of the AAAI Workshop on
+     Knowledge Discovery in Databases (KDD 1994), pp. 359-370.
 """
 
 import torch
@@ -51,8 +55,8 @@ def soft_dtw(pred: torch.Tensor, true: torch.Tensor, gamma: float = 1.0) -> torc
     true : torch.Tensor
         Ground-truth sequence of shape (B, H).
     gamma : float
-        Smoothing parameter γ > 0. Default 1.0 following Cuturi & Blondel
-        (2017).
+        Smoothing parameter gamma > 0. Default 1.0 following Cuturi &
+        Blondel [12].
 
     Returns
     -------
@@ -61,8 +65,8 @@ def soft_dtw(pred: torch.Tensor, true: torch.Tensor, gamma: float = 1.0) -> torc
 
     References
     ----------
-    Cuturi, M., & Blondel, M. (2017). Soft-DTW: a differentiable loss
-        function for time-series. ICML 2017, pp. 894–903.
+    [12] Cuturi, M., & Blondel, M. (2017). Soft-DTW: a differentiable loss
+         function for time-series. ICML 2017, pp. 894-903.
     """
     B, H = pred.shape
 
@@ -84,7 +88,7 @@ def soft_dtw(pred: torch.Tensor, true: torch.Tensor, gamma: float = 1.0) -> torc
             r2 = R[:, i, j - 1]      # left
 
             # Soft-minimum via log-sum-exp:
-            # softmin(a,b,c) = -γ · log(exp(-a/γ) + exp(-b/γ) + exp(-c/γ))
+            # softmin(a,b,c) = -gamma * log(exp(-a/gamma) + exp(-b/gamma) + exp(-c/gamma))
             stacked = torch.stack([-r0 / gamma, -r1 / gamma, -r2 / gamma], dim=1)
             softmin = -gamma * torch.logsumexp(stacked, dim=1)
 

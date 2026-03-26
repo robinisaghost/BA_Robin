@@ -1,8 +1,8 @@
 """
 Evaluation metrics for CGM-based glucose forecasting and event detection.
 
-Three categories of metrics are implemented, following van den Hoek (2026)
-and the internal proposal of the Pattern Recognition Group, University of Bern:
+Three categories of metrics are implemented, following van den Hoek [7]
+and the internal proposal of the Pattern Recognition Group [11]:
 
 1. Forecasting metrics: RMSE and MAE — standard pointwise regression metrics.
 
@@ -11,25 +11,25 @@ and the internal proposal of the Pattern Recognition Group, University of Bern:
    This quantifies the temporal misalignment that inflates RMSE even when
    the predicted shape is clinically plausible.
 
-3. Event metrics: precision, recall, F1, F2 for hypoglycemia event detection
-   with a time tolerance τ. A predicted threshold crossing is counted as a
-   True Positive if it falls within [tc − τ, tc + τ] of the true crossing tc.
-   F2 (β = 2) weights recall more heavily than precision, reflecting the
-   clinical priority of not missing hypoglycemic events, consistent with
-   Hüni (2023).
+3. Event metrics: precision, recall, and F1-score for hypoglycemia event
+   detection with a time tolerance τ. A predicted threshold crossing is
+   counted as a True Positive if it falls within [tc − τ, tc + τ] of the
+   true crossing tc. The F_β score is configurable (β = 1 for F1 per the
+   PRG Proposal [11]; β = 2 for F2 if recall is to be weighted more
+   heavily for clinical use, per Hüni [8]).
 
 References
-----------
-van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
+
+[7] van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
     Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis, University
     of Bern, Faculty of Science (INF). Supervisor: PD Dr. Kaspar Riesen.
 
-Hüni, F. (2023). Predicting events of hypoglycemia: A comparison of long
+[8] Hüni, F. (2023). Predicting events of hypoglycemia: A comparison of long
     short-term memory and graph attention network based approaches. Bachelor
     Thesis, University of Bern, Faculty of Science (INF).
     Supervisor: PD Dr. Kaspar Riesen.
 
-Pattern Recognition Group, University of Bern. Glucose Prediction Proposal.
+[11] Pattern Recognition Group, University of Bern. Glucose Prediction Proposal.
     Internal unpublished manuscript.
 """
 
@@ -41,9 +41,9 @@ def rmse(y_true, y_pred) -> float:
     Root mean squared error.
 
     References
-    ----------
-    Pattern Recognition Group, University of Bern. Glucose Prediction Proposal.
-        Internal unpublished manuscript.
+
+    [11] Pattern Recognition Group, University of Bern. Glucose Prediction
+        Proposal. Internal unpublished manuscript.
     """
     y_true = np.asarray(y_true)
     y_pred = np.asarray(y_pred)
@@ -62,13 +62,13 @@ def best_lag_crosscorr(y_true: np.ndarray, y_pred: np.ndarray, max_lag: int) -> 
     Find the lag Δ* in [-max_lag, max_lag] that maximises cross-correlation
     between y_true and y_pred.
 
-    This is the timeshift metric described in van den Hoek (2026): a large
+    This is the timeshift metric described by van den Hoek [7]: a large
     positive Δ* indicates the prediction is systematically shifted forward
     relative to the ground truth, inflating pointwise RMSE even when the
     predicted trajectory shape is correct.
 
     Parameters
-    ----------
+
     y_true : np.ndarray
         Ground-truth glucose trajectory.
     y_pred : np.ndarray
@@ -77,14 +77,14 @@ def best_lag_crosscorr(y_true: np.ndarray, y_pred: np.ndarray, max_lag: int) -> 
         Maximum lag D in both directions (in time steps).
 
     Returns
-    -------
+
     int
         Best lag Δ* in [-max_lag, max_lag].
 
     References
-    ----------
-    van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
-        Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis,
+
+    [7] van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based
+        Glucose Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis,
         University of Bern, Faculty of Science (INF).
     """
     y_true = np.asarray(y_true, dtype=np.float64)
@@ -121,7 +121,7 @@ def crossing_times(series: np.ndarray, threshold: float, direction: str = "below
     Detect threshold crossing times in a glucose series.
 
     Parameters
-    ----------
+
     series : np.ndarray
         Glucose time series.
     threshold : float
@@ -131,9 +131,9 @@ def crossing_times(series: np.ndarray, threshold: float, direction: str = "below
         'above': detects crossings from below to above threshold (hyperglycemia onset).
 
     References
-    ----------
-    van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
-        Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis,
+
+    [7] van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based
+        Glucose Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis,
         University of Bern, Faculty of Science (INF).
     """
     s = np.asarray(series)
@@ -166,10 +166,10 @@ def event_metrics(
 
     F_β weighs recall β² times more than precision. β = 2 (F2) reflects the
     clinical priority of not missing hypoglycemic events, consistent with
-    Hüni (2023).
+    Hüni [8].
 
     Parameters
-    ----------
+
     true_series : np.ndarray
         Ground-truth glucose trajectory.
     pred_series : np.ndarray
@@ -184,16 +184,16 @@ def event_metrics(
         Crossing direction passed to crossing_times().
 
     Returns
-    -------
+
     dict with keys: tp, fp, fn, precision, recall, fbeta.
 
     References
-    ----------
-    van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
-        Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis,
+
+    [7] van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based
+        Glucose Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis,
         University of Bern, Faculty of Science (INF).
 
-    Hüni, F. (2023). Predicting events of hypoglycemia. Bachelor Thesis,
+    [8] Hüni, F. (2023). Predicting events of hypoglycemia. Bachelor Thesis,
         University of Bern, Faculty of Science (INF).
     """
     true_events = crossing_times(true_series, threshold, direction=direction)
@@ -257,9 +257,9 @@ def best_lag_rmse(true: np.ndarray, pred: np.ndarray, max_lag: int = 24) -> int:
     correlation maximisation.
 
     References
-    ----------
-    van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based Glucose
-        Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis,
+
+    [7] van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based
+        Glucose Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis,
         University of Bern, Faculty of Science (INF).
     """
     true = np.asarray(true).astype(float)
