@@ -107,8 +107,8 @@ def eval_hstep_trace(model, series, lookback, horizon, device, h_index, batch_si
 
 def train_patient(pid, train_s, val_s, lookback, horizon, device,
                   patch_len=12, stride=6, d_model=64, n_heads=4,
-                  n_layers=4, dim_ff=256, dropout=0.1, lr=5e-4,
-                  max_epochs=100, patience=10, batch_size=256):
+                  n_layers=3, dim_ff=256, dropout=0.0254, lr=1.212e-4,
+                  max_epochs=100, patience=10, batch_size=128):
     # No global z-score normalisation: RevIN inside PatchTST handles per-window
     # instance normalisation on raw mg/dL data, as intended by Nie et al. [2].
     train_ds = MultiPatientWindowDataset(
