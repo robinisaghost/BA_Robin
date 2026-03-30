@@ -280,3 +280,46 @@ def best_lag_rmse(true: np.ndarray, pred: np.ndarray, max_lag: int = 24) -> int:
             best_k = k
 
     return best_k
+
+
+def lag_adjusted_rmse(
+    y_true: np.ndarray, y_pred: np.ndarray, max_lag: int = 12
+) -> float:
+    """
+    RMSE after compensating for the best constant temporal shift.
+
+    Searches k in [-max_lag, max_lag] and returns the minimum achievable
+    RMSE after shifting y_pred by k steps:
+
+        lag_rmse = min_{k} RMSE(y_true, shift(y_pred, k))
+
+    This removes the fraction of RMSE that is purely due to a constant
+    time-shift in the predictions, giving a fairer comparison between
+    models trained with alignment-aware losses (bounded-lag, Soft-DTW)
+    and the standard MSE baseline.  The difference
+
+        rmse - lag_rmse
+
+    quantifies the time-shift penalty for each patient.
+
+    Parameters
+
+    y_true : np.ndarray
+        Ground-truth glucose trajectory.
+    y_pred : np.ndarray
+        Predicted glucose trajectory.
+    max_lag : int
+        Maximum shift window D in both directions (in time steps).
+        Default 12 = ±60 min, covering the full prediction horizon.
+
+    References
+
+    [7] van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based
+        Glucose Forecasting and Hypoglycemia Event Prediction. Bachelor Thesis,
+        University of Bern, Faculty of Science (INF).
+    """
+    best_k = best_lag_rmse(y_true, y_pred, max_lag)
+    p = shift_1d(y_pred, best_k)
+    mask = ~np.isnan(p)
+    err = y_true[mask] - p[mask]
+    return float(np.sqrt(np.mean(err * err)))
