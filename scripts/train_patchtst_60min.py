@@ -59,7 +59,7 @@ from ba_baseline.data.patient_loader import load_patient_series
 from ba_baseline.data.split import temporal_split_series
 from ba_baseline.data.multi_patient_dataset import MultiPatientWindowDataset
 from ba_baseline.models.patchtst import PatchTST
-from ba_baseline.metrics.metrics import rmse, mae, event_metrics
+from ba_baseline.metrics.metrics import rmse, mae, event_metrics, lag_adjusted_rmse
 
 
 def set_seed(seed=42):
@@ -279,7 +279,7 @@ def main():
     print(f"Best hyperparameters: {best_hp}")
 
     traces = {}
-    rmses, maes, hypo_metrics_list, pids_done = [], [], [], []
+    rmses, lag_rmses, maes, hypo_metrics_list, pids_done = [], [], [], [], []
 
     all_pids = sorted(d.keys())
     print(f"Training patient-specific PatchTST for {len(all_pids)} patients...")
@@ -309,16 +309,18 @@ def main():
 
         traces[pid] = (y_true, y_pred)
         r = rmse(y_true, y_pred)
+        la_r = lag_adjusted_rmse(y_true, y_pred, max_lag=12)
         m = mae(y_true, y_pred)
         h = event_metrics(
             y_true, y_pred, threshold=HYPO_THRESH, tol=EVENT_TOL, direction="below"
         )
 
         rmses.append(r)
+        lag_rmses.append(la_r)
         maes.append(m)
         hypo_metrics_list.append(h)
         pids_done.append(pid)
-        print(f"  [{i+1}/{len(all_pids)}] patient {pid}: RMSE={r:.3f}  MAE={m:.3f}")
+        print(f"  [{i+1}/{len(all_pids)}] patient {pid}: RMSE={r:.3f}  lag-RMSE={la_r:.3f}  MAE={m:.3f}")
 
     os.makedirs("reports/results", exist_ok=True)
 
@@ -333,14 +335,15 @@ def main():
         "w",
         encoding="utf8",
     ) as f:
-        f.write("patient_id,model,rmse,mae,hypo_precision,hypo_recall,hypo_f1\n")
-        for pid, r, m, h in zip(pids_done, rmses, maes, hypo_metrics_list):
+        f.write("patient_id,model,rmse,lag_rmse,mae,hypo_precision,hypo_recall,hypo_f1\n")
+        for pid, r, la_r, m, h in zip(pids_done, rmses, lag_rmses, maes, hypo_metrics_list):
             f.write(
-                f"{pid},patchtst,{r:.6f},{m:.6f},{h['precision']:.6f},{h['recall']:.6f},{h['fbeta']:.6f}\n"
+                f"{pid},patchtst,{r:.6f},{la_r:.6f},{m:.6f},{h['precision']:.6f},{h['recall']:.6f},{h['fbeta']:.6f}\n"
             )
 
     summary = {
         "rmse_mean": float(np.mean(rmses)),
+        "lag_rmse_mean": float(np.mean(lag_rmses)),
         "mae_mean": float(np.mean(maes)),
         "patient_ids": pids_done,
         "horizon_steps": horizon,
@@ -357,7 +360,7 @@ def main():
 
     print("\n=== PatchTST per-patient (test) ===")
     print(f"Patients: {len(pids_done)}")
-    print(f"RMSE mean={float(np.mean(rmses)):.3f}  MAE mean={float(np.mean(maes)):.3f}")
+    print(f"RMSE mean={float(np.mean(rmses)):.3f}  lag-RMSE mean={float(np.mean(lag_rmses)):.3f}  MAE mean={float(np.mean(maes)):.3f}")
     print("Saved to reports/results/")
 
 
