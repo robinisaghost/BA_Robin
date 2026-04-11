@@ -1,0 +1,45 @@
+device: cpu
+Tuning hyperparameters on patient 85202 (50 Optuna trials)...
+Best hyperparameters: {'hidden_size': 256, 'num_layers': 2, 'dropout': 0.1118671991770475, 'lr': 0.000777212952904292, 'batch_size': 512}
+Training patient-specific LSTM (bounded-lag loss, D=3) for 36 patients...
+  [1/36] patient 85101: RMSE=32.913  MAE=27.796
+  [2/36] patient 85102: RMSE=58.789  MAE=49.055
+  [3/36] patient 85104: RMSE=35.492  MAE=29.925
+  [4/36] patient 85105: RMSE=35.932  MAE=26.155
+  [5/36] patient 85106: RMSE=34.362  MAE=25.557
+  [6/36] patient 85107: RMSE=29.101  MAE=22.627
+  [7/36] patient 85111: RMSE=34.115  MAE=27.252
+  [8/36] patient 85112: RMSE=60.261  MAE=45.337
+  [9/36] patient 85116: RMSE=53.997  MAE=44.035
+  [10/36] patient 85117: RMSE=46.234  MAE=38.418
+  [11/36] patient 85118: RMSE=47.809  MAE=41.403
+  [12/36] patient 85119: RMSE=47.432  MAE=38.782
+  [13/36] patient 85120: RMSE=47.251  MAE=38.697
+  [14/36] patient 85121: RMSE=39.905  MAE=32.254
+  [15/36] patient 85122: RMSE=57.122  MAE=48.414
+  [16/36] patient 85123: RMSE=34.951  MAE=27.755
+  [17/36] patient 85124: RMSE=45.086  MAE=37.006
+  [18/36] patient 85125: RMSE=55.401  MAE=48.459
+  [19/36] patient 85126: RMSE=35.480  MAE=29.624
+  [20/36] patient 85201: RMSE=48.800  MAE=40.949
+  [21/36] patient 85202: RMSE=43.470  MAE=34.171
+  [22/36] patient 85204: RMSE=57.242  MAE=45.803
+  [23/36] patient 85207: RMSE=47.612  MAE=39.811
+  [24/36] patient 85208: RMSE=32.665  MAE=25.744
+  [25/36] patient 85209: RMSE=47.546  MAE=40.223
+  [26/36] patient 85211: RMSE=39.037  MAE=30.248
+  [27/36] patient 85214: RMSE=49.451  MAE=41.538
+  [28/36] patient 85215: RMSE=34.086  MAE=27.512
+  [29/36] patient 85216: RMSE=43.069  MAE=35.248
+  [30/36] patient 85217: RMSE=52.989  MAE=44.453
+  [31/36] patient 85218: RMSE=48.202  MAE=37.815
+  [32/36] patient 85219: RMSE=42.945  MAE=34.433
+  [33/36] patient 85220: RMSE=45.880  MAE=37.796
+  [34/36] patient 85221: RMSE=57.966  MAE=47.538
+  [35/36] patient 85222: RMSE=50.668  MAE=41.036
+  [36/36] patient 85224: RMSE=36.613  MAE=30.496
+
+=== LSTM bounded-lag (test) ===
+Patients: 36
+RMSE mean=44.719  MAE mean=36.482
+Saved to reports/results/

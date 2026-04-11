@@ -1,0 +1,45 @@
+device: cpu
+Tuning hyperparameters on patient 85202 (50 Optuna trials)...
+Best hyperparameters: {'hidden_size': 256, 'num_layers': 2, 'dropout': 0.03841730037902259, 'lr': 0.0009956305642692335, 'batch_size': 512}
+Training patient-specific LSTM (Soft-DTW, gamma=1.0) for 36 patients...
+  [1/36] patient 85101: RMSE=21.125  MAE=16.930
+  [2/36] patient 85102: RMSE=46.962  MAE=38.314
+  [3/36] patient 85104: RMSE=27.996  MAE=22.099
+  [4/36] patient 85105: RMSE=33.889  MAE=21.966
+  [5/36] patient 85106: RMSE=32.189  MAE=23.841
+  [6/36] patient 85107: RMSE=27.819  MAE=21.005
+  [7/36] patient 85111: RMSE=31.603  MAE=25.048
+  [8/36] patient 85112: RMSE=55.871  MAE=40.438
+  [9/36] patient 85116: RMSE=48.097  MAE=35.034
+  [10/36] patient 85117: RMSE=35.290  MAE=28.460
+  [11/36] patient 85118: RMSE=34.019  MAE=27.562
+  [12/36] patient 85119: RMSE=38.074  MAE=29.916
+  [13/36] patient 85120: RMSE=41.881  MAE=33.498
+  [14/36] patient 85121: RMSE=36.591  MAE=27.725
+  [15/36] patient 85122: RMSE=49.568  MAE=39.759
+  [16/36] patient 85123: RMSE=31.380  MAE=24.687
+  [17/36] patient 85124: RMSE=40.140  MAE=30.206
+  [18/36] patient 85125: RMSE=35.205  MAE=25.923
+  [19/36] patient 85126: RMSE=28.045  MAE=23.325
+  [20/36] patient 85201: RMSE=38.928  MAE=30.289
+  [21/36] patient 85202: RMSE=34.068  MAE=25.790
+  [22/36] patient 85204: RMSE=52.265  MAE=39.497
+  [23/36] patient 85207: RMSE=37.716  MAE=30.650
+  [24/36] patient 85208: RMSE=31.322  MAE=24.411
+  [25/36] patient 85209: RMSE=39.012  MAE=32.681
+  [26/36] patient 85211: RMSE=32.381  MAE=24.865
+  [27/36] patient 85214: RMSE=41.436  MAE=34.427
+  [28/36] patient 85215: RMSE=28.654  MAE=22.461
+  [29/36] patient 85216: RMSE=36.864  MAE=29.587
+  [30/36] patient 85217: RMSE=44.747  MAE=35.363
+  [31/36] patient 85218: RMSE=37.501  MAE=28.075
+  [32/36] patient 85219: RMSE=35.108  MAE=26.968
+  [33/36] patient 85220: RMSE=39.571  MAE=32.664
+  [34/36] patient 85221: RMSE=44.359  MAE=33.891
+  [35/36] patient 85222: RMSE=45.565  MAE=36.576
+  [36/36] patient 85224: RMSE=31.016  MAE=24.017
+
+=== LSTM Soft-DTW (test) ===
+Patients: 36
+RMSE mean=37.396  MAE mean=29.110
+Saved to reports/results/

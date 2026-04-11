@@ -1,11 +1,20 @@
 """
 Train patient-specific LSTM models using the bounded-lag alignment loss.
 
-Identical pipeline to train_lstm_60min.py — same Optuna tuning, same
-architecture search space, same evaluation — with the sole difference that
-the training and validation loss is bounded_lag_mse (D=3 steps) instead of
-standard MSE. Models are evaluated at h_index=11 (60-min ahead) using RMSE,
-MAE, and event-based metrics for hypoglycemia detection.
+Identical pipeline to train_lstm_60min.py with two differences:
+  1. The training and validation loss is bounded_lag_mse (D=3 steps) instead
+     of standard MSE.
+  2. The dataset target window is extended by 2*MAX_LAG steps so that every
+     shift k compares exactly horizon=12 ground-truth values (no slice-length
+     bias).  The model still predicts horizon=12 steps.
+
+Hyperparameters are fixed to the values found by Optuna on the MSE baseline
+(patient 85202, 50 trials).  Using the same hyperparameters for all objectives
+ensures that any difference in results is attributable solely to the loss
+function, consistent with the ablation design of van den Hoek [7].
+
+Models are evaluated at h_index=11 (60-min ahead) using RMSE, MAE, and
+event-based metrics for hypoglycemia detection.
 
 Model
 -----
@@ -50,7 +59,6 @@ import os
 import json
 import numpy as np
 import torch
-import optuna
 from torch.utils.data import DataLoader
 
 from ba_baseline.data.patient_loader import load_patient_series
@@ -107,8 +115,9 @@ def train_patient(
     horizon,
     h_index,
     device,
-    hidden_size=819,
-    num_layers=1,
+    max_lag=MAX_LAG,
+    hidden_size=256,
+    num_layers=2,
     dropout=0.0,
     lr=1e-3,
     max_epochs=100,
@@ -118,11 +127,15 @@ def train_patient(
     mean = float(train_s.mean())
     std = float(train_s.std())
 
+    # Extended target window: horizon + 2*max_lag steps so that every shift k
+    # in bounded_lag_mse compares exactly horizon values (no slice-length bias).
+    horizon_ext = horizon + 2 * max_lag
+
     train_ds = MultiPatientWindowDataset(
-        {pid: train_s}, [pid], lookback=lookback, horizon=horizon, mean=mean, std=std
+        {pid: train_s}, [pid], lookback=lookback, horizon=horizon_ext, mean=mean, std=std
     )
     val_ds = MultiPatientWindowDataset(
-        {pid: val_s}, [pid], lookback=lookback, horizon=horizon, mean=mean, std=std
+        {pid: val_s}, [pid], lookback=lookback, horizon=horizon_ext, mean=mean, std=std
     )
 
     train_loader = DataLoader(
@@ -130,7 +143,8 @@ def train_patient(
     )
     val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, num_workers=0)
 
-    # horizon=12: full trajectory needed for bounded-lag alignment loss.
+    # Model predicts horizon=12 steps; the extended target (horizon_ext) is
+    # only used inside the loss function.
     model = LSTMForecaster(
         input_size=1,
         hidden_size=hidden_size,
@@ -177,69 +191,6 @@ def train_patient(
     return model, mean, std
 
 
-def select_average_patient(train_series, val_series, lookback, horizon):
-    """
-    Select the patient with median training-set length as the tuning patient.
-
-    Follows the average-patient approach of Hüni [8]: hyperparameter
-    optimisation is performed on a single representative patient and the
-    resulting configuration is applied to all patients.
-    """
-    eligible = [
-        pid for pid in train_series
-        if len(train_series[pid]) >= lookback + horizon + 1
-        and len(val_series[pid]) >= lookback + horizon + 1
-    ]
-    sorted_pids = sorted(eligible, key=lambda p: len(train_series[p]))
-    return sorted_pids[len(sorted_pids) // 2]
-
-
-def optuna_tune(pid, train_s, val_s, lookback, horizon, h_index, device, n_trials=50):
-    """
-    Bayesian hyperparameter search (Optuna TPE sampler) on a single patient.
-
-    Searches over hidden size, number of layers, dropout, learning rate, and
-    batch size. Each trial uses a short training budget (max_epochs=30,
-    patience=5) to keep tuning feasible on CPU. The best configuration is
-    then used with the full training budget for all patients.
-
-    Follows the average-patient Bayesian optimisation approach of Hüni [8],
-    adapted for LSTM regression with Optuna [10] as the standard
-    PyTorch-compatible hyperparameter framework.
-    """
-    optuna.logging.set_verbosity(optuna.logging.WARNING)
-
-    def objective(trial):
-        hp = dict(
-            hidden_size=trial.suggest_categorical("hidden_size", [256, 512, 1024]),
-            num_layers=trial.suggest_int("num_layers", 1, 2),
-            dropout=trial.suggest_float("dropout", 0.0, 0.3),
-            lr=trial.suggest_float("lr", 1e-4, 1e-3, log=True),
-            batch_size=trial.suggest_categorical("batch_size", [128, 256, 512]),
-            max_epochs=30,
-            patience=5,
-        )
-        model, mean, std = train_patient(
-            pid, train_s, val_s, lookback, horizon, h_index, device, **hp
-        )
-        y_true, y_pred = eval_hstep_trace(
-            model, val_s, lookback, horizon, device, mean, std, h_index
-        )
-        if y_true is None:
-            raise optuna.exceptions.TrialPruned()
-        return float(np.sqrt(np.mean((y_true - y_pred) ** 2)))
-
-    study = optuna.create_study(
-        direction="minimize",
-        sampler=optuna.samplers.TPESampler(seed=42),
-    )
-    study.optimize(objective, n_trials=n_trials, show_progress_bar=False)
-    best = study.best_params.copy()
-    best.pop("max_epochs", None)
-    best.pop("patience", None)
-    return best
-
-
 def main():
     set_seed(42)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -256,14 +207,21 @@ def main():
     HYPO_THRESH = 70.0
     EVENT_TOL = 3
 
-    # Hyperparameter tuning on a single representative patient (Hüni 2023 approach)
-    avg_pid = select_average_patient(train_series, val_series, lookback, horizon)
-    print(f"Tuning hyperparameters on patient {avg_pid} (50 Optuna trials)...")
-    best_hp = optuna_tune(
-        avg_pid, train_series[avg_pid], val_series[avg_pid],
-        lookback, horizon, h_index, device, n_trials=50,
-    )
-    print(f"Best hyperparameters: {best_hp}")
+    # Hyperparameters fixed to the MSE baseline values (Optuna, 50 trials, patient 85202).
+    # Using the same hyperparameters across all objectives ensures any difference
+    # in results is attributable to the loss function only [7].
+    best_hp = {
+        "hidden_size": 256,
+        "num_layers": 2,
+        "dropout": 0.15854918709610058,
+        "lr": 0.0009611047754271736,
+        "batch_size": 128,
+    }
+    print(f"Using baseline hyperparameters: {best_hp}")
+
+    # Extended horizon for training datasets (horizon + 2*MAX_LAG = 18 steps).
+    # Evaluation still uses horizon=12 at h_index=11.
+    horizon_ext = horizon + 2 * MAX_LAG
 
     traces = {}
     rmses, lag_rmses, maes, hypo_metrics_list, pids_done = [], [], [], [], []
@@ -277,8 +235,8 @@ def main():
         test_s = test_series[pid]
 
         if (
-            len(train_s) < lookback + horizon + 1
-            or len(val_s) < lookback + horizon + 1
+            len(train_s) < lookback + horizon_ext + 1
+            or len(val_s) < lookback + horizon_ext + 1
             or len(test_s) < lookback + horizon + 1
         ):
             print(f"  [{i+1}/{len(all_pids)}] patient {pid}: skipped (too short)")
@@ -337,7 +295,7 @@ def main():
         "model": "lstm_bounded_lag",
         "max_lag": MAX_LAG,
         "lookback": lookback,
-        "tuning_patient": avg_pid,
+        "hyperparameters_source": "baseline_optuna_patient_85202",
         "hyperparameters": best_hp,
     }
 

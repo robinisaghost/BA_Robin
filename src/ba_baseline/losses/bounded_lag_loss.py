@@ -53,10 +53,22 @@ def bounded_lag_mse(
     MSE loss with best-lag alignment within ±max_lag steps.
 
     For each sample in the batch the lag k* in [-max_lag, max_lag] that
-    minimises MSE on the overlapping slice is found. The loss is then computed
-    at that alignment. Gradients flow through the MSE at k* (winner-takes-all),
-    not through the argmin, which is consistent with structured-prediction
-    practice for non-differentiable search steps.
+    minimises MSE is found. The loss is then computed at that alignment.
+    Gradients flow through the MSE at k* (winner-takes-all), not through
+    the argmin, which is consistent with structured-prediction practice for
+    non-differentiable search steps.
+
+    To avoid a slice-length bias, the ground-truth tensor must be extended
+    by 2*max_lag steps relative to the prediction horizon.  For every shift k
+    the comparison is always over exactly H = pred.shape[1] values:
+
+        k = -max_lag : pred[0:H] vs true[0         : H       ]
+        k =  0       : pred[0:H] vs true[max_lag   : max_lag+H]
+        k = +max_lag : pred[0:H] vs true[2*max_lag : 2*max_lag+H]
+
+    Without this extension, larger shifts would compare fewer values
+    (H - |k| instead of H), artificially lowering the MSE and incentivising
+    the model to produce shifted outputs.
 
     The alignment window D = max_lag is directly motivated by the
     Sakoe-Chiba band [14], which constrains DTW to a diagonal strip of
@@ -67,9 +79,11 @@ def bounded_lag_mse(
     Parameters
     ----------
     pred : torch.Tensor
-        Predicted trajectory of shape (batch, horizon).
+        Predicted trajectory of shape (batch, H).
     true : torch.Tensor
-        Ground-truth trajectory of shape (batch, horizon).
+        Extended ground-truth trajectory of shape (batch, H + 2*max_lag).
+        Must be constructed from a target window that starts max_lag steps
+        before and ends max_lag steps after the standard horizon window.
     max_lag : int
         Maximum alignment shift D in both directions (in time steps).
 
@@ -98,17 +112,12 @@ def bounded_lag_mse(
     best_mse = None  # shape: (batch,)
 
     for k in range(-max_lag, max_lag + 1):
-        if k > 0:
-            p_slice = pred[:, :H - k]   # pred aligned left
-            t_slice = true[:, k:]       # true shifted right
-        elif k < 0:
-            p_slice = pred[:, -k:]      # pred shifted right
-            t_slice = true[:, :H + k]   # true aligned left
-        else:
-            p_slice = pred
-            t_slice = true
+        # offset maps k ∈ [-max_lag, max_lag] to [0, 2*max_lag]
+        # t_slice always has exactly H values regardless of k
+        offset = k + max_lag
+        t_slice = true[:, offset : offset + H]
 
-        mse_k = ((p_slice - t_slice) ** 2).mean(dim=1)  # (batch,)
+        mse_k = ((pred - t_slice) ** 2).mean(dim=1)  # (batch,)
 
         if best_mse is None:
             best_mse = mse_k

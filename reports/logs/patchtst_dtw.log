@@ -1,0 +1,49 @@
+C:\Users\Robin\Projects\BA_Robin_baseline\src\ba_baseline\models\patchtst.py:133: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(enc_layer, num_layers=n_layers)
+C:\Users\Robin\Projects\BA_Robin_baseline\src\ba_baseline\models\patchtst.py:133: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(enc_layer, num_layers=n_layers)
+device: cpu
+Tuning hyperparameters on patient 85202 (50 Optuna trials)...
+Best hyperparameters: {'d_model': 256, 'n_heads': 4, 'n_layers': 3, 'dim_ff': 128, 'dropout': 0.13973397693889444, 'lr': 0.0006528707932696085, 'batch_size': 256}
+Training patient-specific PatchTST (Soft-DTW, gamma=1.0) for 36 patients...
+  [1/36] patient 85101: RMSE=25.065  MAE=19.115
+  [2/36] patient 85102: RMSE=53.483  MAE=39.103
+  [3/36] patient 85104: RMSE=36.854  MAE=25.305
+  [4/36] patient 85105: RMSE=44.308  MAE=32.624
+  [5/36] patient 85106: RMSE=36.400  MAE=27.567
+  [6/36] patient 85107: RMSE=30.891  MAE=23.529
+  [7/36] patient 85111: RMSE=35.810  MAE=28.824
+  [8/36] patient 85112: RMSE=62.497  MAE=47.419
+  [9/36] patient 85116: RMSE=57.322  MAE=39.686
+  [10/36] patient 85117: RMSE=38.604  MAE=29.629
+  [11/36] patient 85118: RMSE=39.245  MAE=27.166
+  [12/36] patient 85119: RMSE=44.746  MAE=30.826
+  [13/36] patient 85120: RMSE=47.110  MAE=37.742
+  [14/36] patient 85121: RMSE=35.688  MAE=25.956
+  [15/36] patient 85122: RMSE=56.891  MAE=41.959
+  [16/36] patient 85123: RMSE=35.558  MAE=28.278
+  [17/36] patient 85124: RMSE=48.036  MAE=34.817
+  [18/36] patient 85125: RMSE=44.595  MAE=30.752
+  [19/36] patient 85126: RMSE=32.488  MAE=25.349
+  [20/36] patient 85201: RMSE=50.152  MAE=35.888
+  [21/36] patient 85202: RMSE=37.698  MAE=24.529
+  [22/36] patient 85204: RMSE=64.463  MAE=46.467
+  [23/36] patient 85207: RMSE=48.606  MAE=36.006
+  [24/36] patient 85208: RMSE=32.691  MAE=23.602
+  [25/36] patient 85209: RMSE=41.606  MAE=32.342
+  [26/36] patient 85211: RMSE=36.250  MAE=26.818
+  [27/36] patient 85214: RMSE=45.161  MAE=32.148
+  [28/36] patient 85215: RMSE=32.058  MAE=23.886
+  [29/36] patient 85216: RMSE=37.173  MAE=28.007
+  [30/36] patient 85217: RMSE=57.515  MAE=42.793
+  [31/36] patient 85218: RMSE=43.491  MAE=32.500
+  [32/36] patient 85219: RMSE=41.943  MAE=32.181
+  [33/36] patient 85220: RMSE=41.592  MAE=31.878
+  [34/36] patient 85221: RMSE=52.518  MAE=37.505
+  [35/36] patient 85222: RMSE=58.539  MAE=46.653
+  [36/36] patient 85224: RMSE=37.247  MAE=28.825
+
+=== PatchTST Soft-DTW (test) ===
+Patients: 36
+RMSE mean=43.453  MAE mean=32.158
+Saved to reports/results/
