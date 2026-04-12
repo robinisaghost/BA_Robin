@@ -39,12 +39,12 @@ so there is an intentional train–eval mismatch by design.
 
 ## 3. Summary Results vs Baseline
 
-| Model | RMSE | Δ vs baseline | MAE | Precision | Recall | F1 | ΔF1 vs baseline |
-|---|---|---|---|---|---|---|---|
-| LSTM MSE (baseline) | 36.089 | — | 27.118 | 0.0104 | 0.0036 | 0.0054 | — |
-| **LSTM Bounded-lag** | **44.719** | **+24.0%** | **36.482** | 0.0417 | 0.0125 | 0.0154 | +185% |
-| PatchTST MSE (baseline) | 39.271 | — | 29.001 | 0.0482 | 0.0888 | 0.0609 | — |
-| **PatchTST Bounded-lag** | **42.124** | **+7.3%** | **31.286** | 0.0612 | 0.1600 | 0.0838 | +38% |
+| Model | RMSE | lag_rmse | Δ RMSE vs baseline | MAE | Precision | Recall | F1 | ΔF1 vs baseline |
+|---|---|---|---|---|---|---|---|---|
+| LSTM MSE (baseline) | 36.089 | 21.649 | — | 27.118 | 0.0104 | 0.0036 | 0.0054 | — |
+| **LSTM Bounded-lag** | **44.719** | **41.389** | **+24.0%** | **36.482** | 0.0417 | 0.0125 | 0.0154 | +185% |
+| PatchTST MSE (baseline) | 39.271 | 14.213 | — | 29.001 | 0.0482 | 0.0888 | 0.0609 | — |
+| **PatchTST Bounded-lag** | **42.124** | **24.637** | **+7.3%** | **31.286** | 0.0612 | 0.1600 | 0.0838 | +38% |
 
 ---
 
@@ -152,6 +152,23 @@ gradient mechanism. Once a particular shift k* is selected for a training sample
 reinforces predictions at that shifted time, which can progressively push the output away from
 the unshifted target. PatchTST, benefiting from its attention mechanism over the full lookback
 window, is less susceptible to this drift.
+
+### lag_rmse increases — the time-shift artefact is not reduced
+
+The lag_rmse metric measures the best-case RMSE after applying an optimal constant shift
+k* ∈ [−12, 12] steps. It isolates the shape error from the time-shift error.
+
+Contrary to expectation, the bounded-lag loss increases lag_rmse for both models:
+
+- LSTM: 21.649 → 41.389 (+91%)
+- PatchTST: 14.213 → 24.637 (+73%)
+
+This means that even after correcting for the best possible time shift, the bounded-lag models
+produce less accurate predictions than the baseline. The winner-takes-all gradient mechanism
+reinforces whichever shift k* minimises MSE for each batch — which can vary across samples and
+epochs. The result is not a consistent shift, but rather a distorted prediction shape that
+cannot be fully recovered by any single constant shift. The loss permits temporal flexibility
+during training, but this flexibility comes at the cost of shape fidelity at evaluation.
 
 ### Hypoglycemia detection improves
 
