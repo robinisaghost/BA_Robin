@@ -43,12 +43,12 @@ design across all three objectives.
 
 ## 3. Summary Results vs Baseline
 
-| Model | RMSE | Δ vs baseline | MAE | Precision | Recall | F1 | ΔF1 vs baseline |
-|---|---|---|---|---|---|---|---|
-| LSTM MSE (baseline) | 36.089 | — | 27.118 | 0.0104 | 0.0036 | 0.0054 | — |
-| **LSTM Soft-DTW** | **37.396** | **+3.6%** | **29.110** | 0.0435 | 0.0125 | 0.0153 | +183% |
-| PatchTST MSE (baseline) | 39.271 | — | 29.001 | 0.0482 | 0.0888 | 0.0609 | — |
-| **PatchTST Soft-DTW** | **43.453** | **+10.6%** | **32.158** | 0.0766 | 0.1586 | 0.0835 | +37% |
+| Model | RMSE | lag_rmse | Δ RMSE vs baseline | MAE | Precision | Recall | F1 | ΔF1 vs baseline |
+|---|---|---|---|---|---|---|---|---|
+| LSTM MSE (baseline) | 36.089 | 21.649 | — | 27.118 | 0.0104 | 0.0036 | 0.0054 | — |
+| **LSTM Soft-DTW** | **37.396** | **28.619** | **+3.6%** | **29.110** | 0.0435 | 0.0125 | 0.0153 | +183% |
+| PatchTST MSE (baseline) | 39.271 | 14.213 | — | 29.001 | 0.0482 | 0.0888 | 0.0609 | — |
+| **PatchTST Soft-DTW** | **43.453** | **24.166** | **+10.6%** | **32.158** | 0.0766 | 0.1586 | 0.0835 | +37% |
 
 ---
 
@@ -160,6 +160,22 @@ PatchTST Soft-DTW (RMSE = 43.453) shows a larger penalty (+10.6%) than LSTM Soft
 This is likely due to the higher model complexity of PatchTST interacting with the more
 complex Soft-DTW loss surface, combined with the O(H²) per-sample cost reducing effective
 gradient signal per epoch.
+
+### lag_rmse increases — time-shift artefact not reduced
+
+Despite optimising for temporal alignment, Soft-DTW does not reduce the lag_rmse compared
+to baseline:
+
+- LSTM: 21.649 → 28.619 (+32%)
+- PatchTST: 14.213 → 24.166 (+70%)
+
+This mirrors the finding from the bounded-lag branch: alignment-aware losses do not reduce
+the time-shift artefact as measured by lag_rmse. The soft alignment paths in Soft-DTW allow
+flexible warping during training, but this flexibility produces predictions that are not
+consistently shifted in a single direction — rather, the shape of the output is altered across
+multiple time steps. The result is a higher residual error even after the best constant shift
+is applied. LSTM Soft-DTW shows the smallest increase (+32%), consistent with its generally
+better RMSE performance.
 
 ### Hypoglycemia detection: comparable gains to bounded-lag
 

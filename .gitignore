@@ -15,6 +15,7 @@ data/processed/
 # experiment outputs
 reports/results/
 reports/figures/
+!reports/meeting_results/
 
 # Outputs
 runs/
