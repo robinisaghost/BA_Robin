@@ -102,8 +102,7 @@ def eval_hstep_trace(
 
     yhat = yhat * (std + 1e-8) + mean
     ys = ys * (std + 1e-8) + mean
-    # Model outputs a single value (horizon=1); index 0 is the 60-min prediction.
-    # Ground truth ys has shape (N, 12); h_index selects the 60-min step.
+    # Model outputs horizon=12 values; h_index=11 selects the 60-min prediction.
     return ys[:, h_index], yhat[:, h_index]
 
 
