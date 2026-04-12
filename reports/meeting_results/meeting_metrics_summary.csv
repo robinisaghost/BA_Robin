@@ -1,0 +1,3 @@
+model,n_patients,rmse_mean,rmse_std,mae_mean,mae_std,best_lag_steps_mean,best_lag_steps_std,best_lag_minutes_mean,best_lag_minutes_std,hypo_precision_mean,hypo_precision_std,hypo_recall_mean,hypo_recall_std,hypo_f1_mean,hypo_f1_std,hypo_f2_mean,hypo_f2_std
+LSTM,36,36.0887,7.3507,27.1176,5.6937,10.2222,1.8379,51.1111,9.1894,0.0104,0.0625,0.0036,0.0217,0.0054,0.0322,0.0042,0.025
+PatchTST,36,39.271,8.2398,29.0007,6.2612,11.0,0.6325,55.0,3.1623,0.0482,0.0985,0.0888,0.1908,0.0609,0.1278,0.0742,0.1584
