@@ -1,10 +1,16 @@
 """
 Train patient-specific LSTM models using the Soft-DTW alignment loss.
 
-Identical pipeline to train_lstm_60min.py — same Optuna tuning, same
-architecture search space, same evaluation — with the sole difference that
-the training and validation loss is soft_dtw (gamma=1.0) instead of standard
-MSE. Models are evaluated at h_index=11 (60-min ahead) using RMSE, MAE, and
+Identical pipeline to train_lstm_60min.py with one difference:
+  The training and validation loss is soft_dtw (gamma=1.0) instead of
+  standard MSE.
+
+Hyperparameters are fixed to the values found by Optuna on the MSE baseline
+(patient 85202, 50 trials).  Using the same hyperparameters for all objectives
+ensures that any difference in results is attributable solely to the loss
+function, consistent with the ablation design of van den Hoek [7].
+
+Models are evaluated at h_index=11 (60-min ahead) using RMSE, MAE, and
 event-based metrics for hypoglycemia detection.
 
 Model
@@ -36,12 +42,6 @@ References
      delivery in adults with type 1 diabetes. Diabetes Care, 46(9), 1652–1658.
      https://doi.org/10.2337/dc23-0119
 
-[10] Akiba, T., Sano, S., Yanase, T., Ohta, T., & Koyama, M. (2019). Optuna:
-     A next-generation hyperparameter optimization framework. In Proceedings
-     of the 25th ACM SIGKDD International Conference on Knowledge Discovery
-     & Data Mining (pp. 2623–2631).
-     https://doi.org/10.1145/3292500.3330701
-
 [11] Pattern Recognition Group, University of Bern. Glucose Prediction
      Proposal. Internal unpublished manuscript.
 """
@@ -50,7 +50,6 @@ import os
 import json
 import numpy as np
 import torch
-import optuna
 from torch.utils.data import DataLoader
 
 from ba_baseline.data.patient_loader import load_patient_series
@@ -94,8 +93,8 @@ def eval_hstep_trace(
 
     yhat = yhat * (std + 1e-8) + mean
     ys = ys * (std + 1e-8) + mean
-    # Model outputs a single value (horizon=1); index 0 is the 60-min prediction.
-    # Ground truth ys has shape (N, 12); h_index selects the 60-min step.
+    # Model outputs horizon=12 values; h_index=11 selects the 60-min step.
+    # Ground truth ys has shape (N, 12).
     return ys[:, h_index], yhat[:, h_index]
 
 
@@ -107,8 +106,8 @@ def train_patient(
     horizon,
     h_index,
     device,
-    hidden_size=819,
-    num_layers=1,
+    hidden_size=256,
+    num_layers=2,
     dropout=0.0,
     lr=1e-3,
     max_epochs=100,
@@ -177,68 +176,6 @@ def train_patient(
     return model, mean, std
 
 
-def select_average_patient(train_series, val_series, lookback, horizon):
-    """
-    Select the patient with median training-set length as the tuning patient.
-
-    Follows the average-patient approach of Hüni [8]: hyperparameter
-    optimisation is performed on a single representative patient and the
-    resulting configuration is applied to all patients.
-    """
-    eligible = [
-        pid for pid in train_series
-        if len(train_series[pid]) >= lookback + horizon + 1
-        and len(val_series[pid]) >= lookback + horizon + 1
-    ]
-    sorted_pids = sorted(eligible, key=lambda p: len(train_series[p]))
-    return sorted_pids[len(sorted_pids) // 2]
-
-
-def optuna_tune(pid, train_s, val_s, lookback, horizon, h_index, device, n_trials=50):
-    """
-    Bayesian hyperparameter search (Optuna TPE sampler) on a single patient.
-
-    Searches over hidden size, number of layers, dropout, learning rate, and
-    batch size. Each trial uses a short training budget (max_epochs=30,
-    patience=5) to keep tuning feasible on CPU. The best configuration is
-    then used with the full training budget for all patients.
-
-    Follows the average-patient Bayesian optimisation approach of Hüni [8],
-    adapted for LSTM regression with Optuna [10] as the standard
-    PyTorch-compatible hyperparameter framework.
-    """
-    optuna.logging.set_verbosity(optuna.logging.WARNING)
-
-    def objective(trial):
-        hp = dict(
-            hidden_size=trial.suggest_categorical("hidden_size", [256, 512, 1024]),
-            num_layers=trial.suggest_int("num_layers", 1, 2),
-            dropout=trial.suggest_float("dropout", 0.0, 0.3),
-            lr=trial.suggest_float("lr", 1e-4, 1e-3, log=True),
-            batch_size=trial.suggest_categorical("batch_size", [128, 256, 512]),
-            max_epochs=30,
-            patience=5,
-        )
-        model, mean, std = train_patient(
-            pid, train_s, val_s, lookback, horizon, h_index, device, **hp
-        )
-        y_true, y_pred = eval_hstep_trace(
-            model, val_s, lookback, horizon, device, mean, std, h_index
-        )
-        if y_true is None:
-            raise optuna.exceptions.TrialPruned()
-        return float(np.sqrt(np.mean((y_true - y_pred) ** 2)))
-
-    study = optuna.create_study(
-        direction="minimize",
-        sampler=optuna.samplers.TPESampler(seed=42),
-    )
-    study.optimize(objective, n_trials=n_trials, show_progress_bar=False)
-    best = study.best_params.copy()
-    best.pop("max_epochs", None)
-    best.pop("patience", None)
-    return best
-
 
 def main():
     set_seed(42)
@@ -256,14 +193,16 @@ def main():
     HYPO_THRESH = 70.0
     EVENT_TOL = 3
 
-    # Hyperparameter tuning on a single representative patient (Hüni 2023 approach)
-    avg_pid = select_average_patient(train_series, val_series, lookback, horizon)
-    print(f"Tuning hyperparameters on patient {avg_pid} (50 Optuna trials)...")
-    best_hp = optuna_tune(
-        avg_pid, train_series[avg_pid], val_series[avg_pid],
-        lookback, horizon, h_index, device, n_trials=50,
-    )
-    print(f"Best hyperparameters: {best_hp}")
+    # Hyperparameters fixed to MSE baseline values (Optuna, patient 85202, 50 trials).
+    # Only the loss function changes; all other settings are identical to the baseline.
+    best_hp = {
+        "hidden_size": 256,
+        "num_layers": 2,
+        "dropout": 0.15854918709610058,
+        "lr": 0.0009611047754271736,
+        "batch_size": 128,
+    }
+    print(f"Using baseline hyperparameters: {best_hp}")
 
     traces = {}
     rmses, lag_rmses, maes, hypo_metrics_list, pids_done = [], [], [], [], []
@@ -337,7 +276,7 @@ def main():
         "model": "lstm_dtw",
         "gamma": GAMMA,
         "lookback": lookback,
-        "tuning_patient": avg_pid,
+        "tuning_patient": "85202",
         "hyperparameters": best_hp,
     }
 
