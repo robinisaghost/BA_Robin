@@ -1,4 +1,4 @@
-# Objective 3: Event-Centric Evaluation — τ-Sweep
+# Objective 3: Event-Centric Evaluation:τ-Sweep
 
 **Branch:** `devBranch-event-centric`
 **Approach:** Hypoglycemia event detection evaluated across τ ∈ {1,…,6} steps (5–30 min)
@@ -66,7 +66,7 @@ reflecting the clinical priority of not missing hypoglycemic events [2].
 
 ## 5. Analysis and Interpretation
 
-### LSTM Baseline — systematic time-shift exposed by τ-sweep
+### LSTM Baseline: systematic time-shift exposed by τ-sweep
 
 LSTM Baseline F1 is exactly identical from τ=5 to τ=20 (F1=0.0054). This means the event
 detections that do occur are all more than 20 minutes away from the true event onset. Recall
@@ -74,9 +74,9 @@ does not change across this range either (0.0036 throughout). Only at τ=25 do n
 appear, and the jump at τ=30 is substantial (F1=0.0253).
 
 This plateau is the clearest quantitative evidence of the time-shift artefact in this study.
-LSTM does not fail to detect trends — it detects them too early or too late by a systematic
+LSTM does not fail to detect trends, it detects them too early or too late by a systematic
 margin that exceeds 20 minutes. Standard evaluation at τ=15 min understates this problem
-by comparing LSTM and PatchTST under a tolerance that already forgives PatchTST's smaller
+by comparing LSTM and PatchTST under a tolerance that already forgives PatchTSTs smaller
 offset but not LSTM's larger one.
 
 ### Bounded-Lag breaks the LSTM plateau
@@ -106,19 +106,19 @@ suggests that Multi-Step training shifts the event detection distribution: detec
 more consistently spaced 5–10 minutes from true events, rather than split between very close
 and very far. At τ=25 and τ=30, Multi-Step and Bounded-Lag reach similar performance.
 
-### PatchTST scales smoothly across all τ
+### PatchTST scales across all τ
 
 All three PatchTST variants show monotonically increasing F1 with no plateaus. This reflects
 a fundamentally different detection profile: PatchTST's event detections are spread across
 the full tolerance range rather than clustered beyond 20 minutes. Even at τ=5 (±5 min),
-PatchTST Baseline achieves F1=0.0212 — four times higher than LSTM Baseline at the same
+PatchTST Baseline achieves F1=0.0212, four times higher than LSTM Baseline at the same
 tolerance. This confirms that PatchTST's predictions are temporally closer to true events
 across the board.
 
 ### PatchTST Bounded-Lag is the strongest variant at larger tolerances
 
 PatchTST Bounded-Lag achieves the highest F1 and F2 at τ=25 and τ=30 (F1=0.1170 and
-0.1389; F2=0.1480 and 0.1759). Its recall reaches 0.2271 at τ=30 — the highest of any
+0.1389; F2=0.1480 and 0.1759). Its recall reaches 0.2271 at τ=30, the highest of any
 model. This is consistent with the per-objective findings: Bounded-Lag improves recall at
 the cost of a moderate increase in false positives.
 
@@ -129,18 +129,18 @@ Baseline and Bounded-Lag. This suggests that multi-horizon training helps PatchT
 events at the standard clinical tolerance window more precisely. At τ=25 and τ=30,
 Bounded-Lag overtakes Multi-Step as recall continues to grow.
 
-### Clinical interpretation
+### Interpretation
 
 For clinical deployment with a 15-minute warning window (τ=3 steps), the ranking is:
 PatchTST Multi-Step (F2=0.0851) > PatchTST Bounded-Lag (F2=0.0797) > PatchTST Baseline
 (F2=0.0742) >> all LSTM variants (F2 ≤ 0.0127).
 
 If a 30-minute window is acceptable (early warning system), PatchTST Bounded-Lag achieves
-recall=0.227 — detecting roughly one in four hypoglycemia events. LSTM remains poor even
+recall=0.227, detecting roughly one in four hypoglycemia events. LSTM remains poor even
 at this tolerance (recall=0.016–0.020).
 
 The τ-sweep reveals that the choice of τ is not a minor implementation detail but a
 substantive design decision that determines which model appears best. At τ=15 min,
 Multi-Step and Bounded-Lag are comparable; at τ=30 min, Bounded-Lag is clearly stronger.
-Reporting results at a single fixed τ — as is common in the literature — can obscure these
+Reporting results at a single fixed τ can obscure these
 differences.
