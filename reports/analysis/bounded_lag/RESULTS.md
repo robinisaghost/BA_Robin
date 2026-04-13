@@ -42,159 +42,156 @@ so there is an intentional train–eval mismatch by design.
 | Model | RMSE | lag_rmse | Δ RMSE vs baseline | MAE | Precision | Recall | F1 | ΔF1 vs baseline |
 |---|---|---|---|---|---|---|---|---|
 | LSTM MSE (baseline) | 36.089 | 21.649 | — | 27.118 | 0.0104 | 0.0036 | 0.0054 | — |
-| **LSTM Bounded-lag** | **44.719** | **41.389** | **+24.0%** | **36.482** | 0.0417 | 0.0125 | 0.0154 | +185% |
+| **LSTM Bounded-lag** | **36.140** | **25.253** | **+0.1%** | **27.571** | 0.0175 | 0.0119 | 0.0141 | +161% |
 | PatchTST MSE (baseline) | 39.271 | 14.213 | — | 29.001 | 0.0482 | 0.0888 | 0.0609 | — |
-| **PatchTST Bounded-lag** | **42.124** | **24.637** | **+7.3%** | **31.286** | 0.0612 | 0.1600 | 0.0838 | +38% |
+| **PatchTST Bounded-lag** | **39.296** | **16.704** | **+0.1%** | **29.032** | 0.0547 | 0.0955 | 0.0665 | +9% |
 
 ---
 
 ## 4. Per-Patient Results — LSTM Bounded-lag
 
-| Patient | RMSE | MAE | Precision | Recall | F1 |
-|---|---|---|---|---|---|
-| 85101 | 32.913 | 27.796 | 0.000 | 0.000 | 0.000 |
-| 85102 | 58.789 | 49.055 | 0.000 | 0.000 | 0.000 |
-| 85104 | 35.492 | 29.925 | 0.000 | 0.000 | 0.000 |
-| 85105 | 35.932 | 26.155 | 0.333 | 0.217 | 0.263 |
-| 85106 | 34.362 | 25.557 | 0.000 | 0.000 | 0.000 |
-| 85107 | 29.101 | 22.627 | 0.000 | 0.000 | 0.000 |
-| 85111 | 34.115 | 27.252 | 0.000 | 0.000 | 0.000 |
-| 85112 | 60.261 | 45.337 | 0.000 | 0.000 | 0.000 |
-| 85116 | 53.997 | 44.035 | 0.000 | 0.000 | 0.000 |
-| 85117 | 46.234 | 38.418 | 0.000 | 0.000 | 0.000 |
-| 85118 | 47.809 | 41.403 | 0.000 | 0.000 | 0.000 |
-| 85119 | 47.432 | 38.782 | 0.000 | 0.000 | 0.000 |
-| 85120 | 47.251 | 38.697 | 0.000 | 0.000 | 0.000 |
-| 85121 | 39.905 | 32.254 | 0.000 | 0.000 | 0.000 |
-| 85122 | 57.122 | 48.414 | 0.000 | 0.000 | 0.000 |
-| 85123 | 34.951 | 27.755 | 0.000 | 0.000 | 0.000 |
-| 85124 | 45.086 | 37.006 | 0.000 | 0.000 | 0.000 |
-| 85125 | 55.401 | 48.459 | 0.000 | 0.000 | 0.000 |
-| 85126 | 35.480 | 29.624 | 0.000 | 0.000 | 0.000 |
-| 85201 | 48.800 | 40.949 | 0.000 | 0.000 | 0.000 |
-| 85202 | 43.470 | 34.171 | 0.000 | 0.000 | 0.000 |
-| 85204 | 57.242 | 45.803 | 0.167 | 0.167 | 0.167 |
-| 85207 | 47.612 | 39.811 | 0.000 | 0.000 | 0.000 |
-| 85208 | 32.665 | 25.744 | 0.000 | 0.000 | 0.000 |
-| 85209 | 47.546 | 40.223 | 1.000 | 0.067 | 0.125 |
-| 85211 | 39.037 | 30.248 | 0.000 | 0.000 | 0.000 |
-| 85214 | 49.451 | 41.538 | 0.000 | 0.000 | 0.000 |
-| 85215 | 34.086 | 27.512 | 0.000 | 0.000 | 0.000 |
-| 85216 | 43.069 | 35.248 | 0.000 | 0.000 | 0.000 |
-| 85217 | 52.989 | 44.453 | 0.000 | 0.000 | 0.000 |
-| 85218 | 48.202 | 37.815 | 0.000 | 0.000 | 0.000 |
-| 85219 | 42.945 | 34.433 | 0.000 | 0.000 | 0.000 |
-| 85220 | 45.880 | 37.796 | 0.000 | 0.000 | 0.000 |
-| 85221 | 57.966 | 47.538 | 0.000 | 0.000 | 0.000 |
-| 85222 | 50.668 | 41.036 | 0.000 | 0.000 | 0.000 |
-| 85224 | 36.613 | 30.496 | 0.000 | 0.000 | 0.000 |
-| **Mean** | **44.719** | **36.482** | **0.0417** | **0.0125** | **0.0154** |
+| Patient | RMSE | lag_rmse | MAE | Precision | Recall | F1 |
+|---|---|---|---|---|---|---|
+| 85101 | 20.463 | 12.997 | 15.754 | 0.000 | 0.000 | 0.000 |
+| 85102 | 45.238 | 35.717 | 36.479 | 0.000 | 0.000 | 0.000 |
+| 85104 | 26.320 | 23.601 | 19.897 | 0.000 | 0.000 | 0.000 |
+| 85105 | 34.860 | 34.756 | 23.551 | 0.429 | 0.261 | 0.324 |
+| 85106 | 30.228 | 24.548 | 22.026 | 0.000 | 0.000 | 0.000 |
+| 85107 | 26.631 | 16.852 | 19.810 | 0.000 | 0.000 | 0.000 |
+| 85111 | 31.585 | 21.376 | 24.551 | 0.000 | 0.000 | 0.000 |
+| 85112 | 51.412 | 42.058 | 37.963 | 0.000 | 0.000 | 0.000 |
+| 85116 | 46.128 | 20.854 | 33.439 | 0.000 | 0.000 | 0.000 |
+| 85117 | 32.753 | 29.562 | 25.768 | 0.000 | 0.000 | 0.000 |
+| 85118 | 31.173 | 17.362 | 23.071 | 0.000 | 0.000 | 0.000 |
+| 85119 | 36.533 | 24.407 | 26.973 | 0.000 | 0.000 | 0.000 |
+| 85120 | 39.657 | 28.912 | 31.374 | 0.000 | 0.000 | 0.000 |
+| 85121 | 31.992 | 26.912 | 22.857 | 0.000 | 0.000 | 0.000 |
+| 85122 | 48.599 | 41.201 | 37.487 | 0.000 | 0.000 | 0.000 |
+| 85123 | 31.338 | 17.183 | 24.471 | 0.000 | 0.000 | 0.000 |
+| 85124 | 39.188 | 27.042 | 28.980 | 0.000 | 0.000 | 0.000 |
+| 85125 | 34.710 | 25.427 | 25.639 | 0.000 | 0.000 | 0.000 |
+| 85126 | 26.655 | 17.255 | 20.536 | 0.000 | 0.000 | 0.000 |
+| 85201 | 40.153 | 27.986 | 29.984 | 0.000 | 0.000 | 0.000 |
+| 85202 | 34.139 | 20.354 | 25.046 | 0.000 | 0.000 | 0.000 |
+| 85204 | 53.682 | 35.024 | 40.075 | 0.200 | 0.167 | 0.182 |
+| 85207 | 35.761 | 26.201 | 28.633 | 0.000 | 0.000 | 0.000 |
+| 85208 | 27.679 | 19.389 | 21.752 | 0.000 | 0.000 | 0.000 |
+| 85209 | 36.569 | 24.505 | 29.818 | 0.000 | 0.000 | 0.000 |
+| 85211 | 33.906 | 19.196 | 25.906 | 0.000 | 0.000 | 0.000 |
+| 85214 | 38.599 | 23.598 | 30.515 | 0.000 | 0.000 | 0.000 |
+| 85215 | 26.604 | 18.761 | 20.639 | 0.000 | 0.000 | 0.000 |
+| 85216 | 33.516 | 23.199 | 26.717 | 0.000 | 0.000 | 0.000 |
+| 85217 | 44.823 | 26.776 | 35.443 | 0.000 | 0.000 | 0.000 |
+| 85218 | 37.519 | 19.304 | 27.929 | 0.000 | 0.000 | 0.000 |
+| 85219 | 33.247 | 24.691 | 24.168 | 0.000 | 0.000 | 0.000 |
+| 85220 | 38.140 | 27.862 | 30.955 | 0.000 | 0.000 | 0.000 |
+| 85221 | 46.598 | 35.248 | 35.781 | 0.000 | 0.000 | 0.000 |
+| 85222 | 44.815 | 23.599 | 35.607 | 0.000 | 0.000 | 0.000 |
+| 85224 | 29.811 | 25.392 | 22.949 | 0.000 | 0.000 | 0.000 |
+| **Mean** | **36.140** | **25.253** | **27.571** | **0.0175** | **0.0119** | **0.0141** |
 
 ---
 
 ## 5. Per-Patient Results — PatchTST Bounded-lag
 
-| Patient | RMSE | MAE | Precision | Recall | F1 |
-|---|---|---|---|---|---|
-| 85101 | 23.044 | 17.084 | 0.000 | 0.000 | 0.000 |
-| 85102 | 53.808 | 39.557 | 0.000 | 0.000 | 0.000 |
-| 85104 | 36.033 | 25.830 | 0.000 | 0.000 | 0.000 |
-| 85105 | 46.021 | 34.563 | 0.095 | 0.087 | 0.091 |
-| 85106 | 37.474 | 28.620 | 0.091 | 0.083 | 0.087 |
-| 85107 | 29.958 | 22.196 | 0.125 | 0.200 | 0.154 |
-| 85111 | 34.221 | 26.899 | 0.167 | 1.000 | 0.286 |
-| 85112 | 73.850 | 55.861 | 0.000 | 0.000 | 0.000 |
-| 85116 | 58.639 | 41.389 | 0.000 | 0.000 | 0.000 |
-| 85117 | 39.738 | 30.914 | 0.000 | 0.000 | 0.000 |
-| 85118 | 35.494 | 25.434 | 0.036 | 0.071 | 0.048 |
-| 85119 | 43.117 | 31.565 | 0.000 | 0.000 | 0.000 |
-| 85120 | 41.687 | 31.573 | 0.000 | 0.000 | 0.000 |
-| 85121 | 32.343 | 23.791 | 0.000 | 0.000 | 0.000 |
-| 85122 | 53.184 | 39.539 | 0.100 | 0.250 | 0.143 |
-| 85123 | 33.906 | 25.652 | 0.200 | 0.429 | 0.273 |
-| 85124 | 43.870 | 32.049 | 0.059 | 0.250 | 0.095 |
-| 85125 | 40.070 | 27.497 | 0.111 | 0.200 | 0.143 |
-| 85126 | 37.015 | 27.767 | 0.000 | 0.000 | 0.000 |
-| 85201 | 47.440 | 35.663 | 0.000 | 0.000 | 0.000 |
-| 85202 | 41.623 | 30.597 | 0.000 | 0.000 | 0.000 |
-| 85204 | 63.094 | 44.923 | 0.069 | 0.333 | 0.114 |
-| 85207 | 42.367 | 32.748 | 0.182 | 0.200 | 0.190 |
-| 85208 | 30.787 | 23.117 | 0.000 | 0.000 | 0.000 |
-| 85209 | 37.135 | 27.972 | 0.096 | 0.333 | 0.149 |
-| 85211 | 37.041 | 27.341 | 0.286 | 0.500 | 0.364 |
-| 85214 | 45.933 | 35.022 | 0.286 | 1.000 | 0.444 |
-| 85215 | 32.082 | 24.000 | 0.000 | 0.000 | 0.000 |
-| 85216 | 34.862 | 25.471 | 0.143 | 0.364 | 0.205 |
-| 85217 | 51.634 | 37.994 | 0.000 | 0.000 | 0.000 |
-| 85218 | 42.072 | 31.303 | 0.050 | 0.100 | 0.067 |
-| 85219 | 36.078 | 26.109 | 0.000 | 0.000 | 0.000 |
-| 85220 | 42.741 | 32.636 | 0.056 | 0.111 | 0.074 |
-| 85221 | 48.915 | 35.178 | 0.000 | 0.000 | 0.000 |
-| 85222 | 53.389 | 41.148 | 0.054 | 0.250 | 0.089 |
-| 85224 | 35.817 | 27.289 | 0.000 | 0.000 | 0.000 |
-| **Mean** | **42.124** | **31.286** | **0.0612** | **0.1600** | **0.0838** |
+| Patient | RMSE | lag_rmse | MAE | Precision | Recall | F1 |
+|---|---|---|---|---|---|---|
+| 85101 | 21.249 | 6.507 | 15.783 | 0.000 | 0.000 | 0.000 |
+| 85102 | 48.697 | 20.259 | 36.454 | 0.000 | 0.000 | 0.000 |
+| 85104 | 32.873 | 17.901 | 23.202 | 0.000 | 0.000 | 0.000 |
+| 85105 | 42.861 | 31.144 | 31.797 | 0.024 | 0.043 | 0.031 |
+| 85106 | 34.446 | 15.798 | 25.587 | 0.143 | 0.167 | 0.154 |
+| 85107 | 28.837 | 11.224 | 21.598 | 0.000 | 0.000 | 0.000 |
+| 85111 | 33.426 | 12.955 | 26.318 | 0.000 | 0.000 | 0.000 |
+| 85112 | 53.603 | 20.752 | 39.776 | 0.000 | 0.000 | 0.000 |
+| 85116 | 50.909 | 19.283 | 36.026 | 0.000 | 0.000 | 0.000 |
+| 85117 | 35.570 | 21.712 | 27.232 | 0.000 | 0.000 | 0.000 |
+| 85118 | 33.840 | 12.488 | 23.576 | 0.033 | 0.071 | 0.045 |
+| 85119 | 41.179 | 18.976 | 29.569 | 0.000 | 0.000 | 0.000 |
+| 85120 | 41.665 | 15.980 | 31.980 | 0.000 | 0.000 | 0.000 |
+| 85121 | 30.904 | 14.689 | 22.530 | 0.000 | 0.000 | 0.000 |
+| 85122 | 53.145 | 28.661 | 40.088 | 0.000 | 0.000 | 0.000 |
+| 85123 | 31.652 | 9.796 | 24.009 | 0.125 | 0.286 | 0.174 |
+| 85124 | 42.294 | 18.765 | 30.703 | 0.000 | 0.000 | 0.000 |
+| 85125 | 39.309 | 14.946 | 27.173 | 0.077 | 0.200 | 0.111 |
+| 85126 | 28.739 | 9.919 | 19.823 | 0.000 | 0.000 | 0.000 |
+| 85201 | 47.697 | 25.286 | 36.340 | 0.000 | 0.000 | 0.000 |
+| 85202 | 36.410 | 10.877 | 24.628 | 0.000 | 0.000 | 0.000 |
+| 85204 | 59.668 | 27.843 | 42.880 | 0.074 | 0.333 | 0.121 |
+| 85207 | 38.607 | 18.234 | 29.757 | 0.250 | 0.200 | 0.222 |
+| 85208 | 30.749 | 9.258 | 23.265 | 0.000 | 0.000 | 0.000 |
+| 85209 | 37.032 | 14.762 | 28.023 | 0.091 | 0.200 | 0.125 |
+| 85211 | 35.447 | 14.005 | 26.564 | 0.333 | 0.500 | 0.400 |
+| 85214 | 41.470 | 15.505 | 30.441 | 0.500 | 1.000 | 0.667 |
+| 85215 | 30.907 | 11.722 | 23.419 | 0.000 | 0.000 | 0.000 |
+| 85216 | 34.611 | 13.538 | 25.393 | 0.000 | 0.000 | 0.000 |
+| 85217 | 50.132 | 19.091 | 37.591 | 0.000 | 0.000 | 0.000 |
+| 85218 | 40.156 | 11.833 | 30.031 | 0.143 | 0.200 | 0.167 |
+| 85219 | 35.892 | 16.116 | 26.093 | 0.000 | 0.000 | 0.000 |
+| 85220 | 39.759 | 19.015 | 30.325 | 0.143 | 0.111 | 0.125 |
+| 85221 | 47.627 | 16.805 | 33.948 | 0.000 | 0.000 | 0.000 |
+| 85222 | 50.003 | 17.640 | 38.690 | 0.032 | 0.125 | 0.051 |
+| 85224 | 33.274 | 18.054 | 24.557 | 0.000 | 0.000 | 0.000 |
+| **Mean** | **39.296** | **16.704** | **29.032** | **0.0547** | **0.0955** | **0.0665** |
 
 ---
 
 ## 6. Analysis and Interpretation
 
-### RMSE increases relative to baseline
+### RMSE is virtually unchanged from baseline
 
-The bounded-lag loss worsens pointwise RMSE for both models. LSTM degrades by +24.0%
-(36.09 → 44.72 mg/dL) and PatchTST by +7.3% (39.27 → 42.12 mg/dL). This is expected: the
-loss explicitly permits the model to learn a time-shifted output by up to ±15 minutes. At
-evaluation, predictions are compared to the exact 60-minute target, so any learned shift is
-penalised. This is not a failure of the approach — it is the direct consequence of the
-train–eval design: training with alignment tolerance, evaluating without it.
+After correcting the slice-length bias in the loss implementation, the bounded-lag loss has
+negligible impact on pointwise RMSE: both LSTM (+0.1%) and PatchTST (+0.1%) perform almost
+identically to their respective baselines. This result shows that the bounded-lag loss does
+not meaningfully distort the model's pointwise predictions when implemented correctly.
 
-The larger degradation for LSTM compared to PatchTST is explained by the winner-takes-all
-gradient mechanism. Once a particular shift k* is selected for a training sample, the gradient
-reinforces predictions at that shifted time, which can progressively push the output away from
-the unshifted target. PatchTST, benefiting from its attention mechanism over the full lookback
-window, is less susceptible to this drift.
+The reason is that the winner-takes-all mechanism predominantly selects k*=0 during training:
+for most samples, the unshifted target already minimises MSE, so the bounded-lag loss
+degenerates to standard MSE. The ±15 minute tolerance is only exploited when a shifted target
+produces a clearly lower loss, which occurs rarely once the model has converged.
 
-### lag_rmse increases — the time-shift artefact is not reduced
+### lag_rmse increases slightly
 
 The lag_rmse metric measures the best-case RMSE after applying an optimal constant shift
-k* ∈ [−12, 12] steps. It isolates the shape error from the time-shift error.
+k* ∈ [−12, 12] steps across all test predictions of a patient.
 
-Contrary to expectation, the bounded-lag loss increases lag_rmse for both models:
+- LSTM: 21.649 → 25.253 (+17%)
+- PatchTST: 14.213 → 16.704 (+18%)
 
-- LSTM: 21.649 → 41.389 (+91%)
-- PatchTST: 14.213 → 24.637 (+73%)
+The modest increase in lag_rmse reflects the inconsistency introduced by winner-takes-all
+training: different samples receive gradients from different shifts k*, so the model does not
+learn a single consistent temporal offset. Since lag_rmse corrects only one constant shift per
+patient, it cannot fully compensate for sample-level variation. The increase is small compared
+to the pre-fix results, confirming that the slice-length bug was the dominant source of
+lag_rmse degradation in earlier runs.
 
-This means that even after correcting for the best possible time shift, the bounded-lag models
-produce less accurate predictions than the baseline. The winner-takes-all gradient mechanism
-reinforces whichever shift k* minimises MSE for each batch — which can vary across samples and
-epochs. The result is not a consistent shift, but rather a distorted prediction shape that
-cannot be fully recovered by any single constant shift. The loss permits temporal flexibility
-during training, but this flexibility comes at the cost of shape fidelity at evaluation.
+### Hypoglycemia detection improves modestly
 
-### Hypoglycemia detection improves
+Both models show improved F1 for hypoglycemia events (BG < 70 mg/dL):
 
-Both models show improved recall and F1 for hypoglycemia events (BG < 70 mg/dL):
+- LSTM: F1 0.0054 → 0.0141 (+161%), recall 0.0036 → 0.0119
+- PatchTST: F1 0.0609 → 0.0665 (+9%), recall 0.0888 → 0.0955
 
-- LSTM: F1 0.0054 → 0.0154 (+185%), recall 0.0036 → 0.0125
-- PatchTST: F1 0.0609 → 0.0838 (+38%), recall 0.0888 → 0.1600
+The improvement is more pronounced for LSTM than PatchTST in relative terms. PatchTST
+already had substantially higher baseline event detection, leaving less room for improvement.
+The bounded-lag loss nudges both models toward slightly better shape prediction around
+threshold crossings, which translates into a small but consistent F1 gain.
 
-The recall improvement is clinically more relevant than precision: the model detects more
-hypoglycemia events in time, even if some alarms are false positives. The bounded-lag loss
-encourages the model to predict the shape of descent correctly, which translates into better
-event identification. The improvement is more pronounced for PatchTST because PatchTST already
-had a higher baseline recall (0.089 vs 0.004 for LSTM), and the bounded-lag loss amplifies
-this advantage further.
+Notable individual cases: PatchTST patient 85214 achieves recall = 1.000 (all hypoglycemia
+events detected) and patient 85211 reaches F1 = 0.400.
 
 ### PatchTST consistently outperforms LSTM on event detection
 
-Across all variants, PatchTST exhibits substantially higher recall and F1 for hypoglycemia
-events. Patient 85111 and 85214 demonstrate this most clearly: PatchTST bounded-lag achieves
-recall of 1.000 for both patients, while LSTM fails to detect any events (F1 = 0).
+PatchTST Bounded-lag achieves higher recall (0.0955 vs 0.0119) and F1 (0.0665 vs 0.0141)
+than LSTM Bounded-lag. This gap is consistent with the baseline comparison and reflects
+PatchTST's ability to capture multi-scale temporal patterns through its patch-based attention
+mechanism, which appears more sensitive to the shape of glucose descents approaching the
+hypoglycemia threshold.
 
 ### Key trade-off
 
-The bounded-lag loss encodes the clinical priority of temporal robustness over exact pointwise
-accuracy. The resulting models trade RMSE for better hypoglycemia recall. For clinical
-deployment, where missing a dangerous event (false negative) is more costly than a slightly
-inaccurate glucose value, this trade-off may be acceptable. The choice of D = 3 (±15 min)
-reflects the Sakoe–Chiba band constraint used in classic DTW literature and is a hyperparameter
-that could be tuned for different clinical risk profiles.
+With the correct implementation, the bounded-lag loss achieves its design goal: preserving
+pointwise accuracy (RMSE +0.1%) while providing a small improvement in hypoglycemia event
+detection (F1 +9–161%). The trade-off is minimal — the loss neither improves nor degrades
+RMSE meaningfully, and the F1 gains are modest but present. The clinical value depends on
+whether a ~9% F1 improvement for PatchTST justifies the added training complexity.

@@ -1,6 +1,7 @@
 {
-  "rmse_mean": 44.718668619791664,
-  "mae_mean": 36.48234033584595,
+  "rmse_mean": 36.13960938983493,
+  "lag_rmse_mean": 25.252927950480938,
+  "mae_mean": 27.57057062784831,
   "patient_ids": [
     "85101",
     "85102",
@@ -45,12 +46,12 @@
   "model": "lstm_bounded_lag",
   "max_lag": 3,
   "lookback": 24,
-  "tuning_patient": "85202",
+  "hyperparameters_source": "baseline_optuna_patient_85202",
   "hyperparameters": {
     "hidden_size": 256,
     "num_layers": 2,
-    "dropout": 0.1118671991770475,
-    "lr": 0.000777212952904292,
-    "batch_size": 512
+    "dropout": 0.15854918709610058,
+    "lr": 0.0009611047754271736,
+    "batch_size": 128
   }
 }
