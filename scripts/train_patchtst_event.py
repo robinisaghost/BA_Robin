@@ -95,7 +95,10 @@ def train_patient(
 
     n_pos = float(y_tr.sum())
     n_neg = float(len(y_tr)) - n_pos
-    pos_weight = torch.tensor([n_neg / max(n_pos, 1.0)], device=device)
+    if n_pos == 0:
+        print(f"  Patient {pid} skipped: 0 positive events in training split")
+        return None
+    pos_weight = torch.tensor([n_neg / n_pos], device=device)
 
     train_loader = DataLoader(
         TensorDataset(X_tr, y_tr), batch_size=batch_size,
