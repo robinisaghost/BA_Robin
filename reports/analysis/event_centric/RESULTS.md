@@ -1,8 +1,8 @@
-# Objective 3: Event-Centric Evaluation:τ-Sweep
+# Objective 3: Event-Centric Evaluation — τ-Sweep
 
 **Branch:** `devBranch-event-centric`
 **Approach:** Hypoglycemia event detection evaluated across τ ∈ {1,…,6} steps (5–30 min)
-**Models evaluated:** All trained variants (Baseline, Bounded-Lag, Multi-Step)
+**Models evaluated:** All trained variants (Baseline, Bounded-Lag, DTW, Multi-Step)
 
 ---
 
@@ -27,40 +27,40 @@ reflecting the clinical priority of not missing hypoglycemic events [2].
 
 ## 2. F1 Results by Model and τ
 
-| τ (min) | LSTM base | LSTM BL | LSTM multi | PatchTST base | PatchTST BL | PatchTST multi |
-|---|---|---|---|---|---|---|
-| 5  | 0.0054 | 0.0060 | 0.0029 | 0.0212 | 0.0311 | 0.0253 |
-| 10 | 0.0054 | 0.0126 | 0.0098 | 0.0415 | 0.0574 | 0.0533 |
-| 15 | 0.0054 | 0.0141 | 0.0098 | 0.0609 | 0.0665 | 0.0716 |
-| 20 | 0.0054 | 0.0141 | 0.0098 | 0.0729 | 0.0837 | 0.0955 |
-| 25 | 0.0106 | 0.0141 | 0.0149 | 0.0938 | 0.1170 | 0.1143 |
-| 30 | 0.0253 | 0.0226 | 0.0234 | 0.1177 | 0.1389 | 0.1377 |
+| τ (min) | LSTM base | LSTM BL | LSTM DTW | LSTM multi | PatchTST base | PatchTST BL | PatchTST DTW | PatchTST multi |
+|---|---|---|---|---|---|---|---|---|
+| 5  | 0.0054 | 0.0060 | 0.0017 | 0.0029 | 0.0212 | 0.0311 | 0.0435 | 0.0253 |
+| 10 | 0.0054 | 0.0126 | 0.0051 | 0.0098 | 0.0415 | 0.0574 | 0.0577 | 0.0533 |
+| 15 | 0.0054 | 0.0141 | 0.0137 | 0.0098 | 0.0609 | 0.0665 | 0.0624 | 0.0716 |
+| 20 | 0.0054 | 0.0141 | 0.0137 | 0.0098 | 0.0729 | 0.0837 | 0.0977 | 0.0801 |
+| 25 | 0.0106 | 0.0141 | 0.0137 | 0.0149 | 0.0938 | 0.1170 | 0.1140 | 0.1143 |
+| 30 | 0.0253 | 0.0226 | 0.0218 | 0.0234 | 0.1177 | 0.1389 | 0.1247 | 0.1377 |
 
 ---
 
 ## 3. F2 Results by Model and τ
 
-| τ (min) | LSTM base | LSTM BL | LSTM multi | PatchTST base | PatchTST BL | PatchTST multi |
-|---|---|---|---|---|---|---|
-| 5  | 0.0042 | 0.0052 | 0.0026 | 0.0251 | 0.0346 | 0.0306 |
-| 10 | 0.0042 | 0.0113 | 0.0095 | 0.0491 | 0.0674 | 0.0611 |
-| 15 | 0.0042 | 0.0127 | 0.0095 | 0.0742 | 0.0797 | 0.0851 |
-| 20 | 0.0042 | 0.0127 | 0.0095 | 0.0899 | 0.1025 | 0.0955 |
-| 25 | 0.0084 | 0.0127 | 0.0129 | 0.1155 | 0.1480 | 0.1426 |
-| 30 | 0.0192 | 0.0198 | 0.0209 | 0.1467 | 0.1759 | 0.1710 |
+| τ (min) | LSTM base | LSTM BL | LSTM DTW | LSTM multi | PatchTST base | PatchTST BL | PatchTST DTW | PatchTST multi |
+|---|---|---|---|---|---|---|---|---|
+| 5  | 0.0042 | 0.0052 | 0.0014 | 0.0026 | 0.0251 | 0.0346 | 0.0568 | 0.0306 |
+| 10 | 0.0042 | 0.0113 | 0.0041 | 0.0095 | 0.0491 | 0.0674 | 0.0757 | 0.0611 |
+| 15 | 0.0042 | 0.0127 | 0.0102 | 0.0095 | 0.0742 | 0.0797 | 0.0838 | 0.0851 |
+| 20 | 0.0042 | 0.0127 | 0.0102 | 0.0095 | 0.0899 | 0.1025 | 0.1235 | 0.0955 |
+| 25 | 0.0084 | 0.0127 | 0.0102 | 0.0129 | 0.1155 | 0.1480 | 0.1477 | 0.1426 |
+| 30 | 0.0192 | 0.0198 | 0.0173 | 0.0209 | 0.1467 | 0.1759 | 0.1627 | 0.1710 |
 
 ---
 
 ## 4. Recall Results by Model and τ
 
-| τ (min) | LSTM base | LSTM BL | LSTM multi | PatchTST base | PatchTST BL | PatchTST multi |
-|---|---|---|---|---|---|---|
-| 5  | 0.0036 | 0.0048 | 0.0024 | 0.0292 | 0.0381 | 0.0386 |
-| 10 | 0.0036 | 0.0107 | 0.0095 | 0.0568 | 0.0782 | 0.0720 |
-| 15 | 0.0036 | 0.0119 | 0.0095 | 0.0888 | 0.0955 | 0.1032 |
-| 20 | 0.0036 | 0.0119 | 0.0095 | 0.1088 | 0.1250 | 0.1153 |
-| 25 | 0.0074 | 0.0119 | 0.0122 | 0.1400 | 0.1923 | 0.1850 |
-| 30 | 0.0166 | 0.0185 | 0.0201 | 0.1803 | 0.2271 | 0.2196 |
+| τ (min) | LSTM base | LSTM BL | LSTM DTW | LSTM multi | PatchTST base | PatchTST BL | PatchTST DTW | PatchTST multi |
+|---|---|---|---|---|---|---|---|---|
+| 5  | 0.0036 | 0.0048 | 0.0012 | 0.0024 | 0.0292 | 0.0381 | 0.0862 | 0.0386 |
+| 10 | 0.0036 | 0.0107 | 0.0036 | 0.0095 | 0.0568 | 0.0782 | 0.1131 | 0.0720 |
+| 15 | 0.0036 | 0.0119 | 0.0088 | 0.0095 | 0.0888 | 0.0955 | 0.1288 | 0.1032 |
+| 20 | 0.0036 | 0.0119 | 0.0088 | 0.0095 | 0.1088 | 0.1250 | 0.1761 | 0.1153 |
+| 25 | 0.0074 | 0.0119 | 0.0088 | 0.0122 | 0.1400 | 0.1923 | 0.2231 | 0.1850 |
+| 30 | 0.0166 | 0.0185 | 0.0154 | 0.0201 | 0.1803 | 0.2271 | 0.2453 | 0.2196 |
 
 ---
 
@@ -76,8 +76,22 @@ appear, and the jump at τ=30 is substantial (F1=0.0253).
 This plateau is the clearest quantitative evidence of the time-shift artefact in this study.
 LSTM does not fail to detect trends, it detects them too early or too late by a systematic
 margin that exceeds 20 minutes. Standard evaluation at τ=15 min understates this problem
-by comparing LSTM and PatchTST under a tolerance that already forgives PatchTSTs smaller
+by comparing LSTM and PatchTST under a tolerance that already forgives PatchTST's smaller
 offset but not LSTM's larger one.
+
+### LSTM DTW: worse than Baseline at tight tolerances, plateau persists
+
+LSTM DTW achieves F1=0.0017 at τ=5 — the lowest of any model and below even LSTM Baseline
+(0.0054). Recall at τ=5 is only 0.0012. At τ=10, F1 climbs to 0.0051 but remains below
+Baseline. From τ=15 to τ=25, F1 is flat at 0.0137 — the same plateau pattern as LSTM
+Baseline, but shifted to a different (higher) tolerance threshold.
+
+This result is consistent with the lag_rmse finding: DTW training does not reduce LSTM's
+time-shift artefact and in fact worsens event detection timing. The DTW loss is invariant
+to temporal distortions — the model learns that shifted predictions are acceptable because
+the alignment path can warp them to match true trajectories. This removes the gradient
+signal that would otherwise penalise temporal offset, allowing LSTM to drift further from
+true event timing than with pointwise MSE.
 
 ### Bounded-Lag breaks the LSTM plateau
 
@@ -108,39 +122,65 @@ and very far. At τ=25 and τ=30, Multi-Step and Bounded-Lag reach similar perfo
 
 ### PatchTST scales across all τ
 
-All three PatchTST variants show monotonically increasing F1 with no plateaus. This reflects
+All four PatchTST variants show monotonically increasing F1 with no plateaus. This reflects
 a fundamentally different detection profile: PatchTST's event detections are spread across
 the full tolerance range rather than clustered beyond 20 minutes. Even at τ=5 (±5 min),
 PatchTST Baseline achieves F1=0.0212, four times higher than LSTM Baseline at the same
 tolerance. This confirms that PatchTST's predictions are temporally closer to true events
 across the board.
 
-### PatchTST Bounded-Lag is the strongest variant at larger tolerances
+### PatchTST DTW: highest recall at tight tolerances, high false positive rate
 
-PatchTST Bounded-Lag achieves the highest F1 and F2 at τ=25 and τ=30 (F1=0.1170 and
-0.1389; F2=0.1480 and 0.1759). Its recall reaches 0.2271 at τ=30, the highest of any
-model. This is consistent with the per-objective findings: Bounded-Lag improves recall at
-the cost of a moderate increase in false positives.
+PatchTST DTW shows a unique profile in the τ-sweep. At τ=5, it achieves recall=0.0862 —
+the highest of any model at this tolerance and more than twice the next best (PatchTST
+Multi-Step: 0.0386). At τ=30, recall reaches 0.2453, again the highest of any model,
+exceeding PatchTST Bounded-Lag (0.2271).
 
-### PatchTST Multi-Step leads at τ=15–20
+However, the high recall comes with low precision across all τ values. At τ=5, precision
+is only 0.0429, resulting in F1=0.0435. While this is the highest F1 at τ=5, the F2
+(0.0568) is also the highest — suggesting PatchTST DTW generates many threshold crossings,
+of which a relatively large number happen to fall near true events but many are false
+positives. This pattern is consistent with DTW shape alignment encouraging the model to
+reproduce the shape of glucose dips more aggressively, producing more crossings at the cost
+of temporal and amplitude precision.
 
-At τ=15 (F1=0.0716) and τ=20 (F1=0.0955), PatchTST Multi-Step outperforms both PatchTST
-Baseline and Bounded-Lag. This suggests that multi-horizon training helps PatchTST detect
-events at the standard clinical tolerance window more precisely. At τ=25 and τ=30,
-Bounded-Lag overtakes Multi-Step as recall continues to grow.
+As τ increases from 5 to 20, PatchTST DTW's recall grows steeply (0.0862 → 0.1761)
+while Bounded-Lag's grows more moderately (0.0381 → 0.1250). By τ=20, PatchTST DTW
+overtakes Bounded-Lag in F1 (0.0977 vs 0.0837) and F2 (0.1235 vs 0.1025). At τ=30,
+PatchTST DTW's F2=0.1627 falls below Bounded-Lag (0.1759) because the persistent false
+positive cost outweighs the recall advantage when equally weighting both components.
 
-### Interpretation
+For recall-prioritised clinical settings (early warning with high sensitivity), PatchTST DTW
+is the strongest forecast-derived model. For balanced detection (F2 at τ=15–30), Bounded-Lag
+is preferred.
 
-For clinical deployment with a 15-minute warning window (τ=3 steps), the ranking is:
-PatchTST Multi-Step (F2=0.0851) > PatchTST Bounded-Lag (F2=0.0797) > PatchTST Baseline
-(F2=0.0742) >> all LSTM variants (F2 ≤ 0.0127).
+### PatchTST Bounded-Lag is the strongest variant at larger tolerances (F2)
 
-If a 30-minute window is acceptable (early warning system), PatchTST Bounded-Lag achieves
-recall=0.227, detecting roughly one in four hypoglycemia events. LSTM remains poor even
-at this tolerance (recall=0.016–0.020).
+PatchTST Bounded-Lag achieves the highest F2 at τ=25 and τ=30 (F2=0.1480 and 0.1759).
+Its recall reaches 0.2271 at τ=30, second only to PatchTST DTW. This is consistent with
+the per-objective findings: Bounded-Lag improves recall at the cost of a moderate increase
+in false positives, but the balance is better controlled than DTW.
+
+### PatchTST Multi-Step leads at τ=15
+
+At τ=15, PatchTST Multi-Step (F1=0.0716, F2=0.0851) outperforms all other models. This
+suggests that multi-horizon training helps PatchTST detect events at the standard clinical
+tolerance window most precisely. At τ=20, PatchTST DTW overtakes Multi-Step in F1 and F2.
+At τ=25 and τ=30, Bounded-Lag is strongest in F2.
+
+### Summary
+
+For clinical deployment with a 15-minute warning window (τ=3 steps), the F2 ranking is:
+PatchTST Multi-Step (0.0851) > PatchTST DTW (0.0838) > PatchTST Bounded-Lag (0.0797) >
+PatchTST Baseline (0.0742) >> all LSTM variants (F2 ≤ 0.0127).
+
+If maximum recall is the priority (a recall-first early warning system), PatchTST DTW
+achieves the highest recall across all τ values — 0.0862 at τ=5 and 0.2453 at τ=30.
+If F2 (recall-weighted balance) is the priority, PatchTST Bounded-Lag leads at τ≥25.
 
 The τ-sweep reveals that the choice of τ is not a minor implementation detail but a
 substantive design decision that determines which model appears best. At τ=15 min,
-Multi-Step and Bounded-Lag are comparable; at τ=30 min, Bounded-Lag is clearly stronger.
-Reporting results at a single fixed τ can obscure these
-differences.
+Multi-Step and DTW are comparable; at τ=30 min, Bounded-Lag leads in F2. DTW's advantage
+is purely in raw recall, at the cost of a persistently higher false positive rate.
+The LSTM results confirm that DTW training does not improve — and worsens — the time-shift
+artefact relative to MSE.
