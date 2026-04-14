@@ -46,9 +46,9 @@ design across all three objectives.
 | Model | RMSE | lag_rmse | Δ RMSE vs baseline | MAE | Precision | Recall | F1 | ΔF1 vs baseline |
 |---|---|---|---|---|---|---|---|---|
 | LSTM MSE (baseline) | 36.089 | 21.649 | — | 27.118 | 0.0104 | 0.0036 | 0.0054 | — |
-| **LSTM Soft-DTW** | **37.396** | **28.619** | **+3.6%** | **29.110** | 0.0435 | 0.0125 | 0.0153 | +183% |
+| **LSTM Soft-DTW** | **37.232** | **28.668** | **+3.2%** | **28.760** | 0.0389 | 0.0088 | 0.0137 | +154% |
 | PatchTST MSE (baseline) | 39.271 | 14.213 | — | 29.001 | 0.0482 | 0.0888 | 0.0609 | — |
-| **PatchTST Soft-DTW** | **43.453** | **24.166** | **+10.6%** | **32.158** | 0.0766 | 0.1586 | 0.0835 | +37% |
+| **PatchTST Soft-DTW** | **43.235** | **24.006** | **+10.1%** | **32.251** | 0.0564 | 0.1288 | 0.0624 | +2.5% |
 
 ---
 
@@ -56,43 +56,43 @@ design across all three objectives.
 
 | Patient | RMSE | MAE | Precision | Recall | F1 |
 |---|---|---|---|---|---|
-| 85101 | 21.125 | 16.930 | 0.000 | 0.000 | 0.000 |
-| 85102 | 46.962 | 38.314 | 0.000 | 0.000 | 0.000 |
-| 85104 | 27.996 | 22.099 | 0.000 | 0.000 | 0.000 |
-| 85105 | 33.889 | 21.966 | 0.455 | 0.217 | 0.294 |
-| 85106 | 32.189 | 23.841 | 0.000 | 0.000 | 0.000 |
-| 85107 | 27.819 | 21.005 | 0.000 | 0.000 | 0.000 |
-| 85111 | 31.603 | 25.048 | 0.000 | 0.000 | 0.000 |
-| 85112 | 55.871 | 40.438 | 0.000 | 0.000 | 0.000 |
-| 85116 | 48.097 | 35.034 | 0.000 | 0.000 | 0.000 |
-| 85117 | 35.290 | 28.460 | 0.000 | 0.000 | 0.000 |
-| 85118 | 34.019 | 27.562 | 0.000 | 0.000 | 0.000 |
-| 85119 | 38.074 | 29.916 | 0.000 | 0.000 | 0.000 |
-| 85120 | 41.881 | 33.498 | 0.000 | 0.000 | 0.000 |
-| 85121 | 36.591 | 27.725 | 0.000 | 0.000 | 0.000 |
-| 85122 | 49.568 | 39.759 | 0.000 | 0.000 | 0.000 |
-| 85123 | 31.380 | 24.687 | 0.000 | 0.000 | 0.000 |
-| 85124 | 40.140 | 30.206 | 0.000 | 0.000 | 0.000 |
-| 85125 | 35.205 | 25.923 | 0.000 | 0.000 | 0.000 |
-| 85126 | 28.045 | 23.325 | 0.000 | 0.000 | 0.000 |
-| 85201 | 38.928 | 30.289 | 0.000 | 0.000 | 0.000 |
-| 85202 | 34.068 | 25.790 | 0.000 | 0.000 | 0.000 |
-| 85204 | 52.265 | 39.497 | 0.111 | 0.167 | 0.133 |
-| 85207 | 37.716 | 30.650 | 0.000 | 0.000 | 0.000 |
-| 85208 | 31.322 | 24.411 | 0.000 | 0.000 | 0.000 |
-| 85209 | 39.012 | 32.681 | 1.000 | 0.067 | 0.125 |
-| 85211 | 32.381 | 24.865 | 0.000 | 0.000 | 0.000 |
-| 85214 | 41.436 | 34.427 | 0.000 | 0.000 | 0.000 |
-| 85215 | 28.654 | 22.461 | 0.000 | 0.000 | 0.000 |
-| 85216 | 36.864 | 29.587 | 0.000 | 0.000 | 0.000 |
-| 85217 | 44.747 | 35.363 | 0.000 | 0.000 | 0.000 |
-| 85218 | 37.501 | 28.075 | 0.000 | 0.000 | 0.000 |
-| 85219 | 35.108 | 26.968 | 0.000 | 0.000 | 0.000 |
-| 85220 | 39.571 | 32.664 | 0.000 | 0.000 | 0.000 |
-| 85221 | 44.359 | 33.891 | 0.000 | 0.000 | 0.000 |
-| 85222 | 45.565 | 36.576 | 0.000 | 0.000 | 0.000 |
-| 85224 | 31.016 | 24.017 | 0.000 | 0.000 | 0.000 |
-| **Mean** | **37.396** | **29.110** | **0.0435** | **0.0125** | **0.0153** |
+| 85101 | 21.273 | 16.539 | 0.000 | 0.000 | 0.000 |
+| 85102 | 46.579 | 37.596 | 0.000 | 0.000 | 0.000 |
+| 85104 | 26.942 | 20.466 | 0.000 | 0.000 | 0.000 |
+| 85105 | 33.328 | 21.258 | 0.400 | 0.174 | 0.242 |
+| 85106 | 32.590 | 23.800 | 0.000 | 0.000 | 0.000 |
+| 85107 | 27.084 | 20.146 | 0.000 | 0.000 | 0.000 |
+| 85111 | 30.996 | 24.420 | 0.000 | 0.000 | 0.000 |
+| 85112 | 51.708 | 38.630 | 0.000 | 0.000 | 0.000 |
+| 85116 | 48.685 | 35.995 | 0.000 | 0.000 | 0.000 |
+| 85117 | 37.178 | 30.160 | 0.000 | 0.000 | 0.000 |
+| 85118 | 31.683 | 25.120 | 0.000 | 0.000 | 0.000 |
+| 85119 | 39.098 | 31.087 | 0.000 | 0.000 | 0.000 |
+| 85120 | 42.554 | 33.228 | 0.000 | 0.000 | 0.000 |
+| 85121 | 34.880 | 25.643 | 0.000 | 0.000 | 0.000 |
+| 85122 | 50.227 | 40.122 | 0.000 | 0.000 | 0.000 |
+| 85123 | 32.104 | 24.780 | 1.000 | 0.143 | 0.250 |
+| 85124 | 40.815 | 30.765 | 0.000 | 0.000 | 0.000 |
+| 85125 | 35.881 | 26.251 | 0.000 | 0.000 | 0.000 |
+| 85126 | 26.074 | 20.678 | 0.000 | 0.000 | 0.000 |
+| 85201 | 40.557 | 30.575 | 0.000 | 0.000 | 0.000 |
+| 85202 | 34.217 | 25.767 | 0.000 | 0.000 | 0.000 |
+| 85204 | 52.259 | 39.860 | 0.000 | 0.000 | 0.000 |
+| 85207 | 38.197 | 30.619 | 0.000 | 0.000 | 0.000 |
+| 85208 | 30.224 | 23.342 | 0.000 | 0.000 | 0.000 |
+| 85209 | 37.202 | 30.803 | 0.000 | 0.000 | 0.000 |
+| 85211 | 33.625 | 25.820 | 0.000 | 0.000 | 0.000 |
+| 85214 | 41.683 | 34.735 | 0.000 | 0.000 | 0.000 |
+| 85215 | 29.018 | 22.692 | 0.000 | 0.000 | 0.000 |
+| 85216 | 35.505 | 28.450 | 0.000 | 0.000 | 0.000 |
+| 85217 | 45.278 | 36.299 | 0.000 | 0.000 | 0.000 |
+| 85218 | 38.504 | 28.538 | 0.000 | 0.000 | 0.000 |
+| 85219 | 33.845 | 25.156 | 0.000 | 0.000 | 0.000 |
+| 85220 | 37.707 | 30.353 | 0.000 | 0.000 | 0.000 |
+| 85221 | 45.053 | 33.839 | 0.000 | 0.000 | 0.000 |
+| 85222 | 46.050 | 37.183 | 0.000 | 0.000 | 0.000 |
+| 85224 | 31.757 | 24.633 | 0.000 | 0.000 | 0.000 |
+| **Mean** | **37.232** | **28.760** | **0.0389** | **0.0088** | **0.0137** |
 
 ---
 
@@ -100,110 +100,108 @@ design across all three objectives.
 
 | Patient | RMSE | MAE | Precision | Recall | F1 |
 |---|---|---|---|---|---|
-| 85101 | 25.065 | 19.115 | 0.000 | 0.000 | 0.000 |
-| 85102 | 53.483 | 39.103 | 0.038 | 0.125 | 0.059 |
-| 85104 | 36.854 | 25.305 | 0.059 | 0.333 | 0.100 |
-| 85105 | 44.308 | 32.624 | 0.049 | 0.174 | 0.077 |
-| 85106 | 36.400 | 27.567 | 0.000 | 0.000 | 0.000 |
-| 85107 | 30.891 | 23.529 | 0.000 | 0.000 | 0.000 |
-| 85111 | 35.810 | 28.824 | 0.000 | 0.000 | 0.000 |
-| 85112 | 62.497 | 47.419 | 0.000 | 0.000 | 0.000 |
-| 85116 | 57.322 | 39.686 | 0.000 | 0.000 | 0.000 |
-| 85117 | 38.604 | 29.629 | 0.000 | 0.000 | 0.000 |
-| 85118 | 39.245 | 27.166 | 0.219 | 0.500 | 0.304 |
-| 85119 | 44.746 | 30.826 | 0.000 | 0.000 | 0.000 |
-| 85120 | 47.110 | 37.742 | 0.000 | 0.000 | 0.000 |
-| 85121 | 35.688 | 25.956 | 0.048 | 0.200 | 0.077 |
-| 85122 | 56.891 | 41.959 | 0.067 | 0.250 | 0.105 |
-| 85123 | 35.558 | 28.278 | 0.333 | 0.143 | 0.200 |
-| 85124 | 48.036 | 34.817 | 0.034 | 0.250 | 0.061 |
-| 85125 | 44.595 | 30.752 | 0.115 | 0.600 | 0.194 |
-| 85126 | 32.488 | 25.349 | 0.000 | 0.000 | 0.000 |
-| 85201 | 50.152 | 35.888 | 0.000 | 0.000 | 0.000 |
-| 85202 | 37.698 | 24.529 | 0.167 | 0.500 | 0.250 |
-| 85204 | 64.463 | 46.467 | 0.049 | 0.333 | 0.085 |
-| 85207 | 48.606 | 36.006 | 0.500 | 0.200 | 0.286 |
-| 85208 | 32.691 | 23.602 | 0.105 | 0.333 | 0.160 |
-| 85209 | 41.606 | 32.342 | 0.100 | 0.067 | 0.080 |
-| 85211 | 36.250 | 26.818 | 0.500 | 0.500 | 0.500 |
-| 85214 | 45.161 | 32.148 | 0.154 | 1.000 | 0.267 |
-| 85215 | 32.058 | 23.886 | 0.000 | 0.000 | 0.000 |
-| 85216 | 37.173 | 28.007 | 0.143 | 0.091 | 0.111 |
-| 85217 | 57.515 | 42.793 | 0.000 | 0.000 | 0.000 |
-| 85218 | 43.491 | 32.500 | 0.000 | 0.000 | 0.000 |
-| 85219 | 41.943 | 32.181 | 0.000 | 0.000 | 0.000 |
-| 85220 | 41.592 | 31.878 | 0.077 | 0.111 | 0.091 |
-| 85221 | 52.518 | 37.505 | 0.000 | 0.000 | 0.000 |
-| 85222 | 58.539 | 46.653 | 0.000 | 0.000 | 0.000 |
-| 85224 | 37.247 | 28.825 | 0.000 | 0.000 | 0.000 |
-| **Mean** | **43.453** | **32.158** | **0.0766** | **0.1586** | **0.0835** |
+| 85101 | 22.839 | 16.995 | 0.000 | 0.000 | 0.000 |
+| 85102 | 56.063 | 43.297 | 0.000 | 0.000 | 0.000 |
+| 85104 | 34.449 | 24.810 | 0.000 | 0.000 | 0.000 |
+| 85105 | 46.411 | 34.888 | 0.036 | 0.043 | 0.039 |
+| 85106 | 37.784 | 29.171 | 0.000 | 0.000 | 0.000 |
+| 85107 | 32.356 | 23.426 | 0.083 | 0.200 | 0.118 |
+| 85111 | 36.529 | 27.965 | 0.125 | 1.000 | 0.222 |
+| 85112 | 59.771 | 45.580 | 0.000 | 0.000 | 0.000 |
+| 85116 | 55.274 | 38.504 | 0.000 | 0.000 | 0.000 |
+| 85117 | 42.939 | 32.268 | 0.040 | 0.111 | 0.059 |
+| 85118 | 35.159 | 25.495 | 0.000 | 0.000 | 0.000 |
+| 85119 | 44.772 | 30.703 | 0.000 | 0.000 | 0.000 |
+| 85120 | 45.304 | 35.980 | 0.000 | 0.000 | 0.000 |
+| 85121 | 32.590 | 23.420 | 0.000 | 0.000 | 0.000 |
+| 85122 | 57.263 | 43.747 | 0.091 | 0.250 | 0.133 |
+| 85123 | 36.923 | 29.363 | 0.000 | 0.000 | 0.000 |
+| 85124 | 46.742 | 34.353 | 0.000 | 0.000 | 0.000 |
+| 85125 | 42.088 | 29.546 | 0.107 | 0.600 | 0.182 |
+| 85126 | 30.335 | 20.585 | 0.000 | 0.000 | 0.000 |
+| 85201 | 52.958 | 41.367 | 0.000 | 0.000 | 0.000 |
+| 85202 | 40.554 | 30.330 | 0.000 | 0.000 | 0.000 |
+| 85204 | 62.758 | 45.411 | 0.056 | 0.333 | 0.095 |
+| 85207 | 47.223 | 35.431 | 0.667 | 0.200 | 0.308 |
+| 85208 | 34.208 | 24.732 | 0.091 | 0.333 | 0.143 |
+| 85209 | 40.658 | 30.387 | 0.086 | 0.333 | 0.137 |
+| 85211 | 37.185 | 27.272 | 0.400 | 0.500 | 0.444 |
+| 85214 | 46.141 | 35.192 | 0.000 | 0.000 | 0.000 |
+| 85215 | 33.570 | 26.303 | 0.000 | 0.000 | 0.000 |
+| 85216 | 37.921 | 28.583 | 0.000 | 0.000 | 0.000 |
+| 85217 | 55.179 | 40.948 | 0.000 | 0.000 | 0.000 |
+| 85218 | 44.484 | 33.917 | 0.065 | 0.200 | 0.098 |
+| 85219 | 38.044 | 26.954 | 0.000 | 0.000 | 0.000 |
+| 85220 | 41.473 | 31.323 | 0.143 | 0.333 | 0.200 |
+| 85221 | 53.319 | 39.822 | 0.000 | 0.000 | 0.000 |
+| 85222 | 58.033 | 46.351 | 0.000 | 0.000 | 0.000 |
+| 85224 | 37.165 | 26.627 | 0.042 | 0.200 | 0.069 |
+| **Mean** | **43.235** | **32.251** | **0.0564** | **0.1288** | **0.0624** |
 
 ---
 
 ## 6. Analysis and Interpretation
 
-### RMSE: best trade-off among alignment losses
+### RMSE: small penalty, consistent across HP
 
-LSTM Soft-DTW achieves an RMSE of 37.396, only +3.6% above the baseline LSTM MSE (36.089).
-This is by far the smallest RMSE penalty among the three objectives and represents the best
-pointwise accuracy–alignment trade-off observed in this study.
+LSTM Soft-DTW achieves RMSE = 37.232, only +3.2% above baseline LSTM MSE (36.089). This is
+the smallest RMSE penalty across the three objectives and is consistent with the bounded-lag
+result (+3.0%). Soft-DTW distributes the gradient signal across all alignment paths via the
+soft-minimum rather than selecting a single winning shift, which appears to better preserve
+pointwise accuracy.
 
-The reason Soft-DTW outperforms bounded-lag in RMSE is the nature of the gradient signal.
-Bounded-lag selects a single winning shift k* per sample and back-propagates only through that
-shift (winner-takes-all). This hard selection can cause the model to progressively learn
-time-shifted outputs, which are then penalised at pointwise evaluation. Soft-DTW, by contrast,
-distributes gradient across all alignment paths via the soft-minimum, providing a smoother
-optimisation landscape that retains more pointwise accuracy while still encouraging temporal
-alignment.
-
-PatchTST Soft-DTW (RMSE = 43.453) shows a larger penalty (+10.6%) than LSTM Soft-DTW.
-This is likely due to the higher model complexity of PatchTST interacting with the more
-complex Soft-DTW loss surface, combined with the O(H²) per-sample cost reducing effective
-gradient signal per epoch.
+PatchTST Soft-DTW (RMSE = 43.235) shows a larger penalty (+10.1%) compared to baseline
+PatchTST (39.271). This is consistent with the bounded-lag result for PatchTST (+0.1%) being
+an exception — the Soft-DTW loss surface is more complex and PatchTST appears to trade
+pointwise accuracy for trajectory-level alignment more than LSTM does.
 
 ### lag_rmse increases — time-shift artefact not reduced
 
-Despite optimising for temporal alignment, Soft-DTW does not reduce the lag_rmse compared
-to baseline:
+Despite optimising for temporal alignment, Soft-DTW does not reduce lag_rmse compared to
+baseline:
 
-- LSTM: 21.649 → 28.619 (+32%)
-- PatchTST: 14.213 → 24.166 (+70%)
+- LSTM: 21.649 → 28.668 (+32%)
+- PatchTST: 14.213 → 24.006 (+69%)
 
-This mirrors the finding from the bounded-lag branch: alignment-aware losses do not reduce
-the time-shift artefact as measured by lag_rmse. The soft alignment paths in Soft-DTW allow
-flexible warping during training, but this flexibility produces predictions that are not
-consistently shifted in a single direction — rather, the shape of the output is altered across
-multiple time steps. The result is a higher residual error even after the best constant shift
-is applied. LSTM Soft-DTW shows the smallest increase (+32%), consistent with its generally
-better RMSE performance.
+This mirrors the bounded-lag finding. Soft-DTW is by design invariant to temporal distortions:
+the loss is minimised when the predicted trajectory can be warped onto the true trajectory
+within the full alignment space. A model that consistently predicts glucose dynamics 15–30
+minutes too late can still achieve low Soft-DTW loss by warping the alignment path accordingly.
+The model never receives a gradient signal that specifically penalises the direction of time
+offset. As a result, predictions become more varied in their per-sample offset, making a single
+global constant shift (lag_rmse) a worse fit.
 
-### Hypoglycemia detection: comparable gains to bounded-lag
+### Hypoglycemia detection: modest improvement for LSTM, negligible for PatchTST
 
-Both LSTM and PatchTST achieve nearly identical F1 improvements as in the bounded-lag
-objective:
+With corrected baseline hyperparameters, the F1 improvements are substantially smaller than
+preliminary results suggested:
 
-- LSTM: F1 0.0054 → 0.0153 (+183%), same as bounded-lag (+185%)
-- PatchTST: F1 0.0609 → 0.0835 (+37%), same as bounded-lag (+38%)
+- LSTM: F1 0.0054 → 0.0137 (+154%)
+- PatchTST: F1 0.0609 → 0.0624 (+2.5%)
 
-This symmetry suggests that the primary driver of event-detection improvement is the shift
-from a single-horizon MSE objective to a trajectory-level alignment objective, regardless of
-whether that alignment is rigid (bounded-lag) or flexible (DTW).
+The LSTM improvement is real but small in absolute terms (only two patients detect events in
+both runs). The PatchTST improvement is negligible. This is a critical correction from
+earlier results: a previous run with DTW-specific Optuna hyperparameters (d_model=256 vs
+baseline d_model=64) produced F1=0.0835 for PatchTST Soft-DTW (+37%). After controlling for
+architecture by using the shared baseline HP, that apparent gain disappears almost entirely.
+The earlier improvement was driven by the larger model capacity, not by the DTW loss itself.
 
-PatchTST Soft-DTW achieves the highest per-patient F1 values observed in the study: patient
-85211 reaches F1 = 0.500 and patient 85214 reaches recall = 1.000 (all events detected).
+This finding demonstrates that the ablation design — fixing hyperparameters across objectives —
+is essential for isolating the effect of the loss function. Without it, a confound (model size)
+masked the true contribution of Soft-DTW.
 
-### LSTM Soft-DTW: overall best balance
+### LSTM Soft-DTW: most balanced profile among alignment losses
 
-Across all six models, LSTM Soft-DTW presents the most balanced profile:
-- RMSE only slightly above baseline (+3.6%)
-- F1 improvement of ~3× over baseline LSTM
-- Computationally efficient (O(H²) per sample, but H=12 is small)
+LSTM Soft-DTW remains the best-balanced variant:
+- Smallest RMSE penalty (+3.2%)
+- Largest absolute F1 gain among alignment objectives for LSTM (+154%)
+- Computationally tractable (O(H²) per sample, H=12)
 
-### Key trade-off
+### Key limitation of Soft-DTW for this task
 
-Soft-DTW encodes temporal alignment as a soft, differentiable constraint. The resulting models
-learn to predict the shape and direction of glucose dynamics rather than purely optimising for
-the exact value at t+60 min. For hypoglycemia prevention — where detecting a descent trend
-early is more valuable than exact magnitude — this is a clinically motivated objective.
-The γ = 1.0 parameter controls the softness of alignment; smaller γ would approach hard DTW
-alignment (sharper gradients, risk of vanishing) while larger γ would smooth out differences.
+Soft-DTW is designed for applications where exact timing does not matter — recognising the
+shape of a glucose excursion regardless of when it peaks. For the specific clinical goal of
+predicting glucose at exactly t+60 min, this invariance is a liability. The model learns good
+curve shapes but continues to produce them at shifted time points. Combined with the loss of
+the architecture confound, Soft-DTW does not provide a meaningful advantage over MSE for
+this forecasting task when hyperparameters are properly controlled.

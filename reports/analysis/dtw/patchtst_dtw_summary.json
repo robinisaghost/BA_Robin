@@ -1,7 +1,7 @@
 {
-  "rmse_mean": 43.45259401533339,
-  "lag_rmse_mean": 24.166,
-  "mae_mean": 32.15752739376492,
+  "rmse_mean": 43.23510848151313,
+  "lag_rmse_mean": 24.006354813919,
+  "mae_mean": 32.25122700797187,
   "patient_ids": [
     "85101",
     "85102",
@@ -48,12 +48,12 @@
   "lookback": 24,
   "tuning_patient": "85202",
   "hyperparameters": {
-    "d_model": 256,
+    "d_model": 64,
     "n_heads": 4,
     "n_layers": 3,
-    "dim_ff": 128,
-    "dropout": 0.13973397693889444,
-    "lr": 0.0006528707932696085,
-    "batch_size": 256
+    "dim_ff": 256,
+    "dropout": 0.025405743060852786,
+    "lr": 0.00012116603187391654,
+    "batch_size": 128
   }
 }
