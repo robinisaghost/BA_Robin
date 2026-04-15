@@ -1,8 +1,9 @@
-# Objective 3: Event-Centric Evaluation — τ-Sweep
+# Objective 3: Event-Centric Evaluation
 
 **Branch:** `devBranch-event-centric`
-**Approach:** Hypoglycemia event detection evaluated across τ ∈ {1,…,6} steps (5–30 min)
-**Models evaluated:** All trained variants (Baseline, Bounded-Lag, DTW, Multi-Step)
+**Part 1:** τ-sweep of forecast-derived event detection across τ ∈ {1,…,6} steps (5–30 min)
+**Part 2:** Direct binary event classifiers (LSTM Event, PatchTST Event)
+**Models evaluated:** All trained variants (Baseline, Bounded-Lag, DTW, Multi-Step) plus direct classifiers
 
 ---
 
@@ -182,5 +183,118 @@ The τ-sweep reveals that the choice of τ is not a minor implementation detail 
 substantive design decision that determines which model appears best. At τ=15 min,
 Multi-Step and DTW are comparable; at τ=30 min, Bounded-Lag leads in F2. DTW's advantage
 is purely in raw recall, at the cost of a persistently higher false positive rate.
-The LSTM results confirm that DTW training does not improve — and worsens — the time-shift
+The LSTM results confirm that DTW training does not improve and worsens the time-shift
 artefact relative to MSE.
+
+---
+
+## 6. Binary Event Classifier: Method
+
+The binary event classifier is a direct alternative to forecast-derived event detection.
+Instead of predicting the glucose trajectory and then checking for threshold crossings,
+the classifier is trained to answer directly: will glucose fall below 70 mg/dL at any
+point in the next 60 minutes?
+
+For each input window of 24 steps (120 minutes), the label is 1 if the minimum of the
+next 12 steps (60 minutes) falls below 70 mg/dL, and 0 otherwise. BCEWithLogitsLoss
+with a patient-specific class weight (n_neg / n_pos) is used to handle the rarity of
+hypoglycemia events.
+
+The same backbone is used as in the baseline: LSTMForecaster with horizon=1 for LSTM
+Event, and PatchTST with horizon=1 for PatchTST Event. The single output is treated as
+a binary logit. Baseline hyperparameters from Optuna tuning on patient 85202 are used
+without modification, consistent with all other objectives. Patients with no positive
+events in the training split are skipped.
+
+---
+
+## 7. Binary Event Classifier: Results
+
+### 7.1 Mean Results Across Patients
+
+| Model | Precision | Recall | F1 | F2 |
+|---|---|---|---|---|
+| LSTM Event | 0.2373 | 0.6931 | 0.3336 | 0.4626 |
+| PatchTST Event | 0.0544 | 0.6150 | 0.0952 | 0.1785 |
+
+Both classifiers were trained and evaluated on 36 patients.
+
+### 7.2 Comparison with Forecast-Derived Detection at τ=30 min
+
+τ=30 min is the most forgiving tolerance in the τ-sweep. The comparison at τ=30
+therefore represents the upper bound of forecast-derived detection performance.
+
+| Model | F1 | F2 |
+|---|---|---|
+| LSTM Event | 0.3336 | 0.4626 |
+| PatchTST Bounded-Lag (τ=30) | 0.1389 | 0.1759 |
+| PatchTST Multi-Step (τ=30) | 0.1377 | 0.1710 |
+| PatchTST DTW (τ=30) | 0.1247 | 0.1627 |
+| PatchTST Event | 0.0952 | 0.1785 |
+| PatchTST Baseline (τ=30) | 0.1177 | 0.1467 |
+| LSTM Bounded-Lag (τ=30) | 0.0226 | 0.0198 |
+| LSTM Baseline (τ=30) | 0.0253 | 0.0192 |
+
+---
+
+## 8. Binary Event Classifier: Interpretation
+
+### LSTM Event outperforms all forecast-derived models
+
+LSTM Event achieves F2=0.4626. The best forecast-derived model at the most forgiving
+tolerance (PatchTST Bounded-Lag at τ=30) achieves F2=0.1759. LSTM Event is 2.6 times
+higher in F2. The same ordering holds for F1 and recall.
+
+This result shows that directly training a model to detect hypoglycemia events produces
+substantially better results than deriving event detections from a glucose trajectory
+forecast. The forecast models are trained to minimise mean squared error of the predicted
+trajectory. This objective does not directly reward correct detection of threshold
+crossings and does not penalise missed or false events.
+
+### PatchTST Event underperforms relative to LSTM Event
+
+PatchTST Event achieves F2=0.1785. This is comparable to the best forecast-derived
+models at τ=30, which means direct binary training gives PatchTST no clear advantage
+over its own forecast-derived detection. The main reason is low precision: PatchTST Event
+achieves a mean precision of 0.054, meaning approximately 1 in 18 positive predictions
+is a true positive. Per-patient inspection shows that PatchTST Event generates between
+800 and 1400 false positive predictions per patient, compared to 100 to 400 for LSTM Event.
+
+### Why PatchTST Event has lower precision
+
+PatchTST uses Reversible Instance Normalization (RevIN), which normalizes each input
+window by the mean and standard deviation of that specific window before the model
+processes it [1]. After RevIN normalization, two windows with the same shape but
+different absolute glucose levels are represented identically. For example, a window
+centered at 90 mg/dL and a window centered at 150 mg/dL produce the same normalized
+input if they have the same internal shape.
+
+For binary classification of an absolute threshold (70 mg/dL), the absolute glucose
+level of the input window is informative. A patient currently at 90 mg/dL is much closer
+to the hypoglycemia threshold than a patient at 150 mg/dL. After RevIN, the model cannot
+use this difference. It can only use the shape and trend within the window.
+
+LSTM Event normalizes inputs using the mean and standard deviation of the training set
+for each patient, which are fixed across all windows. This means the normalized value of
+70 mg/dL is always the same for a given patient, and the model can learn that normalized
+values below a certain level indicate proximity to the threshold. The absolute level
+information is preserved in the normalized representation.
+
+### The reversal relative to the τ-sweep
+
+In the τ-sweep, PatchTST outperformed LSTM across all models and all tolerance values.
+In direct binary classification, LSTM outperforms PatchTST by a large margin. This
+shows that the same architectural choices that make PatchTST better for glucose
+trajectory forecasting make it less suited for direct binary classification of an
+absolute threshold. RevIN is beneficial for forecasting because it reduces sensitivity
+to patient-level distribution shift [1]. For binary threshold classification, it removes
+the information that matters most.
+
+---
+
+## References
+
+[1] Kim, T., Kim, J., Tae, Y., Park, C., Choi, J. H., & Choo, J. (2022). Reversible
+    instance normalization for accurate time-series forecasting against distribution
+    shift. In The Tenth International Conference on Learning Representations (ICLR 2022).
+    https://openreview.net/forum?id=cGDAkQo1C0p
