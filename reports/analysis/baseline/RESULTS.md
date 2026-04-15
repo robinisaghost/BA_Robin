@@ -35,10 +35,20 @@ across all three objectives. Only the loss function changes in the extension bra
 
 ## 3. Summary Results
 
-| Model | RMSE | MAE | Precision | Recall | F1 |
-|---|---|---|---|---|---|
-| **LSTM MSE** | **36.089** | **27.118** | 0.0104 | 0.0036 | 0.0054 |
-| **PatchTST MSE** | **39.271** | **29.001** | 0.0482 | 0.0888 | 0.0609 |
+Event metrics at tau = 3 steps (15 min), threshold = 70 mg/dL. Δ* measured
+within ±12 steps (±60 min) by minimising RMSE after shift correction.
+
+| Model | RMSE | lag_rmse | Δ* mean (min) | Δ* median (min) | Δ* std (min) | MAE | Precision | Recall | F1 |
+|---|---|---|---|---|---|---|---|---|---|
+| **LSTM MSE** | **36.089** | **21.649** | **-51.2** | **-52.5** | **9.1** | **27.118** | 0.0104 | 0.0036 | 0.0054 |
+| **PatchTST MSE** | **39.271** | **14.213** | **-55.3** | **-55.0** | **3.1** | **29.001** | 0.0482 | 0.0888 | 0.0609 |
+
+Δ* is the correction lag in minutes that minimises RMSE(y_true, shift(y_pred, k))
+within ±12 steps (±60 min). A negative value means the prediction is late by that
+many minutes. For a 60-minute forecast, Δ* ≈ -55 min means the model effectively
+predicts only 5 minutes into the future rather than 60 minutes. Both models show
+a strong and consistent systematic time-shift, which is the central problem addressed
+by all three objectives [3].
 
 ---
 
