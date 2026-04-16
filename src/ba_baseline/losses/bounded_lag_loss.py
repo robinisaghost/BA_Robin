@@ -17,6 +17,15 @@ The objective is applied to this project following the thesis proposal by
 van den Hoek [7]. The time-shift phenomenon that motivates this loss was
 observed in the PRG Proposal [11].
 
+Based on
+---------
+- Le Guen & Thome [12] — DILATE loss, which jointly optimises shape and
+  temporal position; the bounded-lag loss is a simpler discrete variant.
+  Reference implementation: https://github.com/vincent-leguen/DILATE
+- Cuturi & Blondel [13] — Soft-DTW; informed the differentiable alignment
+  framing. Reference: https://github.com/mblondel/soft-dtw
+- Sakoe & Chiba [14] — Sakoe-Chiba band motivates the ±max_lag window.
+
 References
 ----------
 [7]  van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based
