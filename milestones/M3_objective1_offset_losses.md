@@ -84,14 +84,14 @@ Soft-DTW allows the loss to match predicted and true sequences at non-identical 
 | `reports/results/lstm_dtw_*.{json,csv,npz}` | LSTM Soft-DTW results (on `main`) |
 | `reports/results/patchtst_dtw_*.{json,csv,npz}` | PatchTST Soft-DTW results (on `main`) |
 
-### External Repositories
+### External Repositories and References
 
-Both loss functions were implemented from scratch using PyTorch autograd. No external repository code was copied.
+The following repositories served as implementation references:
 
-| Component | Reference repository | Relation to this work |
+| Component | Repository | Role |
 |---|---|---|
-| Bounded-Lag loss | No existing reference repo; design follows [11] | Original implementation |
-| Soft-DTW loss | `github.com/mblondel/soft-dtw` (Cuturi & Blondel [12]) | Re-implemented from scratch in PyTorch following the algorithm in [12]; no code copied from the reference repo |
+| Bounded-Lag loss | Design follows the thesis proposal [11] | No existing reference repo; original implementation using PyTorch autograd |
+| Soft-DTW loss | `github.com/mblondel/soft-dtw` (Cuturi & Blondel [12]); PyTorch port `github.com/Maghoumi/pytorch-softdtw-cuda` | Algorithm and forward pass structure used as reference; adapted to pure-Python PyTorch without CUDA dependency |
 
 ### Ablation Design
 

@@ -80,14 +80,14 @@ All binary event classifier experiments use:
 | `reports/results/lstm_event_per_patient_metrics_all.csv` | LSTM per-patient event metrics |
 | `reports/results/patchtst_event_per_patient_metrics_all.csv` | PatchTST per-patient event metrics |
 
-### External Repositories
+### External Repositories and References
 
-Binary event classifiers were implemented by replacing the regression output head of the baseline models with a sigmoid unit and changing the loss to `torch.nn.BCEWithLogitsLoss`. No external repository was used.
+The following repositories served as implementation references:
 
-| Component | Reference repository | Relation to this work |
+| Component | Repository | Role |
 |---|---|---|
-| BCE loss | PyTorch built-in `torch.nn.BCEWithLogitsLoss` | Standard library; no external repo required |
-| Event classification design | Methodology described in Hüni [8] (no public repo) | Approach follows Hüni [8]; code implemented independently |
+| BCE loss | PyTorch — `github.com/pytorch/pytorch` | `torch.nn.BCEWithLogitsLoss` used directly |
+| Event classification design | Methodology from Hüni [8] (no public repo); peer repo `github.com/ahonongobi/Master-Thesis` consulted | Hüni [8] defines the label construction and evaluation protocol; classifier architecture adapted from the baseline models of M1 |
 
 ---
 

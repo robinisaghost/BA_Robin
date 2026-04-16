@@ -89,15 +89,15 @@ Hyperparameters were tuned via **Optuna** [10] with 50 trials using the **TPE (T
 - **Metrics:** `src/ba_baseline/metrics/metrics.py`
 - **Results:** `reports/results/lstm_60min_summary.json`, `reports/results/patchtst_60min_summary.json`
 
-### External Repositories
+### External Repositories and References
 
-All model code was implemented from scratch in PyTorch and is not copied from any external repository. The following reference implementations were consulted during development:
+The following repositories served as implementation references:
 
-| Component | Reference repository | Relation to this work |
+| Component | Repository | Role |
 |---|---|---|
-| PatchTST architecture | `github.com/yuqinie98/PatchTST` (Nie et al. [2]) | Architecture re-implemented from scratch following the paper; no code copied |
-| LSTM | PyTorch built-in `torch.nn.LSTM` [1] | Standard library module; no external repo required |
-| RevIN normalisation | Implemented inline, following Kim et al. [4] | No external repo used |
+| PatchTST | `github.com/yuqinie98/PatchTST` (Nie et al. [2]) | Reference implementation; architectural choices (learnable positional embeddings, Pre-LayerNorm, GELU activation) follow this repo |
+| LSTM | PyTorch built-in `torch.nn.LSTM` — `github.com/pytorch/pytorch` | Standard library module |
+| RevIN | Kim et al. [4]; patterns from `github.com/ts-kim/RevIN` | Normalisation logic follows this reference |
 
 ### Key Design Choices
 
