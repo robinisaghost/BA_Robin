@@ -1,3 +1,38 @@
+"""
+PatchTST-based glucose forecasting model (event-centric variant).
+
+This variant uses sinusoidal positional encoding instead of learnable
+embeddings, following the original Transformer formulation by Vaswani et al. [3].
+RevIN normalisation is applied inline following Kim et al. [4].
+
+Based on
+---------
+- Nie et al. [2] — PatchTST architecture (patch projection, Transformer encoder,
+  linear head). Reference implementation: https://github.com/yuqinie98/PatchTST
+- Vaswani et al. [3] — sinusoidal positional encoding formula.
+  Reference implementation pattern: https://github.com/pytorch/pytorch
+  (torch.nn.Transformer tutorial).
+- RevIN: https://github.com/ts-kim/RevIN (Kim et al. [4])
+
+References
+----------
+[2]  Nie, Y., Nguyen, N. H., Sinthong, P., & Kalagnanam, J. (2023). A time
+     series is worth 64 words: Long-term forecasting with transformers.
+     ICLR 2023. https://openreview.net/forum?id=Jbdc0vTOcol
+
+[3]  Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L.,
+     Gomez, A. N., Kaiser, L., & Polosukhin, I. (2017). Attention is all
+     you need. NeurIPS 2017.
+
+[4]  Kim, T., Kim, J., Tae, Y., Park, C., Choi, J.-H., & Choo, J. (2022).
+     Reversible instance normalization for accurate time-series forecasting
+     against distribution shift. ICLR 2022.
+     https://openreview.net/forum?id=cGDAkQo1C0p
+
+[11] Pattern Recognition Group, University of Bern. Glucose Prediction
+     Proposal. Internal unpublished manuscript.
+"""
+
 import math
 import torch
 import torch.nn as nn
