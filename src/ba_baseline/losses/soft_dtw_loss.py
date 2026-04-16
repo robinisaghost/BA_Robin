@@ -19,6 +19,15 @@ The smoothing parameter gamma controls the approximation:
 The objective is applied to this project following the thesis proposal by
 van den Hoek [7].
 
+Based on
+---------
+- Cuturi & Blondel [12] — original Soft-DTW algorithm and DP formulation.
+- Reference implementation (NumPy): https://github.com/mblondel/soft-dtw
+- PyTorch port (reference for DP structure and log-sum-exp softmin):
+  https://github.com/Maghoumi/pytorch-softdtw-cuda
+  The forward pass structure (sentinel row/column, softmin via logsumexp)
+  follows this repository. No CUDA dependency is used in this implementation.
+
 References
 ----------
 [7]  van den Hoek, R. (2026). Mitigating Time-Shift Errors in CGM-based
