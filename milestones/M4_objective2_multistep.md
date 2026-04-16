@@ -78,6 +78,15 @@ Evaluation is performed at **h = 11 only** (the 60-minute step), consistent with
 | `reports/results/lstm_multistep_per_patient_metrics_all.csv` | LSTM per-patient results (on `main`) |
 | `reports/results/patchtst_multistep_per_patient_metrics_all.csv` | PatchTST per-patient results (on `main`) |
 
+### External Repositories
+
+Multi-step output was implemented by modifying the baseline model heads (output dimension changed from 1 to H = 12). No external repository was used.
+
+| Component | Reference repository | Relation to this work |
+|---|---|---|
+| Multi-output LSTM head | PyTorch built-in `torch.nn.Linear` | Standard library; no external repo required |
+| Multi-output PatchTST head | `github.com/yuqinie98/PatchTST` (Nie et al. [2]) | Architecture already supports multi-step output; re-implemented from scratch |
+
 ---
 
 ## 4. Results

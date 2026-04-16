@@ -82,12 +82,22 @@ Hyperparameters were tuned via **Optuna** [10] with 50 trials using the **TPE (T
 
 ### Repository
 
-- **Repository:** `github.com/robinisaghost/BA_Robin_baseline` (branch: `main`)
+- **Project repository:** `github.com/robinisaghost/BA_Robin_baseline` (branch: `main`)
 - **Model implementations:** `src/ba_baseline/models/lstm.py`, `src/ba_baseline/models/patchtst.py`
 - **Data pipeline:** `src/ba_baseline/data/patient_loader.py`, `src/ba_baseline/data/multi_patient_dataset.py`, `src/ba_baseline/data/split.py`
 - **Training scripts:** `scripts/train_lstm_60min.py`, `scripts/train_patchtst_60min.py`
 - **Metrics:** `src/ba_baseline/metrics/metrics.py`
 - **Results:** `reports/results/lstm_60min_summary.json`, `reports/results/patchtst_60min_summary.json`
+
+### External Repositories
+
+All model code was implemented from scratch in PyTorch and is not copied from any external repository. The following reference implementations were consulted during development:
+
+| Component | Reference repository | Relation to this work |
+|---|---|---|
+| PatchTST architecture | `github.com/yuqinie98/PatchTST` (Nie et al. [2]) | Architecture re-implemented from scratch following the paper; no code copied |
+| LSTM | PyTorch built-in `torch.nn.LSTM` [1] | Standard library module; no external repo required |
+| RevIN normalisation | Implemented inline, following Kim et al. [4] | No external repo used |
 
 ### Key Design Choices
 

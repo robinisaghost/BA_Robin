@@ -84,6 +84,15 @@ Soft-DTW allows the loss to match predicted and true sequences at non-identical 
 | `reports/results/lstm_dtw_*.{json,csv,npz}` | LSTM Soft-DTW results (on `main`) |
 | `reports/results/patchtst_dtw_*.{json,csv,npz}` | PatchTST Soft-DTW results (on `main`) |
 
+### External Repositories
+
+Both loss functions were implemented from scratch using PyTorch autograd. No external repository code was copied.
+
+| Component | Reference repository | Relation to this work |
+|---|---|---|
+| Bounded-Lag loss | No existing reference repo; design follows [11] | Original implementation |
+| Soft-DTW loss | `github.com/mblondel/soft-dtw` (Cuturi & Blondel [12]) | Re-implemented from scratch in PyTorch following the algorithm in [12]; no code copied from the reference repo |
+
 ### Ablation Design
 
 The sole change between the baseline and each Objective 1 variant is the loss function. Architecture, hyperparameters, data pipeline, evaluation protocol, and random seeds are identical to M1. This ensures that result differences are caused only by the loss change.

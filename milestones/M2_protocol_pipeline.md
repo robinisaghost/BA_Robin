@@ -103,6 +103,15 @@ Full analysis in `reports/analysis/comparison_baseline_robin_vs_fellow.md`.
 | `scripts/compute_full_metrics.py` | Loads `.npz` traces, computes all metrics, writes CSV summaries |
 | `scripts/plot_shift_60min.py` | Visualises prediction vs. ground truth with shift annotation |
 
+### External Repositories
+
+All metric and evaluation code was implemented from scratch. No external repository code was used directly.
+
+| Component | Reference repository | Relation to this work |
+|---|---|---|
+| Cross-correlation best-lag | Standard NumPy (`numpy.correlate`) | Library function; no external repo required |
+| Tolerant event evaluation | Methodology from Hüni [8] | Re-implemented from scratch based on the thesis description; peer repo `github.com/ahonongobi/Master-Thesis` consulted for comparison only |
+
 ### Frameworks
 
 | Component | Library |
