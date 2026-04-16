@@ -13,6 +13,14 @@ ranges.
 PatchTST is used as an advanced Transformer baseline alongside LSTM, following
 the internal proposal of the Pattern Recognition Group [11].
 
+Based on
+---------
+- Nie et al. [2] — paper describing the PatchTST architecture.
+- Reference implementation: https://github.com/yuqinie98/PatchTST
+  Architectural choices (learnable positional embeddings, Pre-LayerNorm,
+  GELU activation, patch projection) follow this repository.
+- RevIN: https://github.com/ts-kim/RevIN (Kim et al. [4])
+
 References
 
 [2] Nie, Y., Nguyen, N. H., Sinthong, P., & Kalagnanam, J. (2023). A time series
