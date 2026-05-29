@@ -1,0 +1,77 @@
+\chapter{Experiments} \label{ch:experiments}
+This chapter presents the empirical results of all experimental configurations evaluated across the cohort of 36 patients. Section~\ref{sec:exp:baseline} establishes the baseline performance. Sections~\ref{sec:exp:obj1} through~\ref{sec:exp:obj3} detail the results for each specific research objective. Section~\ref{sec:exp:overall} concludes with a comprehensive comparative summary.
+
+% ================================================================
+\section{Baseline: Single-Step Forecasting} \label{sec:exp:baseline}
+% ================================================================
+\begin{planned}
+    \item Reporting of the baseline results under mean squared error optimization.
+    \item Presentation of the Shift-Penalty to quantify the temporal misalignment.
+    \item Include a plot showing a single-patient trajectory comparison to visually demonstrate the systematic prediction delay.
+    \item Include the population-level histogram of the per-patient best-lag to prove the time shift is systematic across the cohort.
+\end{planned}
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.9\textwidth]{figures/baseline_trajectory.png}
+    \caption{Baseline forecasting trajectories illustrating the systematic time shift.}
+    \label{fig:exp:baseline_curves}
+\end{figure}
+
+% ================================================================
+\section{Objective 1: Offset-Aware Loss Functions} \label{sec:exp:obj1}
+% ================================================================
+\subsection{Bounded-Lag Loss Results}
+\begin{planned}
+    \item Description of the results when optimizing with a predefined local neighborhood.
+    \item Statistical reporting of the marginal gains in event-centric detection performance.
+\end{planned}
+
+\subsection{Soft-DTW Loss Results}
+\begin{planned}
+    \item Detailed analysis of the Soft-DTW optimization outcomes.
+    \item Discussion of the expanded temporal alignment variance. Explain why elastic sequence matching during training yields higher residual shape misalignment metrics.
+    \item Include a plot comparing standard MSE trajectories against Soft-DTW trajectories to visually explain the trade off between structural shape matching and exact amplitude tracking.
+    \item Interpretation of why relaxing temporal constraints fails to supply the structural information needed to anticipate future glycemic changes.
+\end{planned}
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.9\textwidth]{figures/soft_dtw_comparison.png}
+    \caption{Visual comparison of trajectories trained with standard MSE versus Soft-DTW.}
+    \label{fig:exp:soft_dtw_plot}
+\end{figure}
+
+% ================================================================
+\section{Objective 2: Multi-Step Forecasting} \label{sec:exp:obj2}
+% ================================================================
+\begin{planned}
+    \item Reporting of the direct multi-step sequence supervision results.
+    \item Interpretation of how simultaneous loss minimization across early steps acts as a temporal anchor to maintain phase coherence.
+    \item Include a plot demonstrating the improved phase alignment of the multi-step approach compared to the single-step baseline.
+\end{planned}
+
+% ================================================================
+\section{Objective 3: Event-Centric Evaluation} \label{sec:exp:obj3}
+% ================================================================
+\begin{planned}
+    \item Evaluation of the forecast-derived event detectors across tolerance ranges.
+    \item Include the $\tau$-Sweep plot to visually track F1 curves across tolerance ranges. Interpret the flat response as empirical evidence of the static prediction delay.
+    \item Reporting of the direct binary event classifier performance.
+    \item Include a plot showing the direct classifier output trace (probabilities vs. true events) to highlight the performance inversion between the recurrent model and the instance-normalized transformer.
+\end{planned}
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.9\textwidth]{figures/tau_sweep.png}
+    \caption{Hypo-F1 score as a function of the tolerance window $\tau$.}
+    \label{fig:exp:tau_sweep_plot}
+\end{figure}
+
+% ================================================================
+\section{Overall Comparison} \label{sec:exp:overall}
+% ================================================================
+\begin{planned}
+    \item Descriptive summary of the global metrics across all tested configurations.
+    \item Final structural recommendation motivating a decoupled dual-model system.
+\end{planned}

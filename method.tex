@@ -1,0 +1,36 @@
+\chapter{Experimental Design and Training Objectives} \label{ch:method}
+This chapter describes the formal problem definitions, dataset characteristics, and the specific configurations of the research objectives.
+
+% ================================================================
+\section{Problem Formulation} \label{sec:method:problem}
+% ================================================================
+\begin{planned}
+    \item Mathematical notation of the continuous glucose input sequence and the multi-step output trajectory vector.
+    \item Formal presentation of the binary event classification label representing hypoglycemia breaches.
+\end{planned}
+
+% ================================================================
+\section{Dataset and CGM Characteristics} \label{sec:method:setup}
+% ================================================================
+\subsection{Continuous Glucose Monitoring and The T1DATA Cohort} \label{sec:method:setup:cgm}
+\begin{planned}
+    \item Brief explanation of Continuous Glucose Monitoring (CGM) technology and its physiological delay.
+    \item Introduction of the T1DATA clinical trial dataset (36 patients, 5-minute sampling rate).
+    \item Description of the fundamental tracking information deficit and the high lag-1 autocorrelation ($> 0.98$), which directly motivates the time-shift problem.
+    \item Mention the severe class imbalance inherent to the dataset (true hypoglycemia onset windows constitute a small minority), motivating the F2 metric and weighted loss functions. \textit{No plot required.}
+\end{planned}
+
+\subsection{Train/Val/Test Splits and Hyperparameter Optimization} \label{sec:method:setup:splits}
+\begin{planned}
+    \item Chronological partition (60/20/20) to preserve continuous temporal integrity and prevent future-data leakage.
+    \item Operational parameters of the Optuna automated search space framework executed exclusively on the designated tuning patient.
+\end{planned}
+
+% ================================================================
+\section{Training Objectives} \label{sec:method:objectives}
+% ================================================================
+\begin{planned}
+    \item \textbf{Objective 1 (Offset-Aware Loss):} Parameters for the Bounded-Lag and Soft-DTW pipelines.
+    \item \textbf{Objective 2 (Multi-Step):} Implementation of the direct multi-output (12 simultaneous tracking horizons).
+    \item \textbf{Objective 3 (Event-Centric):} Sequential tolerance sweep design and the weighted binary cross-entropy loss for direct classification.
+\end{planned}
