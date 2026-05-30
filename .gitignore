@@ -28,3 +28,17 @@ checkpoints/
 .DS_Store
 Thumbs.db
 
+# LaTeX build artefacts
+thesis/*.aux
+thesis/*.log
+thesis/*.toc
+thesis/*.out
+thesis/*.fls
+thesis/*.fdb_latexmk
+thesis/*.synctex.gz
+thesis/*.bbl
+thesis/*.blg
+thesis/*.lof
+thesis/*.lot
+thesis/main.pdf
+

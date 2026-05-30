@@ -1,0 +1,40 @@
+\begin{abstract}
+
+\begin{planned}
+    \item \textbf{Problem.} Deep learning models trained with mean squared error (MSE)
+          on univariate CGM data produce glucose predictions that are systematically
+          delayed by about 50 to 55 minutes. This time-shift artefact causes
+          hypoglycemia events (glucose below 70~mg/dL) to be detected too late
+          or not at all.
+
+    \item \textbf{Methods.} Three objectives are evaluated in a controlled ablation
+          study. Only one factor changes per objective; all other settings are identical
+          to the baseline.
+          \begin{itemize}
+              \item Objective 1: offset-aware loss functions, specifically
+                    Bounded-Lag ($D{=}3$ steps, $\pm$15~min) and Soft-DTW ($\gamma{=}1.0$)
+              \item Objective 2: multi-step forecasting with simultaneous prediction
+                    of all $H{=}12$ steps              \item Objective 3: event-centric evaluation with a
+                    $\tau$-sweep ($\tau \in \{1,\ldots,6\}$ steps) and a direct
+                    binary event classifier (BCE loss)
+          \end{itemize}
+
+    \item \textbf{Forecasting results.} Multi-step MSE achieves the lowest lag\_rmse
+          of all tested methods (LSTM: 20.74~mg/dL, PatchTST: 14.53~mg/dL).
+          Loss function changes alone do not reduce the time-shift artefact.
+
+    \item \textbf{Event detection results.} The LSTM binary classifier achieves
+          F1~$= 0.334$, a 62-fold improvement over forecast-derived detection
+          (F1~$= 0.005$). Recall~$= 0.693$ means 69\,\% of hypoglycemia events
+          are correctly detected. The PatchTST classifier achieves only
+          F1~$= 0.095$ due to very low precision caused by its
+          Reversible Instance Normalization removing absolute glucose level
+          information.
+
+    \item \textbf{Conclusion.} Forecasting and event detection work best as two
+          separate tasks. The recommended setup is a multi-step MSE model for
+          glucose trajectory prediction and an LSTM binary classifier for
+          hypoglycemia early warning.
+\end{planned}
+
+\end{abstract}
