@@ -8,6 +8,7 @@ This chapter presents the empirical results of all experimental configurations e
     \item Reporting of the baseline results under mean squared error optimization, including Mean~Lag to quantify the systematic temporal misalignment.
     \item Include a plot showing a single-patient trajectory comparison to visually demonstrate the systematic prediction delay.
     \item Include the population-level boxplot of the per-patient best-lag to prove the time shift is systematic across the cohort.
+    \item Note that the two architectures already show different event detection behavior at baseline: the LSTM has very low recall, while the PatchTST has higher recall but very low precision. This difference is important context for the findings in Section~\ref{sec:exp:obj3}.
 \end{planned}
 
 \begin{table}[H]
@@ -55,6 +56,7 @@ PatchTST\,MSE  & 39.27 & 55.3 & 29.00 & 0.048 & 0.089 & 0.061 & 0.074 \\
     \item Discussion of the expanded temporal alignment variance. Explain why elastic sequence matching during training yields higher residual shape misalignment metrics.
     \item Include a plot comparing standard MSE trajectories against Soft-DTW trajectories to visually explain the trade off between structural shape matching and exact amplitude tracking.
     \item Interpretation of why relaxing temporal constraints fails to supply the structural information needed to anticipate future glycemic changes.
+    \item Note that Soft-DTW behaves differently depending on the architecture. For the LSTM it reduces the mean lag the most out of all tested strategies, but at the cost of higher RMSE. For the PatchTST it barely reduces the lag and causes a large increase in RMSE without any meaningful gain in event detection.
 \end{planned}
 
 \begin{figure}[H]
@@ -95,6 +97,7 @@ Architecture & Loss & RMSE & Lag (min) & MAE & Precision & Recall & F1 & F2 \\
     \item Reporting of the direct multi-step sequence supervision results.
     \item Interpretation of how simultaneous loss minimization across early steps acts as a temporal anchor to maintain phase coherence.
     \item Include a plot demonstrating the improved phase alignment of the multi-step approach compared to the single-step baseline.
+    \item Note that multi-step supervision gives the best RMSE and MAE values overall, which means it produces more accurate trajectories. However, the improvement in event detection is very small for the LSTM and only moderate for the PatchTST. Multi-step supervision therefore does not solve the event detection problem on its own.
 \end{planned}
 
 \begin{figure}[H]
@@ -132,6 +135,7 @@ Architecture & Supervision & RMSE & Lag (min) & MAE & Precision & Recall & F1 & 
 \begin{planned}
     \item Evaluation of the forecast-derived event detectors across tolerance ranges.
     \item Include the $\tau$-Sweep plot to visually track F1 curves across tolerance ranges for all four training strategies. The full numerical breakdowns (Precision, Recall, F1, F2) for all configurations are provided in Tables~\ref{tab:app:tau_sweep_lstm} and~\ref{tab:app:tau_sweep_patchtst} (Appendix~\ref{appendix:detailed_metrics}); F1/Precision/Recall curves across all strategies are shown in Figs.~\ref{fig:app:tau_sweep_lstm} and~\ref{fig:app:tau_sweep_patchtst}.
+    \item Point out the clear difference between the two architectures in the tau sweep: the LSTM curves stay almost flat across all tolerance values, while the PatchTST curves rise steeply as $\tau$ increases. This suggests that the PatchTST produces predictions that have the right shape but the wrong timing, whereas the LSTM struggles with both timing and shape.
     \item Reporting of the direct binary event classifier performance.
     \item Include a plot showing the direct classifier output trace (probabilities vs.\ true events) to highlight the performance inversion between the recurrent model and the instance-normalized transformer.
     \item For a visual comparison of forecast-derived detectors and direct classifiers in Precision--Recall space, see Fig.~\ref{fig:app:pr_paradox} (Appendix~\ref{appendix:detailed_metrics}).
@@ -172,7 +176,7 @@ PatchTST event classifier & 0.054 & 0.615          & 0.095 & 0.178          \\
 % ================================================================
 \begin{planned}
     \item Descriptive summary of the global metrics across all tested configurations (see Table~\ref{tab:exp:overall}).
-    \item Final structural recommendation motivating a decoupled dual-model system.
+    \item Final structural recommendation motivating a decoupled dual-model system. The results show that the best event detection is achieved by the LSTM direct classifier (F2~=~0.463), while the best trajectory quality is achieved by the PatchTST multi-step model (lowest RMSE among PatchTST variants, best forecasting F2). These two strengths come from different architectures, which suggests that a system using both models in combination would outperform any single model on its own.
 \end{planned}
 
 \begin{table}[H]
