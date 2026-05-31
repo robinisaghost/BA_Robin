@@ -1,0 +1,86 @@
+==============================================================
+ INSTRUCTIONS: Which files must be copied to thesis/img/?
+==============================================================
+
+For local compilation or upload to Overleaf, copy the following
+files into the folder  thesis/img/
+
+Run from the repository root (PowerShell):
+  Copy-Item figures\hypo_episode.png              thesis\img\hypo_episode.png
+  Copy-Item figures\timeshift_demo.png            thesis\img\timeshift_demo.png
+  Copy-Item figures\confusion_example.png         thesis\img\confusion_example.png
+  Copy-Item figures\tau_sweep.png                 thesis\img\tau_sweep.png
+  Copy-Item figures\classifier_predictions.png    thesis\img\classifier_predictions.png
+  Copy-Item figures\confusion_counts.png          thesis\img\confusion_counts.png
+  Copy-Item figures\pr_paradox.png                thesis\img\pr_paradox.png
+  Copy-Item reports\figures\tau_sweep\tau_sweep_comparison.png  thesis\img\tau_sweep_comparison.png
+  Copy-Item reports\figures\60min_compare_window\patient_85202.png  thesis\img\patient_85202.png
+
+==============================================================
+ FILES TO BE ADDED MANUALLY BY USER (existing diagrams)
+==============================================================
+
+The following two architecture diagrams must be uploaded manually
+to Overleaf (or placed in thesis/img/ for local compilation):
+
+  img/lstm_cell.png
+      -> LSTM architecture diagram (2 layers, linear head)
+
+  img/patchtst_arch_b.png
+      -> PatchTST architecture diagram (patching, Transformer, RevIN)
+
+==============================================================
+ NEW FIGURES TO BE GENERATED (still placeholder boxes in the LaTeX)
+==============================================================
+
+Four new figures were added during the supervisor-review revision.
+Each currently renders as a framed placeholder box. Generate them
+from the existing analysis scripts and drop them into thesis/img/:
+
+  img/class_imbalance.png         (Chapter 2, Section 2.1.2)
+      -> Bar chart of positive vs. negative windows per patient,
+         plus cohort-level aggregate. Motivates the F2 metric and
+         the inverse-frequency BCE loss.
+
+  img/chronological_split.png     (Chapter 3, Section 3.2.1)
+      -> Schematic of the 60/20/20 chronological split per patient
+         (time on x-axis). Can be drawn in TikZ or as a simple
+         horizontal-bar matplotlib figure.
+
+  img/lag_distribution.png        (Chapter 4, Section 4.1)
+      -> Histogram of per-patient best-lag Delta* in 5-minute steps,
+         one panel per architecture (LSTM, PatchTST). Mean and
+         median annotated. Can be produced by
+         scripts/plot_shift_60min.py (already in the repo).
+
+  img/lead_time_distribution.png  (Chapter 4, Section 4.4.3)
+      -> Histogram or boxplot of per-event lead times for the
+         LSTM and PatchTST direct classifiers. Vertical line at
+         15 minutes marks the clinically meaningful threshold.
+
+==============================================================
+ COMPLETE LIST of all img/ references in the LaTeX
+==============================================================
+
+Chapter 1 (introduction.tex):
+  img/hypo_episode.png            <- figures/hypo_episode.png
+  img/timeshift_demo.png          <- figures/timeshift_demo.png
+
+Chapter 2 (background.tex):
+  img/lstm_cell.png               <- [add manually]
+  img/patchtst_arch_b.png         <- [add manually]
+  img/tau_tolerance.png           <- [add manually]
+  img/class_imbalance.png         <- [generate from data analysis]   *** NEW ***
+
+Chapter 3 (method.tex):
+  img/chronological_split.png     <- [generate as schematic]         *** NEW ***
+
+Chapter 4 (experiments.tex):
+  img/patient_85202.png           <- reports/figures/60min_compare_window/patient_85202.png
+  img/lag_distribution.png        <- scripts/plot_shift_60min.py     *** NEW ***
+  img/tau_sweep.png               <- figures/tau_sweep.png
+  img/tau_sweep_comparison.png    <- reports/figures/tau_sweep/tau_sweep_comparison.png
+  img/classifier_predictions.png  <- figures/classifier_predictions.png
+  img/confusion_counts.png        <- figures/confusion_counts.png
+  img/pr_paradox.png              <- figures/pr_paradox.png
+  img/lead_time_distribution.png  <- [generate from classifier outputs] *** NEW ***
