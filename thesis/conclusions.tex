@@ -22,17 +22,10 @@ This chapter summarizes the central empirical findings of the ablation study dis
 % ================================================================
 
 \begin{planned}
-    \item Acknowledgment of the strictly univariate constraint which mathematically bounds the predictive capacity during sudden metabolic fluctuations.
-    \item Critical assessment of the short median advance warning window achieved by the primary classification architecture.
-    \item Evaluation of the severe dataset class imbalance which restricts overall precision metrics and induces false alarm sequences.
+    \item Acknowledgment of the strictly univariate constraint which bounds the predictive capacity during sudden metabolic fluctuations. A model that only sees glucose values cannot know about a recent insulin dose or a meal, both of which directly cause glucose changes.
+    \item Discussion of the short advance warning window shown in Fig.~\ref{fig:exp:lead_time}. The LSTM classifier fires too late in almost half of all cases, which limits its usefulness for a patient who needs time to act. Discuss why this happens: the model detects the start of a drop but not the drop before it starts.
+    \item Evaluation of the severe class imbalance which restricts overall precision and causes many false alarms. Only 5.7\% of all windows contain a hypoglycaemia event, which makes the problem structurally difficult regardless of the model architecture.
 \end{planned}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{lead_time_distribution.png}
-    \caption{Distribution of lead times for true-positive detections by the LSTM and PatchTST direct event classifiers across the 36-patient cohort. Lead time is the elapsed time in minutes from alarm issuance to the first hypoglycaemic step in the prediction window. Bars are grouped by model and binned at 5-minute intervals; the median lead time per model is shown in the legend.}
-    \label{fig:conc:lead_time}
-\end{figure}
 
 % ================================================================
 \section{Future Work}
