@@ -17,7 +17,7 @@ This chapter presents the empirical results of all experimental configurations e
 \label{tab:exp:baseline}
 \begin{tabular}{lrrrrrrr}
 \toprule
-Model & RMSE\,$\downarrow$ & Lag\,$\downarrow$ (min) & MAE\,$\downarrow$ & Precision\,$\uparrow$ & Recall\,$\uparrow$ & F1\,$\uparrow$ & F2\,$\uparrow$ \\
+Model & RMSE & Lag (min) & MAE & Precision & Recall & F1 & F2 \\
 \midrule
 LSTM\,MSE      & 36.09 & 51.2 & 27.12 & 0.010 & 0.004 & 0.005 & 0.004 \\
 PatchTST\,MSE  & 39.27 & 55.3 & 29.00 & 0.048 & 0.089 & 0.061 & 0.074 \\
@@ -72,7 +72,7 @@ PatchTST\,MSE  & 39.27 & 55.3 & 29.00 & 0.048 & 0.089 & 0.061 & 0.074 \\
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{llrrrrrrr}
 \toprule
-Architecture & Loss & RMSE\,$\downarrow$ & Lag\,$\downarrow$ (min) & MAE\,$\downarrow$ & Precision\,$\uparrow$ & Recall\,$\uparrow$ & F1\,$\uparrow$ & F2\,$\uparrow$ \\
+Architecture & Loss & RMSE & Lag (min) & MAE & Precision & Recall & F1 & F2 \\
 \midrule
 \multicolumn{9}{l}{\textit{LSTM}} \\[2pt]
  & MSE (baseline) & 36.09 & 51.2          & 27.12 & 0.010 & 0.004 & 0.005 & 0.004 \\
@@ -112,7 +112,7 @@ Architecture & Loss & RMSE\,$\downarrow$ & Lag\,$\downarrow$ (min) & MAE\,$\down
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{llrrrrrrr}
 \toprule
-Architecture & Supervision & RMSE\,$\downarrow$ & Lag\,$\downarrow$ (min) & MAE\,$\downarrow$ & Precision\,$\uparrow$ & Recall\,$\uparrow$ & F1\,$\uparrow$ & F2\,$\uparrow$ \\
+Architecture & Supervision & RMSE & Lag (min) & MAE & Precision & Recall & F1 & F2 \\
 \midrule
 \multicolumn{9}{l}{\textit{LSTM}} \\[2pt]
  & Single-step (baseline) & 36.09 & 51.2                  & 27.12 & 0.010 & 0.004 & 0.005 & 0.004 \\
@@ -158,7 +158,7 @@ Architecture & Supervision & RMSE\,$\downarrow$ & Lag\,$\downarrow$ (min) & MAE\
 \label{tab:exp:classifiers}
 \begin{tabular}{lrrrr}
 \toprule
-Model & Precision\,$\uparrow$ & Recall\,$\uparrow$ & F1\,$\uparrow$ & F2\,$\uparrow$ \\
+Model & Precision & Recall & F1 & F2 \\
 \midrule
 LSTM event classifier     & 0.237 & \textbf{0.693} & 0.334 & \textbf{0.463} \\
 PatchTST event classifier & 0.054 & 0.615          & 0.095 & 0.178          \\
@@ -183,7 +183,7 @@ PatchTST event classifier & 0.054 & 0.615          & 0.095 & 0.178          \\
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{llrrrrrrr}
 \toprule
-Architecture & Training & RMSE\,$\downarrow$ & Lag\,$\downarrow$ (min) & MAE\,$\downarrow$ & Precision\,$\uparrow$ & Recall\,$\uparrow$ & F1\,$\uparrow$ & F2\,$\uparrow$ \\
+Architecture & Training & RMSE & Lag (min) & MAE & Precision & Recall & F1 & F2 \\
 \midrule
 \multicolumn{9}{l}{\textit{LSTM}} \\[2pt]
  & MSE (baseline) & 36.09 & 51.2          & 27.12          & 0.010 & 0.004 & 0.005 & 0.004 \\
