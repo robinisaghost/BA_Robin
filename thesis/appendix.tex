@@ -28,21 +28,21 @@ This appendix contains supplementary figures that support the findings presented
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{confusion_counts.png}
-    \caption[Confusion counts for direct event classifiers]{Absolute confusion counts (TP, FP, FN; log scale) for the LSTM and PatchTST direct event classifiers evaluated on Task~A across the full 36-patient cohort. The LSTM accumulates 3.1 false alarms per true positive detected; the PatchTST incurs 16.4 false alarms per true positive, reflecting its substantially lower precision despite comparable recall (Table~\ref{tab:exp:classifiers} in Chapter~\ref{ch:experiments}).}
+    \caption[Confusion counts for direct event classifiers]{Absolute confusion counts (TP, FP, FN; log scale) for the LSTM and PatchTST direct event classifiers evaluated across the full 36-patient cohort. Counts are aggregated over all patients; the logarithmic scale is used to make the smaller TP bars visible alongside the larger FP counts. Corresponding precision, recall, and F-scores are reported in Table~\ref{tab:exp:classifiers}.}
     \label{fig:app:confusion_counts}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{pr_paradox.png}
-    \caption[Precision--Recall space: forecast-derived vs.\ direct classifiers]{Precision--Recall space for forecast-derived detectors (hollow markers) and direct binary classifiers (filled markers) for LSTM (circles) and PatchTST (squares). The forecast-derived detectors cluster near the origin due to the systematic prediction delay. Direct training on the classification task dramatically shifts both models into clinically relevant recall regimes, with the LSTM achieving the superior precision--recall trade-off.}
+    \caption[Precision--Recall space: forecast-derived vs.\ direct classifiers]{Precision--Recall space for all four detector configurations. Hollow markers represent forecast-derived detectors (threshold applied to the regression output); filled markers represent direct binary classifiers. Circles correspond to LSTM, squares to PatchTST. Each point is the cohort-mean operating point at the standard detection threshold.}
     \label{fig:app:pr_paradox}
 \end{figure}
 
 \begin{table}[htbp]
 \centering
 \small
-\caption[$\tau$-sweep numerical breakdown]{Detailed numerical breakdown of the forecast-derived hypoglycaemia detection performance as a function of the tolerance window $\tau$ (in minutes) for the LSTM and PatchTST MSE baselines. Metrics are computed over the full 36-patient cohort. The monotonic increase of all metrics with $\tau$ confirms that performance gains reflect tolerance compensation for the static prediction delay rather than genuine anticipatory detection.}
+\caption[$\tau$-sweep numerical breakdown]{Detailed numerical breakdown of the forecast-derived hypoglycaemia detection performance as a function of the tolerance window $\tau$ (in minutes) for the LSTM and PatchTST MSE baselines. Each row gives the cohort-mean Precision, Recall, F1, and F2 at the corresponding $\tau$. The values are visualised as curves in Fig.~\ref{fig:exp:tau_sweep_plot}.}
 \label{tab:app:tau_sweep}
 \begin{tabular}{lrrrr}
 \toprule
