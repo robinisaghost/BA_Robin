@@ -88,7 +88,7 @@ def make_figure45(all_results: dict):
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=8,
                bbox_to_anchor=(0.5, -0.12), frameon=True)
-    fig.suptitle("Forecast-derived event detection: F1 vs.\ tolerance $\\tau$",
+    fig.suptitle(r"Forecast-derived event detection: F1 vs. tolerance $\tau$",
                  fontsize=9, y=1.02)
     fig.tight_layout()
     fig.savefig(IMG_DIR / "tau_sweep_comparison.png", dpi=200, bbox_inches="tight")
@@ -118,7 +118,7 @@ def make_appendix_figure(all_results: dict, arch: str, fname: str):
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=8,
                bbox_to_anchor=(0.5, -0.12), frameon=True)
-    fig.suptitle(f"{arch}: detection metrics vs.\ tolerance $\\tau$", fontsize=9, y=1.02)
+    fig.suptitle(rf"{arch}: detection metrics vs. tolerance $\tau$", fontsize=9, y=1.02)
     fig.tight_layout()
     fig.savefig(IMG_DIR / fname, dpi=200, bbox_inches="tight")
     plt.close(fig)
