@@ -150,9 +150,9 @@ def make_obj1_all_predictions():
     ]
 
     pred_styles = {
-        "MSE (baseline)": dict(color="#4878CF", linestyle="--",  linewidth=1.3, alpha=0.9),
-        "Bounded-Lag":    dict(color="#DD8452", linestyle="-.",  linewidth=1.3, alpha=0.9),
-        "Soft-DTW":       dict(color="#55A868", linestyle=":",   linewidth=1.6, alpha=0.9),
+        "MSE (baseline)": dict(color="#1565C0", linestyle="--",  linewidth=1.8, alpha=1.0),
+        "Bounded-Lag":    dict(color="#E65100", linestyle="-.",  linewidth=1.8, alpha=1.0),
+        "Soft-DTW":       dict(color="#00695C", linestyle=":",   linewidth=2.4, alpha=1.0),
     }
 
     fig, axes = plt.subplots(1, 2, figsize=(8.5, 3.8), sharey=False, sharex=True)
@@ -165,7 +165,7 @@ def make_obj1_all_predictions():
         ax.fill_between(t, y_lo, HYPO_LINE, alpha=0.08, color="#C44E52", zorder=0)
         ax.axhline(HYPO_LINE, color="#C44E52", linewidth=0.9, linestyle="--",
                    alpha=0.7, label="70 mg/dL threshold")
-        ax.plot(t, true_w, color="black", linewidth=1.8, label="Ground truth", zorder=4)
+        ax.plot(t, true_w, color="black", linewidth=2.5, label="Ground truth", zorder=4)
         for label, pred in preds.items():
             ax.plot(t, pred, label=label, zorder=3, **pred_styles[label])
 
@@ -212,8 +212,8 @@ def make_multistep_vs_baseline_trace():
     ]
 
     pred_styles = {
-        "Single-step (baseline)": dict(color="#4878CF", linestyle="--", linewidth=1.3, alpha=0.9),
-        "Multi-step":             dict(color="#55A868", linestyle="-.", linewidth=1.3, alpha=0.9),
+        "Single-step (baseline)": dict(color="#1565C0", linestyle="--", linewidth=1.8, alpha=1.0),
+        "Multi-step":             dict(color="#E65100", linestyle="-.", linewidth=1.8, alpha=1.0),
     }
 
     fig, axes = plt.subplots(1, 2, figsize=(8.5, 3.8), sharey=False, sharex=True)
@@ -226,7 +226,7 @@ def make_multistep_vs_baseline_trace():
         ax.fill_between(t, y_lo, HYPO_LINE, alpha=0.08, color="#C44E52", zorder=0)
         ax.axhline(HYPO_LINE, color="#C44E52", linewidth=0.9, linestyle="--",
                    alpha=0.7, label="70 mg/dL threshold")
-        ax.plot(t, true_w, color="black", linewidth=1.8, label="Ground truth", zorder=4)
+        ax.plot(t, true_w, color="black", linewidth=2.5, label="Ground truth", zorder=4)
         for label, pred in preds.items():
             ax.plot(t, pred, label=label, zorder=3, **pred_styles[label])
 
