@@ -22,7 +22,7 @@ This chapter describes the formal problem definitions, dataset characteristics, 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{class_imbalance.png}
-    \caption{Class distribution of the hypoglycaemia detection task across the 36-patient T1DATA cohort. Each window is labelled positive if glucose falls below 70~mg/dL within the next 60~minutes. Positive windows account for only 5.7\% of all labelled windows at cohort level (3{,}462 positive vs.\ 57{,}680 negative), with substantial variation across patients. This severe imbalance motivates the use of the F2 metric and inverse-frequency weighting in the binary cross-entropy loss for direct classifiers.}
+    \caption{Class distribution of the hypoglycaemia detection task across the 36-patient T1DATA cohort. Each window is labelled positive if glucose falls below 70~mg/dL within the next 60~minutes. Positive windows account for only 5.7\% of all labelled windows at cohort level (3{,}462 positive vs.\ 57{,}680 negative), with substantial variation across patients as shown by the per-patient breakdown.}
     \label{fig:method:class_imbalance}
 \end{figure}
 

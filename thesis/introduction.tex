@@ -34,10 +34,9 @@ This chapter motivates the presented research, introduces the central problem of
     \caption[Illustration of the time-shift artefact in glucose forecasting]{%
     Illustration of the time-shift artefact in MSE-trained univariate
     glucose forecasting models. Both the LSTM (top) and PatchTST (bottom)
-    predictions follow the true glucose trajectory closely in shape but
-    are delayed by approximately 55~minutes. Hypoglycemia threshold
-    crossings are therefore detected too late, or not at all, which
-    motivates the lag\_rmse diagnostic metric introduced in this thesis.}
+    predictions are plotted against the true glucose trajectory over the
+    same time window. The red dashed line marks the 70~mg/dL hypoglycaemia
+    threshold; the shaded region below indicates the hypoglycaemic zone.}
     \label{fig:intro:timeshift_demo}
 \end{figure}
 
