@@ -174,7 +174,10 @@ def make_obj1_all_predictions():
         ax.set_title(arch)
 
     axes[0].set_ylabel("Blood glucose (mg/dL)")
-    axes[0].legend(loc="upper right", fontsize=8)
+
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=5, fontsize=8,
+               bbox_to_anchor=(0.5, -0.12), frameon=True)
 
     fig.suptitle("Objective 1: Offset-Aware Loss Functions", y=1.02, fontsize=10)
     fig.tight_layout()
@@ -232,7 +235,10 @@ def make_multistep_vs_baseline_trace():
         ax.set_title(arch)
 
     axes[0].set_ylabel("Blood glucose (mg/dL)")
-    axes[0].legend(loc="upper right", fontsize=8)
+
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=8,
+               bbox_to_anchor=(0.5, -0.12), frameon=True)
 
     fig.suptitle("Single-step vs. Multi-step supervision", y=1.02, fontsize=9)
     fig.tight_layout()
