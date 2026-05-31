@@ -320,8 +320,10 @@ def make_baseline_trajectory_comparison():
         ax.set_ylim(y_lo, max(true_w.max(), pred.max()) + 12)
 
     axes[0].set_ylabel("Blood glucose (mg/dL)")
-    axes[0].legend(loc="upper right", fontsize=7.5)
-    axes[1].legend(loc="upper right", fontsize=7.5)
+
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=3, fontsize=8,
+               bbox_to_anchor=(0.5, -0.12), frameon=True)
 
     fig.suptitle("Baseline 60min prediction", y=1.02, fontsize=9)
     fig.tight_layout()

@@ -34,7 +34,7 @@ PatchTST\,MSE  & 39.27 & 55.3 & 29.00 & 0.048 & 0.089 & 0.061 & 0.074 \\
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{lag_distribution.png}
+    \includegraphics[width=0.55\textwidth]{lag_distribution.png}
     \caption{Boxplot of the per-patient prediction delay $\Delta^*$ for the LSTM and PatchTST baseline models. Each point represents one of the 36 patients. $\Delta^*$ is the shift in minutes that minimises the per-patient RMSE between the shifted prediction and the ground truth. Both models show a median delay near the full 60-minute forecast horizon, confirming that the temporal misalignment is a systematic, cohort-wide phenomenon.}
     \label{fig:exp:lag_dist}
 \end{figure}
