@@ -178,24 +178,25 @@ PatchTST event classifier & 0.054 & 0.615          & 0.095 & 0.178          \\
 \begin{table}[H]
 \centering
 \small
-\caption{Comprehensive summary of all eight training configurations. Bold values mark the best result per column. Lag is the average absolute shift in minutes that minimises per-patient RMSE ($|\Delta^*| \times 5$~min). RMSE and MAE are in mg/dL; Hypo-F1 is derived from threshold-based event detection at 70~mg/dL.}
+\caption{Comprehensive summary of all eight training configurations. Bold values mark the best result per column. Lag is the average absolute shift in minutes that minimises per-patient RMSE ($|\Delta^*| \times 5$~min). RMSE and MAE are in mg/dL; event-detection metrics are derived by thresholding each 60-min prediction at 70~mg/dL. Means over 36 patients.}
 \label{tab:exp:overall}
-\begin{tabular}{llrrrr}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrrrr}
 \toprule
-Architecture & Training & RMSE\,$\downarrow$ & Lag\,$\downarrow$ (min) & MAE\,$\downarrow$ & Hypo-F1\,$\uparrow$ \\
+Architecture & Training & RMSE\,$\downarrow$ & Lag\,$\downarrow$ (min) & MAE\,$\downarrow$ & Precision\,$\uparrow$ & Recall\,$\uparrow$ & F1\,$\uparrow$ & F2\,$\uparrow$ \\
 \midrule
-\multicolumn{6}{l}{\textit{LSTM}} \\[2pt]
- & MSE (baseline) & 36.09 & 51.2                  & 27.12          & 0.005 \\
- & Bounded-Lag    & 36.14 & 48.6                  & 27.57          & 0.014 \\
- & Soft-DTW       & 37.23 & \textbf{46.0}         & 28.76          & 0.014 \\
- & Multi-step     & \textbf{35.59} & 50.1         & \textbf{26.80} & 0.010 \\
+\multicolumn{9}{l}{\textit{LSTM}} \\[2pt]
+ & MSE (baseline) & 36.09 & 51.2          & 27.12          & 0.010 & 0.004 & 0.005 & 0.004 \\
+ & Bounded-Lag    & 36.14 & 48.6          & 27.57          & 0.017 & 0.012 & 0.014 & 0.013 \\
+ & Soft-DTW       & 37.23 & \textbf{46.0} & 28.76          & 0.039 & 0.009 & 0.014 & 0.010 \\
+ & Multi-step     & \textbf{35.59} & 50.1 & \textbf{26.80} & 0.011 & 0.009 & 0.010 & 0.010 \\
 \midrule
-\multicolumn{6}{l}{\textit{PatchTST}} \\[2pt]
- & MSE (baseline) & 39.27 & 55.3                  & 29.00          & 0.061 \\
- & Bounded-Lag    & 39.30 & 54.6                  & 29.03          & 0.067 \\
- & Soft-DTW       & 43.24 & 54.4                  & 32.25          & 0.062 \\
- & Multi-step     & 39.05 & 54.6                  & 28.84          & \textbf{0.072} \\
+\multicolumn{9}{l}{\textit{PatchTST}} \\[2pt]
+ & MSE (baseline) & 39.27 & 55.3          & 29.00          & 0.048 & 0.089 & 0.061 & 0.074 \\
+ & Bounded-Lag    & 39.30 & 54.6          & 29.03          & 0.055 & 0.095 & 0.066 & 0.080 \\
+ & Soft-DTW       & 43.24 & 54.4          & 32.25          & 0.056 & \textbf{0.129} & 0.062 & 0.084 \\
+ & Multi-step     & 39.05 & 54.6          & 28.84          & \textbf{0.060} & 0.103 & \textbf{0.072} & \textbf{0.085} \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
