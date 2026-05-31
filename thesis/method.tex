@@ -16,13 +16,20 @@ This chapter describes the formal problem definitions, dataset characteristics, 
 \begin{planned}
     \item Introduction of the T1DATA clinical trial dataset: 36 anonymised Type~1 diabetes patients, CGM readings at a 5-minute sampling interval.
     \item The glucose signal has a lag-1 autocorrelation above 0.98, meaning each reading is nearly identical to the previous one. This makes it easy for a model to predict well by copying recent history, which is the root cause of the time-shift artefact.
-    \item Class imbalance: only 5.7\% of all labelled windows contain a hypoglycaemia event, motivating the F2 metric and weighted loss in direct classifiers (see also Fig.~\ref{fig:bg:class_imbalance}).
+    \item Class imbalance: only 5.7\% of all labelled windows contain a hypoglycaemia event, motivating the F2 metric and weighted loss in direct classifiers (see Fig.~\ref{fig:method:class_imbalance}).
 \end{planned}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{class_imbalance.png}
+    \caption{Class distribution of the hypoglycaemia detection task across the 36-patient T1DATA cohort. Each window is labelled positive if glucose falls below 70~mg/dL within the next 60~minutes. Positive windows account for only 5.7\% of all labelled windows at cohort level (3{,}462 positive vs.\ 57{,}680 negative), with substantial variation across patients. This severe imbalance motivates the use of the F2 metric and inverse-frequency weighting in the binary cross-entropy loss for direct classifiers.}
+    \label{fig:method:class_imbalance}
+\end{figure}
 
 \subsection{Train/Val/Test Splits and Hyperparameter Optimization} \label{sec:method:setup:splits}
 \begin{planned}
     \item Chronological partition (60/20/20) to preserve continuous temporal integrity and prevent future-data leakage.
-    \item Operational parameters of the Optuna automated search space framework executed exclusively on the designated tuning patient.
+    \item Operational parameters of the Optuna automated search space framework executed exclusively on the designated tuning patient. The full set of resulting hyperparameters is listed in Table~\ref{tab:app:hyperparams} (Appendix~\ref{appendix:hyperparams}).
 \end{planned}
 
 
@@ -34,25 +41,3 @@ This chapter describes the formal problem definitions, dataset characteristics, 
     \item \textbf{Objective 2 (Multi-Step):} The single 60-minute output is replaced by 12 simultaneous step predictions covering the full forecast window. Supervising all steps at once gives the model direct feedback about earlier time points, which may anchor the prediction in time.
     \item \textbf{Objective 3 (Event-Centric):} Two approaches are tested: (a) the tolerance window $\tau$ is swept from 5 to 60 minutes to see how much loosening the timing requirement improves detection for the MSE-trained forecasters; (b) direct binary classifiers are trained end-to-end on the event label and compared against the threshold-based forecast detectors.
 \end{planned}
-
-\begin{table}[htbp]
-\centering
-\caption{Hyperparameters derived by Optuna (50 trials on patient 85202) and locked for all experiments. These values are held constant across all three research objectives; only the loss function or output head is varied per objective.}
-\label{tab:method:hyperparams}
-\begin{tabular}{lrr}
-\toprule
-Hyperparameter & LSTM & PatchTST \\
-\midrule
-Hidden size / $d_\text{model}$  & 256   & 64 \\
-Number of layers                & 2     & 3 \\
-Dropout                         & 0.159 & 0.025 \\
-Learning rate                   & $9.61 \times 10^{-4}$ & $1.21 \times 10^{-4}$ \\
-Batch size                      & 128   & 128 \\
-Feed-forward dim.\ ($d_\text{ff}$) & ---   & 256 \\
-Attention heads ($h$)           & ---   & 4 \\
-Lookback window                 & \multicolumn{2}{c}{24 steps (120 min)} \\
-Forecast horizon                & \multicolumn{2}{c}{12 steps (60 min)} \\
-Optuna trials                   & \multicolumn{2}{c}{50} \\
-\bottomrule
-\end{tabular}
-\end{table}

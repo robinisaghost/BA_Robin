@@ -32,6 +32,13 @@ This appendix contains supplementary figures that support the findings presented
     \label{fig:app:confusion_counts}
 \end{figure}
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{pr_paradox.png}
+    \caption[Precision--Recall space: forecast-derived vs.\ direct classifiers]{Precision--Recall space for forecast-derived detectors (hollow markers) and direct binary classifiers (filled markers) for LSTM (circles) and PatchTST (squares). The forecast-derived detectors cluster near the origin due to the systematic prediction delay. Direct training on the classification task dramatically shifts both models into clinically relevant recall regimes, with the LSTM achieving the superior precision--recall trade-off.}
+    \label{fig:app:pr_paradox}
+\end{figure}
+
 \begin{table}[htbp]
 \centering
 \small

@@ -30,7 +30,7 @@ This chapter provides the theoretical foundation for the thesis, focusing strict
     \item Key limitation: MSE penalises a prediction that is correct in shape but slightly shifted in time just as harshly as a completely wrong prediction.
 \end{planned}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{loss_mse.png}
     \caption{Visual representation of the Mean Squared Error (MSE). The strict point-wise alignment heavily penalizes structurally correct predictions that are temporally delayed.}
@@ -78,17 +78,17 @@ This chapter provides the theoretical foundation for the thesis, focusing strict
     \label{fig:bg:tau_tolerance}
 \end{figure}
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\textwidth]{class_imbalance.png}
-    \caption{Class distribution of the hypoglycaemia detection task across the 36-patient T1DATA cohort. Each window is labelled positive if glucose falls below 70~mg/dL within the next 60~minutes. Positive windows account for only 5.7\% of all labelled windows at cohort level (3{,}462 positive vs.\ 57{,}680 negative), with substantial variation across patients. This severe imbalance motivates the use of the F2 metric and inverse-frequency weighting in the binary cross-entropy loss for direct classifiers.}
-    \label{fig:bg:class_imbalance}
-\end{figure}
 
 % ================================================================
 \section{Related Work} \label{sec:bg:relwork}
 % ================================================================
 \begin{planned}
-    \item Review of dominant recurrent and transformer-based neural structures applied within modern long-horizon metabolic time series prediction.
-    \item Comparison of prior approaches, positioning this thesis explicitly within the gap of separating shape error from temporal misalignment.
+    \item Discussion of \citet{huni2023glucose} as the direct predecessor at the University of Bern, which addressed hypoglycaemia prediction using LSTM and Graph Attention Networks~\citep{velickovic2018gat} but did not isolate or quantify the time-shift artefact as a separate phenomenon.
+    \item Review of the survey by \citet{lim2021tsforecast} on deep learning for time-series forecasting, covering the dominance of recurrent architectures and the emergence of attention-based models~\citep{vaswani2017attention}, leading to patch-based Transformer designs such as PatchTST~\citep{nie2023patchtst}.
+    \item Analysis of the structural consequence of Reversible Instance Normalisation~\citep{kim2022revin} used in PatchTST: stripping absolute level information stabilises training across patients but systematically degrades threshold-based hypoglycaemia classification.
+    \item Positioning of DTW~\citep{sakoe1978dtw} and its differentiable extension Soft-DTW~\citep{cuturi2017softdtw} in the literature: both are predominantly used as evaluation metrics or post-hoc alignment tools; this thesis evaluates Soft-DTW specifically as a training objective for regression.
+    \item Review of direct multi-output forecasting for blood glucose, where a model simultaneously predicts the full future trajectory instead of a single step~\citep{fox2018multioutput}. This approach is used as the basis for Objective 2 and is compared against the single-step baseline to evaluate whether full-trajectory supervision reduces the prediction delay.
+    \item Overview of direct binary classification approaches for hypoglycemia prediction from CGM data, which train models end-to-end on event labels instead of deriving detections from a regression output~\citep{shao2024hypoglycemia, cinar2025hypoclassification}. These approaches motivate the direct classifier evaluated in Objective 3 and serve as a comparison point for threshold-based detection.
+    \item Prior work acknowledges temporal delay in CGM forecasting and some studies include lag-aware evaluation components, such as temporal gain within composite metrics~\citep{wolff2025cgpm}, or address the delay through future-aware training strategies~\citep{sun2026futureaware}, but these treat the delay as a side observation rather than the primary subject of a controlled ablation study.
+    \item The research gap is that no prior study has used a dedicated metric to isolate the temporal shift from the shape error and then systematically tested whether different training objectives can close that gap.
 \end{planned}
