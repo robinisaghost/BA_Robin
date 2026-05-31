@@ -28,14 +28,14 @@ PatchTST\,MSE  & 39.27 & 55.3 & 29.00 & 0.048 & 0.089 & 0.061 & 0.074 \\
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{patient_85102.png}
-    \caption[Baseline 60min prediction]{Baseline 60-minute forecasting trajectories for patient 85102. The selected window contains a hypoglycaemia episode where glucose drops below the 70~mg/dL threshold. Both the LSTM and PatchTST predictions follow the glucose shape closely but arrive approximately 55 to 60~minutes late, so the predicted threshold crossing occurs after the true event.}
+    \caption[Baseline 60min prediction]{Baseline 60-minute forecasting trajectories for patient 85102 over a representative 10-hour window containing a hypoglycaemia episode. LSTM (left) and PatchTST (right) are shown side by side. The black line is the ground truth CGM signal; the blue dashed line is the model prediction. The red dashed line marks the 70~mg/dL hypoglycaemia threshold.}
     \label{fig:exp:baseline_curves}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.55\textwidth]{lag_distribution.png}
-    \caption{Boxplot of the per-patient prediction delay $\Delta^*$ for the LSTM and PatchTST baseline models. Each point represents one of the 36 patients. $\Delta^*$ is the shift in minutes that minimises the per-patient RMSE between the shifted prediction and the ground truth. Both models show a median delay near the full 60-minute forecast horizon, confirming that the temporal misalignment is a systematic, cohort-wide phenomenon.}
+    \caption{Boxplot of the per-patient prediction delay $\Delta^*$ for the LSTM and PatchTST baseline models. Each point represents one of the 36 patients. $\Delta^*$ is the temporal shift in minutes that minimises the per-patient RMSE between the shifted prediction and the ground truth.}
     \label{fig:exp:lag_dist}
 \end{figure}
 
@@ -60,7 +60,7 @@ PatchTST\,MSE  & 39.27 & 55.3 & 29.00 & 0.048 & 0.089 & 0.061 & 0.074 \\
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{obj1_all_predictions.png}
-    \caption{Prediction trajectories for all three Objective~1 training strategies on a representative patient window (patient 85102, 10-hour window containing a hypoglycaemia episode). LSTM (top) and PatchTST (bottom) are shown separately; all three predictions are overlaid against the ground truth. The Bounded-Lag prediction closely tracks the MSE baseline, while Soft-DTW shows marginally higher amplitude variance due to its elastic shape-matching objective. None of the three strategies eliminates the systematic temporal delay (Table~\ref{tab:exp:obj1}).}
+    \caption{Prediction trajectories for all three Objective~1 training strategies on a representative patient window (patient 85102, 10-hour window containing a hypoglycaemia episode). LSTM (left) and PatchTST (right) are shown side by side; all three predictions are overlaid against the ground truth CGM signal. Line colours and styles distinguish the three training objectives as indicated in the legend.}
     \label{fig:exp:obj1_predictions}
 \end{figure}
 
@@ -100,7 +100,7 @@ Architecture & Loss & RMSE\,$\downarrow$ & Lag\,$\downarrow$ (min) & MAE\,$\down
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{multistep_vs_baseline_trace.png}
-    \caption{Prediction trajectories for LSTM (left) and PatchTST (right) on a representative patient window (patient 85102) containing a hypoglycaemia episode. Single-step baseline and multi-step predictions are overlaid against the ground truth. The multi-step model exhibits marginally improved phase coherence, consistent with the reduced lag reported in Table~\ref{tab:exp:obj2}.}
+    \caption{Prediction trajectories for LSTM (left) and PatchTST (right) on a representative patient window (patient 85102) containing a hypoglycaemia episode. The single-step baseline and multi-step predictions are overlaid against the ground truth CGM signal. Line colours and styles are as indicated in the legend.}
     \label{fig:exp:multistep_plot}
 \end{figure}
 
@@ -140,14 +140,14 @@ Architecture & Supervision & RMSE\,$\downarrow$ & Lag\,$\downarrow$ (min) & MAE\
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{tau_sweep_comparison.png}
-    \caption{Forecast-derived hypoglycaemia detection performance (F1, Precision, Recall) as a function of the tolerance window $\tau$ for the LSTM and PatchTST MSE baselines. All three metrics increase monotonically with $\tau$, confirming that the improvement comes from accepting delayed detections rather than from genuine anticipatory prediction.}
+    \caption{Forecast-derived hypoglycaemia detection performance (F1, Precision, Recall) as a function of the tolerance window $\tau$ for the LSTM and PatchTST MSE baselines. Each curve shows how the metric changes as $\tau$ is widened from 5 to 60~minutes. The detailed numerical values are listed in Table~\ref{tab:app:tau_sweep} (Appendix~\ref{appendix:detailed_metrics}).}
     \label{fig:exp:tau_sweep_plot}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{classifier_predictions.png}
-    \caption{Output traces of the LSTM (top) and PatchTST (bottom) direct event classifiers for a representative patient segment. The LSTM produces focused, high-confidence alarms; the PatchTST fires persistently across the window, yielding substantially higher recall at the cost of far more false positives. The absolute counts across the full cohort are shown in Fig.~\ref{fig:app:confusion_counts}.}
+    \caption{Output traces of the LSTM (top) and PatchTST (bottom) direct event classifiers for a representative patient segment. The predicted event probability is plotted against time; the shaded regions indicate windows where the ground truth label is positive. The absolute confusion counts across the full cohort are shown in Fig.~\ref{fig:app:confusion_counts}.}
     \label{fig:exp:classifier_traces}
 \end{figure}
 

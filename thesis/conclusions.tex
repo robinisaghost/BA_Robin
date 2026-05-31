@@ -30,7 +30,7 @@ This chapter summarizes the central empirical findings of the ablation study dis
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{lead_time_distribution.png}
-    \caption{Distribution of lead times for true-positive detections by the LSTM and PatchTST direct event classifiers. Lead time is the elapsed time in minutes from alarm issuance to the first hypoglycaemic step in the prediction window. For the LSTM, 49.5\% of true positives carry a lead time of 0~min, meaning the hypoglycaemic event is already in progress at the moment of detection. The PatchTST shows a more evenly distributed lead time with a median of 15~min, at the cost of substantially more false alarms.}
+    \caption{Distribution of lead times for true-positive detections by the LSTM and PatchTST direct event classifiers across the 36-patient cohort. Lead time is the elapsed time in minutes from alarm issuance to the first hypoglycaemic step in the prediction window. Bars are grouped by model and binned at 5-minute intervals; the median lead time per model is shown in the legend.}
     \label{fig:conc:lead_time}
 \end{figure}
 
