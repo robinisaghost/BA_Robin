@@ -138,6 +138,7 @@ Architecture & Supervision & RMSE & Lag (min) & MAE & Precision & Recall & F1 & 
     \item Point out the clear difference between the two architectures in the tau sweep: the LSTM curves stay almost flat across all tolerance values, while the PatchTST curves rise steeply as $\tau$ increases. This suggests that the PatchTST produces predictions that have the right shape but the wrong timing, whereas the LSTM struggles with both timing and shape.
     \item Reporting of the direct binary event classifier performance.
     \item Include a plot showing the direct classifier output trace (probabilities vs.\ true events) to highlight the performance inversion between the recurrent model and the instance-normalized transformer.
+    \item Report the lead-time analysis for the two classifiers. The median lead time for the LSTM classifier is 5 minutes, and 49.5\% of all true positive predictions fire at the moment when the patient is already in hypoglycaemia. The PatchTST classifier has a median lead time of 15 minutes and a more even distribution of warning times. This means that the LSTM classifier is largely reactive rather than truly predictive.
     \item For a visual comparison of forecast-derived detectors and direct classifiers in Precision--Recall space, see Fig.~\ref{fig:app:pr_paradox} (Appendix~\ref{appendix:detailed_metrics}).
 \end{planned}
 
