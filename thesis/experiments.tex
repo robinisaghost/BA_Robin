@@ -131,7 +131,7 @@ Architecture & Supervision & RMSE & Lag (min) & MAE & Precision & Recall & F1 & 
 % ================================================================
 \begin{planned}
     \item Evaluation of the forecast-derived event detectors across tolerance ranges.
-    \item Include the $\tau$-Sweep plot to visually track F1 curves across tolerance ranges. Interpret the flat response as empirical evidence of the static prediction delay. The full numerical breakdown across all tolerance values is provided in Table~\ref{tab:app:tau_sweep} (Appendix~\ref{appendix:detailed_metrics}).
+    \item Include the $\tau$-Sweep plot to visually track F1 curves across tolerance ranges for all four training strategies. The full numerical breakdowns (Precision, Recall, F1, F2) for all configurations are provided in Tables~\ref{tab:app:tau_sweep_lstm} and~\ref{tab:app:tau_sweep_patchtst} (Appendix~\ref{appendix:detailed_metrics}); F1/Precision/Recall curves across all strategies are shown in Figs.~\ref{fig:app:tau_sweep_lstm} and~\ref{fig:app:tau_sweep_patchtst}.
     \item Reporting of the direct binary event classifier performance.
     \item Include a plot showing the direct classifier output trace (probabilities vs.\ true events) to highlight the performance inversion between the recurrent model and the instance-normalized transformer.
     \item For a visual comparison of forecast-derived detectors and direct classifiers in Precision--Recall space, see Fig.~\ref{fig:app:pr_paradox} (Appendix~\ref{appendix:detailed_metrics}).
@@ -140,7 +140,7 @@ Architecture & Supervision & RMSE & Lag (min) & MAE & Precision & Recall & F1 & 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{tau_sweep_comparison.png}
-    \caption{Forecast-derived hypoglycaemia detection performance (F1, Precision, Recall) as a function of the tolerance window $\tau$ for the LSTM and PatchTST MSE baselines. Each curve shows how the metric changes as $\tau$ is widened from 5 to 60~minutes. The detailed numerical values are listed in Table~\ref{tab:app:tau_sweep} (Appendix~\ref{appendix:detailed_metrics}).}
+    \caption{F1 as a function of the tolerance window $\tau$ for all four training strategies, shown separately for LSTM (left) and PatchTST (right). Each curve corresponds to one training objective (MSE, Bounded-Lag, Soft-DTW, Multi-step) and shows how F1 changes as $\tau$ is widened from 0 to 60~minutes. Detailed numerical breakdowns (Precision, Recall, F1, F2) for all strategies are listed in Tables~\ref{tab:app:tau_sweep_lstm} and~\ref{tab:app:tau_sweep_patchtst} (Appendix~\ref{appendix:detailed_metrics}); F1/Precision/Recall curves are shown in Figs.~\ref{fig:app:tau_sweep_lstm} and~\ref{fig:app:tau_sweep_patchtst}.}
     \label{fig:exp:tau_sweep_plot}
 \end{figure}
 
