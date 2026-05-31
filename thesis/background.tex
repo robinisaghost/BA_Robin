@@ -42,7 +42,7 @@ This chapter provides the theoretical foundation for the thesis, focusing strict
     \item Description of the Bounded Lag loss, which accepts a prediction as correct if it falls within a fixed time window of the true value, removing the penalty for small timing offsets.
 \end{planned}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{loss_bounded_lag.png}
     \caption{Visual representation of the Bounded Lag Loss. Temporal shifts within a predefined local neighborhood are tolerated without penalty.}
@@ -55,7 +55,7 @@ This chapter provides the theoretical foundation for the thesis, focusing strict
     \item Trade-off: focusing on shape matching reduces the penalty for timing errors but can increase overall amplitude error.
 \end{planned}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{loss_dtw_alignment.png}
     \caption{Visual representation of the Soft DTW Loss. The algorithm dynamically warps the time axis to match structural shapes using one-to-many alignments.}
@@ -71,7 +71,7 @@ This chapter provides the theoretical foundation for the thesis, focusing strict
     \item Derivation of precision, recall, and harmonic F1/F2 score metrics adapted to the evaluation of highly skewed event detection tasks.
 \end{planned}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{tau_tolerance.png}
     \caption{Illustration of the event-detection tolerance window $\tau$. The true threshold crossing $t_c$ and the predicted crossing $p_c$ are considered a matched detection if $|t_c - p_c| \leq \tau$. The shaded $\pm\tau$ band around $t_c$ defines the acceptance region; predictions falling outside this window are counted as false positives or misses.}
