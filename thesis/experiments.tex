@@ -190,7 +190,7 @@ PatchTST event classifier & 0.054 & 0.615          & 0.095 & 0.178          \\
 \begin{table}[H]
 \centering
 \small
-\caption{Comprehensive summary of all eight training configurations. Bold values mark the best result per column. Lag is the average absolute shift in minutes that minimises per-patient RMSE ($|\Delta^*| \times 5$~min). RMSE and MAE are in mg/dL; event-detection metrics are derived by thresholding each 60-min prediction at 70~mg/dL. Means over 36 patients.}
+\caption{Comprehensive summary of all ten model configurations. The first eight rows show the forecast-derived detectors; the final two rows show the direct binary event classifiers. Bold values mark the best result per column. Lag is the average absolute shift in minutes that minimises per-patient RMSE ($|\Delta^*| \times 5$~min). RMSE and MAE are in mg/dL; for forecasting models, event-detection metrics are derived by thresholding each 60-min prediction at 70~mg/dL. Dashes indicate metrics that are not applicable to classifiers. Means over 36 patients.}
 \label{tab:exp:overall}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{llrrrrrrr}
@@ -206,8 +206,12 @@ Architecture & Training & RMSE & Lag (min) & MAE & Precision & Recall & F1 & F2 
 \multicolumn{9}{l}{\textit{PatchTST}} \\[2pt]
  & MSE (baseline) & 39.27 & 55.3          & 29.00          & 0.048 & 0.089 & 0.061 & 0.074 \\
  & Bounded-Lag    & 39.30 & 54.6          & 29.03          & 0.055 & 0.095 & 0.066 & 0.080 \\
- & Soft-DTW       & 43.24 & 54.4          & 32.25          & 0.056 & \textbf{0.129} & 0.062 & 0.084 \\
- & Multi-step     & 39.05 & 54.6          & 28.84          & \textbf{0.060} & 0.103 & \textbf{0.072} & \textbf{0.085} \\
+ & Soft-DTW       & 43.24 & 54.4          & 32.25          & 0.056 & 0.129 & 0.062 & 0.084 \\
+ & Multi-step     & 39.05 & 54.6          & 28.84          & 0.060 & 0.103 & 0.072 & 0.085 \\
+\midrule
+\multicolumn{9}{l}{\textit{Direct Event Classifiers}} \\[2pt]
+ & LSTM            & ---   & ---           & ---            & \textbf{0.237} & \textbf{0.693} & \textbf{0.334} & \textbf{0.463} \\
+ & PatchTST        & ---   & ---           & ---            & 0.054 & 0.615 & 0.095 & 0.178 \\
 \bottomrule
 \end{tabular}}
 \end{table}
