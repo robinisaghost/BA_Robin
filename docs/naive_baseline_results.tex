@@ -3,7 +3,7 @@
 \usepackage{booktabs}
 \usepackage[ngerman]{babel}
 
-\title{Naive Baselines -- Hypoglykämie-Erkennung}
+\title{Hypoglykämie-Erkennung -- Ergebnisübersicht}
 \author{Robin van den Hoek}
 \date{\today}
 
@@ -12,26 +12,32 @@
 
 \begin{table}[h]
 \centering
-\caption{Naive Baselines ohne Training (Kohortenmittel, 36 Patienten). \textit{Naive Last Value:} Alarm wird ausgegeben wenn der aktuell letzte Glukosewert bereits unter 70~mg/dL liegt -- das Modell reagiert also erst wenn der Patient schon in der Hypoglykämie ist. \textit{Naive Mean:} Alarm wird ausgegeben wenn der Durchschnitt des gesamten 2-stündigen Lookback-Fensters unter 70~mg/dL liegt -- da der Mittelwert sehr tief sein muss damit die Regel auslöst, werden fast alle Ereignisse verpasst.}
-\begin{tabular}{lrrrr}
+\caption{Vergleich aller Modellvarianten zur Hypoglykämie-Erkennung (Kohortenmittel, 36 Patienten, Schwellenwert 70~mg/dL).
+\textit{Naive Baselines:} Regelbasierte Modelle ohne Training.
+\textit{Forecast-basierte Erkennung ($\tau = 60$~min):} Standard-Regressionsmodelle, die einen Alarm ausgeben wenn der Minimalwert der vorhergesagten Kurve innerhalb von 60~Minuten unter 70~mg/dL fällt.
+\textit{Direkte Event-Classifier:} Spezialisierte binäre Klassifikatoren, die direkt vorhersagen ob innerhalb der nächsten 60~Minuten eine Hypoglykämie eintreten wird.
+F2 gewichtet Recall doppelt so stark wie Precision.}
+\begin{tabular}{llrrrr}
 \toprule
-Modell & Precision & Recall & F1 & F2 \\
+Gruppe & Modell & Precision & Recall & F1 & F2 \\
 \midrule
-Naive Last Value & 0.857 & 0.326 & 0.473 & 0.373 \\
-Naive Mean       & 0.396 & 0.041 & 0.074 & 0.050 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[h]
-\centering
-\caption{Trainierte binäre Event-Classifier (Kohortenmittel, 36 Patienten). Beide Modelle beantworten die Frage: \textit{Wird die Glukose irgendwann in den nächsten 60~Minuten unter 70~mg/dL fallen?} Das Label ist 1 wenn das Minimum der nächsten 12 Schritte (60~Min.) unter 70~mg/dL liegt. Trainiert mit gewichtetem \texttt{BCEWithLogitsLoss} um das Klassenungleichgewicht (5.7\% positive Fenster) zu berücksichtigen. F2 gewichtet Recall doppelt so stark wie Precision.}
-\begin{tabular}{lrrrr}
-\toprule
-Modell & Precision & Recall & F1 & F2 \\
+\multicolumn{6}{l}{\textit{Naive Baselines}} \\[2pt]
+ & Naive Last Value & 0.857 & 0.326 & 0.473 & 0.373 \\
+ & Naive Mean       & 0.396 & 0.041 & 0.074 & 0.050 \\
 \midrule
-LSTM Event Classifier    & 0.237 & 0.693 & 0.334 & 0.463 \\
-PatchTST Event Classifier & 0.054 & 0.615 & 0.095 & 0.178 \\
+\multicolumn{6}{l}{\textit{Forecast-basierte Erkennung ($\tau = 60$~min)}} \\[2pt]
+ & LSTM MSE          & 0.010 & 0.004 & 0.005 & 0.004 \\
+ & LSTM Bounded-Lag  & 0.017 & 0.012 & 0.014 & 0.013 \\
+ & LSTM Soft-DTW     & 0.039 & 0.009 & 0.014 & 0.010 \\
+ & LSTM Multi-step   & 0.011 & 0.009 & 0.010 & 0.010 \\
+ & PatchTST MSE         & 0.048 & 0.089 & 0.061 & 0.074 \\
+ & PatchTST Bounded-Lag & 0.055 & 0.095 & 0.066 & 0.080 \\
+ & PatchTST Soft-DTW    & 0.056 & 0.129 & 0.062 & 0.084 \\
+ & PatchTST Multi-step  & 0.060 & 0.103 & 0.072 & 0.085 \\
+\midrule
+\multicolumn{6}{l}{\textit{Direkte Event-Classifier}} \\[2pt]
+ & LSTM Event Classifier    & 0.237 & 0.693 & 0.334 & 0.463 \\
+ & PatchTST Event Classifier & 0.054 & 0.615 & 0.095 & 0.178 \\
 \bottomrule
 \end{tabular}
 \end{table}
