@@ -1,5 +1,5 @@
 \chapter{Theory and Background} \label{ch:background}
-This chapter provides the theoretical foundation for the thesis, focusing strictly on the mechanics of sequential modeling and the time-shift anomaly. Section~\ref{sec:bg:models} introduces the deep learning architectures. Section~\ref{sec:bg:losses} details the mathematical formulations of the evaluated loss functions. Section~\ref{sec:bg:metrics} defines the point-wise and event-centric evaluation metrics, and Section~\ref{sec:bg:relwork} discusses related work in glucose forecasting.
+This chapter provides the theoretical foundation for the thesis, focusing strictly on the mechanics of sequential modeling and the time-shift anomaly. Section~\ref{sec:bg:models} introduces the deep learning architectures. Section~\ref{sec:bg:losses} details the mathematical formulations of the evaluated loss functions. Section~\ref{sec:bg:metrics} defines the point-wise and event-centric evaluation metrics.
 
 % ================================================================
 \section{Deep Learning for Time Series Forecasting} \label{sec:bg:models}
@@ -8,17 +8,29 @@ This chapter provides the theoretical foundation for the thesis, focusing strict
 \begin{planned}
     \item Theoretical foundation of recurrent neural networks for sequential data and the resolution of the vanishing gradient problem.
     \item Mathematical mechanics of the input, forget, and output gating mechanisms.
-    \item Brief specification of the chosen baseline recurrent network topology (two stacked layers, hidden size 256).
-    \item \textit{Note: The full architecture diagram is provided in Appendix~\ref{appendix:architectures}.}
+    \item Brief specification of the chosen baseline recurrent network topology (two stacked layers, hidden size 256), illustrated in Fig.~\ref{fig:bg:lstm_arch}.
 \end{planned}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{lstm_cell.png}
+    \caption[Architecture of the LSTM model]{Architecture of the LSTM model used as the recurrent baseline. The input is a 24-step lookback window representing 120~minutes of CGM data. Based on \citet{hochreiter1997lstm}.}
+    \label{fig:bg:lstm_arch}
+\end{figure}
 
 \subsection{PatchTST} \label{sec:bg:models:patchtst}
 \begin{planned}
-    \item Review of self-attention mechanisms and the core design of the PatchTST architecture (segmentation into overlapping patches).
+    \item Review of self-attention mechanisms and the core design of the PatchTST architecture (segmentation into overlapping patches), illustrated in Fig.~\ref{fig:bg:patchtst_arch}.
     \item Mathematical framework of Reversible Instance Normalization (RevIN) utilized to stabilize training.
     \item Analysis of the structural consequence of instance normalization, which strips absolute level info and compromises classification against static boundaries.
-    \item \textit{Note: The full architecture diagram is shown in Fig.~\ref{fig:app:patchtst_arch} (Appendix~\ref{appendix:architectures}).}
 \end{planned}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{patchtst_arch_b.png}
+    \caption[Architecture of the PatchTST model]{Architecture of the PatchTST model adapted to the CGM setting, incorporating Reversible Instance Normalisation (RevIN). Source: \citet{nie2023patchtst}.}
+    \label{fig:bg:patchtst_arch}
+\end{figure}
 
 % ================================================================
 \section{Loss Functions for Sequential Regression} \label{sec:bg:losses}
@@ -79,16 +91,3 @@ This chapter provides the theoretical foundation for the thesis, focusing strict
 \end{figure}
 
 
-% ================================================================
-\section{Related Work} \label{sec:bg:relwork}
-% ================================================================
-\begin{planned}
-    \item Discussion of \citet{huni2023glucose} as the direct predecessor at the University of Bern, which addressed hypoglycaemia prediction using LSTM and Graph Attention Networks~\citep{velickovic2018gat} but did not isolate or quantify the time-shift artefact as a separate phenomenon.
-    \item Review of the survey by \citet{lim2021tsforecast} on deep learning for time-series forecasting, covering the dominance of recurrent architectures and the emergence of attention-based models~\citep{vaswani2017attention}, leading to patch-based Transformer designs such as PatchTST~\citep{nie2023patchtst}.
-    \item Analysis of the structural consequence of Reversible Instance Normalisation~\citep{kim2022revin} used in PatchTST: stripping absolute level information stabilises training across patients but systematically degrades threshold-based hypoglycaemia classification.
-    \item Positioning of DTW~\citep{sakoe1978dtw} and its differentiable extension Soft-DTW~\citep{cuturi2017softdtw} in the literature: both are predominantly used as evaluation metrics or post-hoc alignment tools; this thesis evaluates Soft-DTW specifically as a training objective for regression.
-    \item Review of direct multi-output forecasting for blood glucose, where a model simultaneously predicts the full future trajectory instead of a single step~\citep{fox2018multioutput}. This approach is used as the basis for Objective 2 and is compared against the single-step baseline to evaluate whether full-trajectory supervision reduces the prediction delay.
-    \item Overview of direct binary classification approaches for hypoglycemia prediction from CGM data, which train models end-to-end on event labels instead of deriving detections from a regression output~\citep{shao2024hypoglycemia, cinar2025hypoclassification}. These approaches motivate the direct classifier evaluated in Objective 3 and serve as a comparison point for threshold-based detection.
-    \item Prior work acknowledges temporal delay in CGM forecasting and some studies include lag-aware evaluation components, such as temporal gain within composite metrics~\citep{wolff2025cgpm}, or address the delay through future-aware training strategies~\citep{sun2026futureaware}, but these treat the delay as a side observation rather than the primary subject of a controlled ablation study.
-    \item The research gap is that no prior study has used a dedicated metric to isolate the temporal shift from the shape error and then systematically tested whether different training objectives can close that gap.
-\end{planned}

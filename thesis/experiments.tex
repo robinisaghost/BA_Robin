@@ -134,7 +134,7 @@ Architecture & Supervision & RMSE & Lag (min) & MAE & Precision & Recall & F1 & 
 % ================================================================
 \begin{planned}
     \item Evaluation of the forecast-derived event detectors across tolerance ranges.
-    \item Include the $\tau$-Sweep plot to visually track F1 curves across tolerance ranges for all four training strategies. The full numerical breakdowns (Precision, Recall, F1, F2) for all configurations are provided in Tables~\ref{tab:app:tau_sweep_lstm} and~\ref{tab:app:tau_sweep_patchtst} (Appendix~\ref{appendix:detailed_metrics}); F1/Precision/Recall curves across all strategies are shown in Figs.~\ref{fig:app:tau_sweep_lstm} and~\ref{fig:app:tau_sweep_patchtst}.
+    \item Include the $\tau$-Sweep plot to visually track F1 curves across tolerance ranges for all four training strategies (Fig.~\ref{fig:exp:tau_sweep_plot}). Per-architecture breakdowns of all three metrics (F1, Precision, Recall) are shown in Figs.~\ref{fig:exp:tau_sweep_lstm} and~\ref{fig:exp:tau_sweep_patchtst}. The full numerical breakdowns (Precision, Recall, F1, F2) for all configurations are provided in Tables~\ref{tab:app:tau_sweep_lstm} and~\ref{tab:app:tau_sweep_patchtst} (Appendix~\ref{appendix:detailed_metrics}).
     \item Point out the clear difference between the two architectures in the tau sweep: the LSTM curves stay almost flat across all tolerance values, while the PatchTST curves rise steeply as $\tau$ increases. This suggests that the PatchTST produces predictions that have the right shape but the wrong timing, whereas the LSTM struggles with both timing and shape.
     \item Reporting of the direct binary event classifier performance.
     \item Include a plot showing the direct classifier output trace (probabilities vs.\ true events) to highlight the performance inversion between the recurrent model and the instance-normalized transformer.
@@ -145,8 +145,22 @@ Architecture & Supervision & RMSE & Lag (min) & MAE & Precision & Recall & F1 & 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{tau_sweep_comparison.png}
-    \caption{F1 as a function of the tolerance window $\tau$ for all four training strategies, shown separately for LSTM (left) and PatchTST (right). Each curve corresponds to one training objective (MSE, Bounded-Lag, Soft-DTW, Multi-step) and shows how F1 changes as $\tau$ is widened from 0 to 60~minutes. Detailed numerical breakdowns (Precision, Recall, F1, F2) for all strategies are listed in Tables~\ref{tab:app:tau_sweep_lstm} and~\ref{tab:app:tau_sweep_patchtst} (Appendix~\ref{appendix:detailed_metrics}); F1/Precision/Recall curves are shown in Figs.~\ref{fig:app:tau_sweep_lstm} and~\ref{fig:app:tau_sweep_patchtst}.}
+    \caption{F1 as a function of the tolerance window $\tau$ for all four training strategies, shown separately for LSTM (left) and PatchTST (right). Each curve corresponds to one training objective (MSE, Bounded-Lag, Soft-DTW, Multi-step) and shows how F1 changes as $\tau$ is widened from 0 to 60~minutes. Per-metric breakdowns (F1, Precision, Recall) are shown in Figs.~\ref{fig:exp:tau_sweep_lstm} and~\ref{fig:exp:tau_sweep_patchtst}. Detailed numerical tables are provided in Appendix~\ref{appendix:detailed_metrics}.}
     \label{fig:exp:tau_sweep_plot}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{tau_sweep_appendix_lstm.png}
+    \caption{Cohort-mean F1, Precision, and Recall as a function of the tolerance window $\tau$ for all four LSTM training strategies (MSE, Bounded-Lag, Soft-DTW, Multi-step). Each panel shows one metric; line colours and styles correspond to the training objective as indicated in the legend.}
+    \label{fig:exp:tau_sweep_lstm}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{tau_sweep_appendix_patchtst.png}
+    \caption{Cohort-mean F1, Precision, and Recall as a function of the tolerance window $\tau$ for all four PatchTST training strategies (MSE, Bounded-Lag, Soft-DTW, Multi-step). Each panel shows one metric; line colours and styles correspond to the training objective as indicated in the legend.}
+    \label{fig:exp:tau_sweep_patchtst}
 \end{figure}
 
 \begin{figure}[H]

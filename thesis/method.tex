@@ -29,8 +29,30 @@ This chapter describes the formal problem definitions, dataset characteristics, 
 \subsection{Train/Val/Test Splits and Hyperparameter Optimization} \label{sec:method:setup:splits}
 \begin{planned}
     \item Chronological partition (60/20/20) to preserve continuous temporal integrity and prevent future-data leakage.
-    \item Operational parameters of the Optuna automated search space framework executed exclusively on the designated tuning patient. The full set of resulting hyperparameters is listed in Table~\ref{tab:app:hyperparams} (Appendix~\ref{appendix:hyperparams}).
+    \item Operational parameters of the Optuna automated search space framework executed exclusively on the designated tuning patient. The full set of resulting hyperparameters is listed in Table~\ref{tab:method:hyperparams}.
 \end{planned}
+
+\begin{table}[H]
+\centering
+\caption[Optuna-tuned hyperparameters]{Optuna-tuned hyperparameters for the LSTM and PatchTST architectures. The search was conducted on the validation set of patient 85202 only. Identical hyperparameters are used for all training objectives (MSE, Bounded-Lag, Soft-DTW, Multi-Step); only the loss function or output head is modified per objective.}
+\label{tab:method:hyperparams}
+\begin{tabular}{lrr}
+\toprule
+Hyperparameter & LSTM & PatchTST \\
+\midrule
+Hidden size / $d_\text{model}$      & 256     & 64 \\
+Number of layers                     & 2       & 3 \\
+Dropout                              & 0.159   & 0.025 \\
+Learning rate                        & $9.61 \times 10^{-4}$ & $1.21 \times 10^{-4}$ \\
+Batch size                           & 128     & 128 \\
+Feed-forward dim.\ ($d_\text{ff}$)  & ---     & 256 \\
+Attention heads ($h$)                & ---     & 4 \\
+Lookback window                      & \multicolumn{2}{c}{24 steps (120 min)} \\
+Forecast horizon                     & \multicolumn{2}{c}{12 steps (60 min)} \\
+Optuna trials                        & \multicolumn{2}{c}{50} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 
 % ================================================================

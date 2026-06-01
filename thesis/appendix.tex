@@ -1,29 +1,9 @@
 \begin{appendix}
 
 % ================================================================
-\chapter{Architecture Diagrams} \label{appendix:architectures}
-% ================================================================
-This appendix provides the complete structural diagrams for the deep learning architectures utilised in this thesis.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.9\textwidth]{lstm_cell.png}
-    \caption[Architecture of the LSTM model]{Architecture of the LSTM model used as the recurrent baseline. The input is a 24-step lookback window representing 120~minutes of CGM data. Based on \citet{hochreiter1997lstm}.}
-    \label{fig:app:lstm_arch}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.9\textwidth]{patchtst_arch_b.png}
-    \caption[Architecture of the PatchTST model]{Architecture of the PatchTST model adapted to the CGM setting, incorporating Reversible Instance Normalisation (RevIN). Source: \citet{nie2023patchtst}.}
-    \label{fig:app:patchtst_arch}
-\end{figure}
-
-
-% ================================================================
 \chapter{Supplementary Evaluation Figures} \label{appendix:detailed_metrics}
 % ================================================================
-This appendix contains supplementary figures that support the findings presented in Chapter~\ref{ch:experiments}.
+This appendix contains supplementary figures and numerical tables that support the findings presented in Chapter~\ref{ch:experiments}.
 
 \begin{figure}[H]
     \centering
@@ -39,24 +19,10 @@ This appendix contains supplementary figures that support the findings presented
     \label{fig:app:pr_paradox}
 \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{tau_sweep_appendix_lstm.png}
-    \caption[$\tau$-sweep curves for LSTM: all training strategies]{Cohort-mean F1, Precision, and Recall as a function of the tolerance window $\tau$ for all four LSTM training strategies (MSE, Bounded-Lag, Soft-DTW, Multi-step). Each panel shows one metric; line colours and styles correspond to the training objective as indicated in the legend.}
-    \label{fig:app:tau_sweep_lstm}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{tau_sweep_appendix_patchtst.png}
-    \caption[$\tau$-sweep curves for PatchTST: all training strategies]{Cohort-mean F1, Precision, and Recall as a function of the tolerance window $\tau$ for all four PatchTST training strategies (MSE, Bounded-Lag, Soft-DTW, Multi-step). Each panel shows one metric; line colours and styles correspond to the training objective as indicated in the legend.}
-    \label{fig:app:tau_sweep_patchtst}
-\end{figure}
-
 \begin{table}[H]
 \centering
 \small
-\caption[$\tau$-sweep numerical breakdown: LSTM]{Cohort-mean Precision, Recall, F1, and F2 of the forecast-derived hypoglycaemia detector for all four LSTM training strategies as a function of the tolerance window $\tau$. The corresponding F1 curves are shown in Fig.~\ref{fig:exp:tau_sweep_plot} and Fig.~\ref{fig:app:tau_sweep_lstm}.}
+\caption[$\tau$-sweep numerical breakdown: LSTM]{Cohort-mean Precision, Recall, F1, and F2 of the forecast-derived hypoglycaemia detector for all four LSTM training strategies as a function of the tolerance window $\tau$. The corresponding curves are shown in Figs.~\ref{fig:exp:tau_sweep_plot} and~\ref{fig:exp:tau_sweep_lstm}.}
 \label{tab:app:tau_sweep_lstm}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{lrrrrrrrrrrrrrrrr}
@@ -80,7 +46,7 @@ $\tau$ (min) & P & R & F1 & F2 & P & R & F1 & F2 & P & R & F1 & F2 & P & R & F1 
 \begin{table}[H]
 \centering
 \small
-\caption[$\tau$-sweep numerical breakdown: PatchTST]{Cohort-mean Precision, Recall, F1, and F2 of the forecast-derived hypoglycaemia detector for all four PatchTST training strategies as a function of the tolerance window $\tau$. The corresponding F1 curves are shown in Fig.~\ref{fig:exp:tau_sweep_plot} and Fig.~\ref{fig:app:tau_sweep_patchtst}.}
+\caption[$\tau$-sweep numerical breakdown: PatchTST]{Cohort-mean Precision, Recall, F1, and F2 of the forecast-derived hypoglycaemia detector for all four PatchTST training strategies as a function of the tolerance window $\tau$. The corresponding curves are shown in Figs.~\ref{fig:exp:tau_sweep_plot} and~\ref{fig:exp:tau_sweep_patchtst}.}
 \label{tab:app:tau_sweep_patchtst}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{lrrrrrrrrrrrrrrrr}
@@ -102,31 +68,5 @@ $\tau$ (min) & P & R & F1 & F2 & P & R & F1 & F2 & P & R & F1 & F2 & P & R & F1 
 \end{table}
 
 
-% ================================================================
-\chapter{Hyperparameter Details} \label{appendix:hyperparams}
-% ================================================================
-This appendix specifies the final hyperparameter configuration used for all experiments. Parameters were determined via Optuna~\cite{akiba2019optuna} with 50 trials on the designated tuning patient (85202) and held constant across all three research objectives.
-
-\begin{table}[htbp]
-\centering
-\caption[Optuna-tuned hyperparameters]{Optuna-tuned hyperparameters for the LSTM and PatchTST architectures. The search was conducted on the validation set of patient 85202 only. Identical hyperparameters are used for all training objectives (MSE, Bounded-Lag, Soft-DTW, Multi-Step); only the loss function or output head is modified per objective.}
-\label{tab:app:hyperparams}
-\begin{tabular}{lrr}
-\toprule
-Hyperparameter & LSTM & PatchTST \\
-\midrule
-Hidden size / $d_\text{model}$      & 256     & 64 \\
-Number of layers                     & 2       & 3 \\
-Dropout                              & 0.159   & 0.025 \\
-Learning rate                        & $9.61 \times 10^{-4}$ & $1.21 \times 10^{-4}$ \\
-Batch size                           & 128     & 128 \\
-Feed-forward dim.\ ($d_\text{ff}$)  & ---     & 256 \\
-Attention heads ($h$)                & ---     & 4 \\
-Lookback window                      & \multicolumn{2}{c}{24 steps (120 min)} \\
-Forecast horizon                     & \multicolumn{2}{c}{12 steps (60 min)} \\
-Optuna trials                        & \multicolumn{2}{c}{50} \\
-\bottomrule
-\end{tabular}
-\end{table}
 
 \end{appendix}
