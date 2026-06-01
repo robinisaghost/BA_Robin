@@ -1,93 +1,39 @@
 \documentclass[11pt, a4paper]{article}
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{booktabs}
-\usepackage{array}
-\usepackage{parskip}
+\usepackage[ngerman]{babel}
 
-\title{Supplementary Results: Naive Baseline Comparison\\
-\large Hypoglycaemia Event Detection -- T1DATA Cohort (36 Patients)}
+\title{Naive Baselines -- Hypoglykämie-Erkennung}
 \author{Robin van den Hoek}
 \date{\today}
 
 \begin{document}
 \maketitle
 
-\section*{Overview}
-
-This document reports the performance of two naive rule-based detectors alongside the trained
-event classifiers. The naive baselines require no learning and serve as a lower bound: a trained
-model that does not outperform them has not extracted any useful information from the data.
-
-All metrics are cohort means over 36 patients, evaluated on the held-out test split.
-
-\section*{Naive Baseline Definitions}
-
-\textbf{Naive Last Value.}
-If the most recent glucose reading in the lookback window is below 70~mg/dL, an event is
-predicted. This rule fires only when the patient is already in hypoglycaemia. It is highly
-precise but misses the large majority of events because it cannot anticipate future drops.
-
-\textbf{Naive Mean.}
-If the average glucose over the full 2-hour lookback window is below 70~mg/dL, an event is
-predicted. Because the average must fall below the threshold, this rule fires very rarely and
-misses almost everything.
-
-\section*{Task A: Will a hypoglycaemia event occur anywhere in the next 60 minutes?}
+\begin{table}[h]
+\centering
+\caption{Naive Baselines ohne Training (Kohortenmittel, 36 Patienten). \textit{Naive Last Value:} Alarm wird ausgegeben wenn der aktuell letzte Glukosewert bereits unter 70~mg/dL liegt -- das Modell reagiert also erst wenn der Patient schon in der Hypoglykämie ist. \textit{Naive Mean:} Alarm wird ausgegeben wenn der Durchschnitt des gesamten 2-stündigen Lookback-Fensters unter 70~mg/dL liegt -- da der Mittelwert sehr tief sein muss damit die Regel auslöst, werden fast alle Ereignisse verpasst.}
+\begin{tabular}{lrrrr}
+\toprule
+Modell & Precision & Recall & F1 & F2 \\
+\midrule
+Naive Last Value & 0.857 & 0.326 & 0.473 & 0.373 \\
+Naive Mean       & 0.396 & 0.041 & 0.074 & 0.050 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{table}[h]
 \centering
-\caption{Task A results. F2 weights recall twice as heavily as precision.}
+\caption{Trainierte binäre Event-Classifier (Kohortenmittel, 36 Patienten). Beide Modelle beantworten die Frage: \textit{Wird die Glukose irgendwann in den nächsten 60~Minuten unter 70~mg/dL fallen?} Das Label ist 1 wenn das Minimum der nächsten 12 Schritte (60~Min.) unter 70~mg/dL liegt. Trainiert mit gewichtetem \texttt{BCEWithLogitsLoss} um das Klassenungleichgewicht (5.7\% positive Fenster) zu berücksichtigen. F2 gewichtet Recall doppelt so stark wie Precision.}
 \begin{tabular}{lrrrr}
 \toprule
-Model & Precision & Recall & F1 & F2 \\
+Modell & Precision & Recall & F1 & F2 \\
 \midrule
-Naive Last Value        & 0.857 & 0.326 & 0.473 & 0.373 \\
-Naive Mean              & 0.396 & 0.041 & 0.074 & 0.050 \\
-\midrule
-LSTM Event Classifier   & 0.237 & 0.693 & 0.334 & 0.463 \\
+LSTM Event Classifier    & 0.237 & 0.693 & 0.334 & 0.463 \\
 PatchTST Event Classifier & 0.054 & 0.615 & 0.095 & 0.178 \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-The Naive Last Value achieves a higher F1 (0.473) than the LSTM classifier (0.334) because it
-operates at a very different precision--recall trade-off: it fires only when glucose is already
-below 70~mg/dL, which makes it very precise but nearly useless for early warning. The LSTM
-classifier has a substantially higher recall (0.693 vs.\ 0.326), meaning it catches more than
-twice as many events at an earlier point in time. On F2, which weights recall more heavily,
-the LSTM classifier (0.463) outperforms the naive rule (0.373). The PatchTST classifier does
-not outperform the Naive Last Value on any metric.
-
-\section*{Task B: Will a hypoglycaemia event occur at approximately 60 minutes (tolerance $\pm$15 min)?}
-
-\begin{table}[h]
-\centering
-\caption{Task B results. The positive label is 1 if the minimum glucose in the window [45, 75]~min ahead is below 70~mg/dL.}
-\begin{tabular}{lrrrr}
-\toprule
-Model & Precision & Recall & F1 & F2 \\
-\midrule
-Naive Last Value              & 0.216 & 0.113 & 0.149 & 0.125 \\
-Naive Mean                    & 0.115 & 0.016 & 0.029 & 0.020 \\
-\midrule
-LSTM Point-Event Classifier   & 0.088 & 0.525 & 0.143 & 0.237 \\
-PatchTST Point-Event Classifier & 0.036 & 0.537 & 0.064 & 0.124 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Task B is a harder and more specific question. The LSTM point-event classifier barely exceeds
-the Naive Last Value on F1 (0.143 vs.\ 0.149) and has substantially lower precision (0.088
-vs.\ 0.216). On F2, the LSTM (0.237) outperforms the naive rule (0.125) due to its higher
-recall. The PatchTST point-event classifier does not outperform the Naive Last Value on any
-metric. These results indicate that predicting the exact 60-minute horizon is a considerably
-harder problem than predicting whether any event will occur in the next hour.
-
-\section*{Note on Inclusion in Thesis}
-
-The naive baselines are reported here for completeness and supervisor reference. Following
-discussion with the supervisor, they are not included in the main thesis, as the focus of the
-ablation study is on the comparison between forecasting-derived detectors and trained binary
-classifiers rather than on rule-based baselines.
 
 \end{document}
