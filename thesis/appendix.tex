@@ -8,14 +8,14 @@ This appendix provides the complete structural diagrams for the deep learning ar
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{lstm_cell.png}
-    \caption[Architecture of the LSTM model]{Architecture of the LSTM model used as the recurrent baseline. The input is a 24-step lookback window representing 120~minutes of CGM data.}
+    \caption[Architecture of the LSTM model]{Architecture of the LSTM model used as the recurrent baseline. The input is a 24-step lookback window representing 120~minutes of CGM data. Based on \citet{hochreiter1997lstm}.}
     \label{fig:app:lstm_arch}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{patchtst_arch_b.png}
-    \caption[Architecture of the PatchTST model]{Architecture of the PatchTST model adapted to the CGM setting, incorporating Reversible Instance Normalisation (RevIN).}
+    \caption[Architecture of the PatchTST model]{Architecture of the PatchTST model adapted to the CGM setting, incorporating Reversible Instance Normalisation (RevIN). Source: \citet{nie2023patchtst}.}
     \label{fig:app:patchtst_arch}
 \end{figure}
 
