@@ -7,7 +7,7 @@ This chapter presents the empirical results of all experimental configurations e
 \begin{planned}
     \item Reporting of the baseline results under mean squared error optimization, including Mean~Lag to quantify the systematic temporal misalignment.
     \item Include a plot showing a single-patient trajectory comparison to visually demonstrate the systematic prediction delay.
-    \item Include the population-level boxplot of the per-patient best-lag to prove the time shift is systematic across the cohort.
+    \item Include the population-level boxplot of the per-patient best-lag to demonstrate that the time shift is systematic across the cohort.
     \item Note that the two architectures already show different event detection behavior at baseline: the LSTM has very low recall, while the PatchTST has higher recall but very low precision. This difference is important context for the findings in Section~\ref{sec:exp:obj3}.
 \end{planned}
 
@@ -47,7 +47,7 @@ PatchTST\,MSE  & 39.27 & 55.3 & 29.00 & 0.048 & 0.089 & 0.061 & 0.074 \\
 \subsection{Bounded-Lag Loss Results}
 \begin{planned}
     \item Description of the results when optimizing with a predefined local neighborhood.
-    \item Statistical reporting of the marginal gains in event-centric detection performance.
+    \item Reporting of the marginal gains in event-centric detection performance.
 \end{planned}
 
 \subsection{Soft-DTW Loss Results}

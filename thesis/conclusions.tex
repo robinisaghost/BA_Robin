@@ -23,7 +23,7 @@ This chapter summarizes the central empirical findings of the ablation study dis
 
 \begin{planned}
     \item Acknowledgment of the strictly univariate constraint which bounds the predictive capacity during sudden metabolic fluctuations. A model that only sees glucose values cannot know about a recent insulin dose or a meal, both of which directly cause glucose changes.
-    \item Discussion of the short advance warning window shown in Fig.~\ref{fig:exp:lead_time}. The LSTM classifier fires too late in almost half of all cases, which limits its usefulness for a patient who needs time to act. Discuss why this happens: the model detects the start of a drop but not the drop before it starts.
+    \item Discussion of the short advance warning window shown in Fig.~\ref{fig:exp:lead_time}. The LSTM classifier fires too late in almost half of all cases, which limits its usefulness for a patient who needs time to act. Discuss why this happens: the model responds to an ongoing decline rather than anticipating a future one.
     \item Evaluation of the severe class imbalance which restricts overall precision and causes many false alarms. Only 5.7\% of all windows contain a hypoglycaemia event, which makes the problem structurally difficult regardless of the model architecture.
 \end{planned}
 

@@ -35,8 +35,8 @@ This chapter motivates the presented research, introduces the central problem of
     Illustration of the time-shift artefact in MSE-trained univariate
     glucose forecasting models. Both the LSTM (top) and PatchTST (bottom)
     predictions are plotted against the true glucose trajectory over the
-    same time window. The red dashed line marks the 70~mg/dL hypoglycaemia
-    threshold; the shaded region below indicates the hypoglycaemic zone.}
+    same time window. The dashed line marks the 70~mg/dL hypoglycaemia
+    threshold; the region below indicates the hypoglycaemic zone.}
     \label{fig:intro:timeshift_demo}
 \end{figure}
 
@@ -59,7 +59,7 @@ This chapter motivates the presented research, introduces the central problem of
 % ================================================================
 
 \begin{planned}
-    \item Execution of a highly standardized ablation study comprising multiple training methodologies evaluated uniformly across a substantial cohort of 36 independent patients.
+    \item Execution of a standardized ablation study comprising multiple training methodologies evaluated uniformly across a cohort of 36 independent patients.
     \item Methodological incorporation of the lag\_rmse metric to separate structural shape errors from pure temporal misalignment components within the total error.
     \item Formulation of the tolerance-sweep evaluation protocol to systematically map the detection capabilities of different forecasting models across multiple distinct time windows.
     \item Demonstration of the architectural performance inversion where specific transformer properties excel at trajectory forecasting while recurrent structures show superior classification alignment.
