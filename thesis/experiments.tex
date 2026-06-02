@@ -1,20 +1,16 @@
 \chapter{Experiments} \label{ch:experiments}
-This chapter presents the empirical results of all experimental configurations evaluated across the cohort of 36 patients. Section~\ref{sec:exp:baseline} establishes the baseline performance. Sections~\ref{sec:exp:obj1} through~\ref{sec:exp:obj3} detail the results for each specific research objective. Section~\ref{sec:exp:overall} concludes with a comprehensive comparative summary.
+This chapter presents the empirical results of all experimental configurations evaluated across the cohort of 36 patients. Section~\ref{sec:exp:baseline} establishes the baseline performance under standard MSE training. Sections~\ref{sec:exp:obj1} through~\ref{sec:exp:obj3} report the results for each of the three research objectives. Section~\ref{sec:exp:overall} provides a comprehensive comparative summary across all ten model configurations.
 
 % ================================================================
 \section{Baseline: Single-Step Forecasting} \label{sec:exp:baseline}
 % ================================================================
-\begin{planned}
-    \item Reporting of the baseline results under mean squared error optimization, including Mean~Lag to quantify the systematic temporal misalignment.
-    \item Include a plot showing a single-patient trajectory comparison to visually demonstrate the systematic prediction delay.
-    \item Include the population-level boxplot of the per-patient best-lag to demonstrate that the time shift is systematic across the cohort.
-    \item Note that the two architectures already show different event detection behavior at baseline: the LSTM has very low recall, while the PatchTST has higher recall but very low precision. This difference is important context for the findings in Section~\ref{sec:exp:obj3}.
-\end{planned}
+
+Under standard MSE training, both architectures exhibit the systematic prediction delay that motivates this study. Table~\ref{tab:exp:baseline} reports the cohort-mean baseline results. The LSTM achieves an RMSE of 36.09~mg/dL with a mean lag of 51.2~minutes, while PatchTST achieves an RMSE of 39.27~mg/dL with a mean lag of 55.3~minutes. Both values indicate that the predicted trajectory is displaced forward by approximately ten steps relative to the true signal, which is consistent with the high lag-1 autocorrelation of the glucose series described in Section~\ref{sec:method:setup:cgm}. Fig.~\ref{fig:exp:baseline_curves} illustrates this delay for a representative patient segment; Fig.~\ref{fig:exp:lag_dist} confirms that the delay is systematic and present in nearly all 36 patients for both architectures.
 
 \begin{table}[H]
 \centering
 \small
-\caption{Baseline single-step forecasting performance under standard MSE training. Mean~Lag is the average absolute shift in minutes that minimises per-patient RMSE ($|\Delta^*| \times 5$~min). RMSE and MAE are in mg/dL; event-detection metrics (Precision, Recall, F1, F2) are derived by thresholding each 60-min prediction at 70~mg/dL. Means over 36 patients.}
+\caption{Baseline single-step forecasting performance under standard MSE training. Mean~Lag is the average absolute shift in minutes that minimises per-patient RMSE ($|\Delta^*| \times 5$~min). RMSE and MAE are in mg/dL; event-detection metrics (Precision, Recall, F1, F2) are derived by thresholding each 60-min prediction at 70~mg/dL with $\tau = 15$~min. Means over 36 patients.}
 \label{tab:exp:baseline}
 \begin{tabular}{lrrrrrrr}
 \toprule
@@ -40,24 +36,23 @@ PatchTST\,MSE  & 39.27 & 55.3 & 29.00 & 0.048 & 0.089 & 0.061 & 0.074 \\
     \label{fig:exp:lag_dist}
 \end{figure}
 
+At baseline, the event detection performance is extremely low for both models. The LSTM achieves a recall of only 0.004, meaning it detects fewer than one in two hundred true hypoglycaemia events. The PatchTST has a higher recall of 0.089 but a precision of only 0.048, indicating that the majority of its predicted alarms are false positives. These baseline differences in detection behaviour reflect structural properties of the two architectures and provide important context for the event-centric results in Section~\ref{sec:exp:obj3}.
 
 % ================================================================
 \section{Objective 1: Offset-Aware Loss Functions} \label{sec:exp:obj1}
 % ================================================================
+
 \subsection{Bounded-Lag Loss Results}
-\begin{planned}
-    \item Description of the results when optimizing with a predefined local neighborhood.
-    \item Reporting of the marginal gains in event-centric detection performance.
-\end{planned}
+
+The Bounded-Lag loss (Section~\ref{sec:bg:losses:bl}) accepts a predicted value as correct if it falls within a fixed local neighbourhood of the true value, thereby removing the gradient penalty for small temporal offsets. As shown in Table~\ref{tab:exp:obj1}, the effect on the prediction delay is modest. For the LSTM, the mean lag decreases from 51.2 to 48.6~minutes, a reduction of 2.6~minutes, while RMSE remains nearly unchanged at 36.14~mg/dL. For PatchTST, the lag decreases by only 0.7~minutes (55.3 to 54.6~min) and RMSE stays at 39.30~mg/dL. Event detection improves marginally: the LSTM F2 increases from 0.004 to 0.013 and PatchTST F2 from 0.074 to 0.080. These results indicate that a locally tolerant loss reduces the lag metric slightly but is insufficient to overcome the broader structural delay in the predictions.
 
 \subsection{Soft-DTW Loss Results}
-\begin{planned}
-    \item Detailed analysis of the Soft-DTW optimization outcomes.
-    \item Discussion of the expanded temporal alignment variance. Explain why elastic sequence matching during training yields higher residual shape misalignment metrics.
-    \item Include a plot comparing standard MSE trajectories against Soft-DTW trajectories to visually explain the trade off between structural shape matching and exact amplitude tracking.
-    \item Interpretation of why relaxing temporal constraints fails to supply the structural information needed to anticipate future glycemic changes.
-    \item Note that Soft-DTW behaves differently depending on the architecture. For the LSTM it reduces the mean lag the most out of all tested strategies, but at the cost of higher RMSE. For the PatchTST it barely reduces the lag and causes a large increase in RMSE without any meaningful gain in event detection.
-\end{planned}
+
+The Soft-DTW loss~\citep{cuturi2017softdtw} (Section~\ref{sec:bg:losses:sdtw}) aligns two sequences by elastically warping the time axis to match their shapes. This allows one-to-many correspondences between time steps, which reduces the gradient penalty for temporally displaced predictions more aggressively than the Bounded-Lag loss. The results in Table~\ref{tab:exp:obj1} and Fig.~\ref{fig:exp:obj1_predictions} reveal a clear difference between the two architectures.
+
+For the LSTM, Soft-DTW produces the largest lag reduction of all evaluated strategies: the mean lag decreases from 51.2 to 46.0~minutes, a reduction of 5.2~minutes. However, this comes at a cost: RMSE increases from 36.09 to 37.23~mg/dL (+3.2\%) and MAE increases from 27.12 to 28.76~mg/dL. Event detection does not improve; the F2 score of 0.010 is similar to the MSE baseline (0.004), and recall decreases from 0.004 to 0.009. The elastic alignment during training shifts the prediction closer in time to the true trajectory, but this does not translate into a meaningful gain in detecting threshold crossings.
+
+For PatchTST, the behaviour is different. The lag decreases by only 0.9~minutes (55.3 to 54.4~min) while RMSE increases substantially from 39.27 to 43.24~mg/dL (+10.1\%). This large amplitude error without meaningful lag reduction is explained by the Reversible Instance Normalisation~\citep{kim2022revin} used in PatchTST: RevIN strips the absolute level information from each input window before processing and restores it afterwards. During training with Soft-DTW, the model attempts to align shapes that have been normalised away, which produces a large and inconsistent error signal that degrades amplitude accuracy without providing a coherent temporal alignment objective.
 
 \begin{figure}[H]
     \centering
@@ -69,7 +64,7 @@ PatchTST\,MSE  & 39.27 & 55.3 & 29.00 & 0.048 & 0.089 & 0.061 & 0.074 \\
 \begin{table}[H]
 \centering
 \small
-\caption{Effect of offset-aware loss functions on forecasting accuracy and mean prediction delay. Lag is the average absolute shift in minutes that minimises per-patient RMSE ($|\Delta^*| \times 5$~min). RMSE and MAE are in mg/dL; event-detection metrics are derived by thresholding each 60-min prediction at 70~mg/dL. Means over 36 patients.}
+\caption{Effect of offset-aware loss functions on forecasting accuracy and mean prediction delay. Lag is the average absolute shift in minutes that minimises per-patient RMSE ($|\Delta^*| \times 5$~min). RMSE and MAE are in mg/dL; event-detection metrics are derived by thresholding each 60-min prediction at 70~mg/dL with $\tau = 15$~min. Bold values mark the best result per metric within each architecture. Means over 36 patients.}
 \label{tab:exp:obj1}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{llrrrrrrr}
@@ -89,16 +84,15 @@ Architecture & Loss & RMSE & Lag (min) & MAE & Precision & Recall & F1 & F2 \\
 \end{tabular}}
 \end{table}
 
+Across both architectures, Objective~1 demonstrates that modifying the optimisation criterion alone does not resolve the prediction delay. The lag-1 autocorrelation of the glucose signal is so strong that any loss function which tolerates small timing offsets still permits the model to achieve low training error by closely following the recent signal history. Reducing the timing penalty does not supply the model with the information needed to anticipate future changes in glucose level.
 
 % ================================================================
 \section{Objective 2: Multi-Step Forecasting} \label{sec:exp:obj2}
 % ================================================================
-\begin{planned}
-    \item Reporting of the direct multi-step sequence supervision results.
-    \item Interpretation of how simultaneous loss minimization across early steps acts as a temporal anchor to maintain phase coherence.
-    \item Include a plot demonstrating the improved phase alignment of the multi-step approach compared to the single-step baseline.
-    \item Note that multi-step supervision gives the best RMSE and MAE values overall, which means it produces more accurate trajectories. However, the improvement in event detection is very small for the LSTM and only moderate for the PatchTST. Multi-step supervision therefore does not solve the event detection problem on its own.
-\end{planned}
+
+Multi-step supervision~\citep{fox2018multioutput} replaces the single output at $t+H$ with 12 simultaneous predictions at $t+1, \ldots, t+H$, as described in Section~\ref{sec:method:obj2}. The MSE loss is computed uniformly across all 12 predicted steps. Table~\ref{tab:exp:obj2} and Fig.~\ref{fig:exp:multistep_plot} report the results.
+
+Multi-step supervision achieves the best trajectory accuracy among all evaluated strategies. The LSTM multi-step model reaches an RMSE of 35.59~mg/dL and an MAE of 26.80~mg/dL, the lowest values observed across the full set of ten configurations. The PatchTST multi-step model achieves its best RMSE (39.05~mg/dL) and MAE (28.84~mg/dL) among all PatchTST variants. The reduction in prediction error is modest but consistent across both architectures, which is explained by the broader supervision signal: computing the loss over all 12 output steps reduces the weight of any single large error at the endpoint and encourages the model to produce a more accurate overall trajectory.
 
 \begin{figure}[H]
     \centering
@@ -110,7 +104,7 @@ Architecture & Loss & RMSE & Lag (min) & MAE & Precision & Recall & F1 & F2 \\
 \begin{table}[H]
 \centering
 \small
-\caption{Effect of multi-step sequence supervision on forecasting accuracy and mean prediction delay. RMSE and MAE are in mg/dL; event-detection metrics are derived by thresholding each 60-min prediction at 70~mg/dL. Means over 36 patients.}
+\caption{Effect of multi-step sequence supervision on forecasting accuracy and mean prediction delay. RMSE and MAE are in mg/dL; event-detection metrics are derived by thresholding each 60-min prediction at 70~mg/dL with $\tau = 15$~min. Bold values mark the best result per metric within each architecture. Means over 36 patients.}
 \label{tab:exp:obj2}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{llrrrrrrr}
@@ -128,19 +122,17 @@ Architecture & Supervision & RMSE & Lag (min) & MAE & Precision & Recall & F1 & 
 \end{tabular}}
 \end{table}
 
+Despite the improvement in trajectory accuracy, the event detection gains remain small. The LSTM F2 increases from 0.004 to 0.010, and the PatchTST F2 from 0.074 to 0.085. The mean lag decreases by only 1.1~minutes for LSTM (51.2 to 50.1~min) and 0.7~minutes for PatchTST (55.3 to 54.6~min). The improved accuracy at earlier prediction steps reduces cumulative point-wise error, but it does not change the fundamental pattern of the model reproducing recent glucose history rather than anticipating future changes. As a result, the predicted threshold crossing remains systematically delayed, and the improvement in detection performance is not clinically meaningful on its own.
 
 % ================================================================
 \section{Objective 3: Event-Centric Evaluation} \label{sec:exp:obj3}
 % ================================================================
-\begin{planned}
-    \item Evaluation of the forecast-derived event detectors across tolerance ranges.
-    \item Include the $\tau$-Sweep plot to visually track F1 curves across tolerance ranges for all four training strategies (Fig.~\ref{fig:exp:tau_sweep_plot}). Per-architecture breakdowns of all three metrics (F1, Precision, Recall) are shown in Figs.~\ref{fig:exp:tau_sweep_lstm} and~\ref{fig:exp:tau_sweep_patchtst}. The full numerical breakdowns (Precision, Recall, F1, F2) for all configurations are provided in Tables~\ref{tab:app:tau_sweep_lstm} and~\ref{tab:app:tau_sweep_patchtst} (Appendix~\ref{appendix:detailed_metrics}).
-    \item Point out the clear difference between the two architectures in the tau sweep: the LSTM curves stay almost flat across all tolerance values, while the PatchTST curves rise steeply as $\tau$ increases. This suggests that the PatchTST produces predictions that have the right shape but the wrong timing, whereas the LSTM struggles with both timing and shape.
-    \item Reporting of the direct binary event classifier performance.
-    \item Include a plot showing the direct classifier output trace (probabilities vs.\ true events) to highlight the performance inversion between the recurrent model and the instance-normalized transformer.
-    \item Report the lead-time analysis for the two classifiers using Fig.~\ref{fig:exp:lead_time}. The median lead time for the LSTM classifier is 5 minutes, and 49.5\% of all true positive predictions fire at the moment when the patient is already in hypoglycaemia. The PatchTST classifier has a median lead time of 15 minutes and a more even distribution of warning times. This means that the LSTM classifier is largely reactive rather than truly predictive.
-    \item For a visual comparison of forecast-derived detectors and direct classifiers in Precision--Recall space, see Fig.~\ref{fig:app:pr_paradox} (Appendix~\ref{appendix:detailed_metrics}).
-\end{planned}
+
+\subsection{Forecast-Derived Detection: Tolerance Sweep}
+
+The tolerance sweep evaluates how forecast-derived event detection changes as the acceptance window $\tau$ is widened from 0 to 60~minutes in 5-minute steps (Section~\ref{sec:bg:metrics}). Full numerical results are provided in Tables~\ref{tab:app:tau_sweep_lstm} and~\ref{tab:app:tau_sweep_patchtst} in Appendix~\ref{appendix:detailed_metrics}. Fig.~\ref{fig:exp:tau_sweep_plot} summarises the F1 curves; Figs.~\ref{fig:exp:tau_sweep_lstm} and~\ref{fig:exp:tau_sweep_patchtst} show per-metric breakdowns for all training strategies.
+
+The sweep reveals a fundamental architectural difference. For PatchTST, the F1 score rises steeply as $\tau$ increases: the MSE baseline rises from 0.061 at $\tau = 15$~min to 0.551 at $\tau = 60$~min. For LSTM, the same strategy rises only from 0.005 to 0.113 over the same range. This contrast indicates that PatchTST produces predicted threshold crossings that are structurally present but temporally displaced, while the LSTM rarely produces threshold crossings at all, regardless of how wide the tolerance window becomes. Offset-aware training strategies do not resolve this pattern: even the Soft-DTW LSTM, which achieves the largest lag reduction, reaches only F1 = 0.082 at $\tau = 60$~min, compared to 0.551 for PatchTST MSE.
 
 \begin{figure}[H]
     \centering
@@ -163,6 +155,14 @@ Architecture & Supervision & RMSE & Lag (min) & MAE & Precision & Recall & F1 & 
     \label{fig:exp:tau_sweep_patchtst}
 \end{figure}
 
+\subsection{Direct Binary Event Classifiers}
+
+Direct binary classifiers~\citep{shao2024hypoglycemia, cinar2025hypoclassification} are trained end-to-end on the event label defined in Section~\ref{sec:method:problem}, using a weighted binary cross-entropy loss to address the class imbalance (Section~\ref{sec:method:setup:cgm}). Table~\ref{tab:exp:classifiers} and Fig.~\ref{fig:exp:classifier_traces} report the results.
+
+Both classifiers substantially outperform the best forecast-derived detectors. The LSTM event classifier achieves a recall of 0.693 and an F2 of 0.463, compared to a best forecast-derived F2 of 0.013 for the LSTM under Bounded-Lag loss. The PatchTST event classifier achieves a recall of 0.615 and an F2 of 0.178, compared to a best forecast-derived F2 of 0.085. The large gains in recall confirm that a task-specific training objective is far more effective at detecting hypoglycaemia than threshold-based detection on a regression output.
+
+A performance inversion is observed between the two architectures. In the forecasting tasks, the LSTM consistently achieves lower RMSE (36.09~mg/dL) than PatchTST (39.27~mg/dL). In the classification task, this ordering reverses: the LSTM event classifier achieves F2~=~0.463, substantially higher than the PatchTST classifier at F2~=~0.178. This inversion is explained by the Reversible Instance Normalisation~\citep{kim2022revin} used in PatchTST: RevIN strips the absolute level information from each input window before processing. A classifier trained on normalised inputs cannot reliably associate a given window with the fixed glucose threshold of 70~mg/dL, as the absolute scale has been removed. The LSTM retains full amplitude information and can therefore learn to detect proximity to the threshold directly from the raw glucose values.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{classifier_predictions.png}
@@ -173,7 +173,7 @@ Architecture & Supervision & RMSE & Lag (min) & MAE & Precision & Recall & F1 & 
 \begin{table}[H]
 \centering
 \small
-\caption{Direct binary event classifier performance (Task A: will a hypoglycaemia event occur in the next 60~min?). F2 weights recall twice as heavily as precision, reflecting the clinical priority of minimising missed events. Means over 36 patients.}
+\caption{Direct binary event classifier performance (will a hypoglycaemia event occur in the next 60~min?). F2 weights recall twice as heavily as precision, reflecting the clinical priority of minimising missed events. Bold values mark the best result per column. Means over 36 patients.}
 \label{tab:exp:classifiers}
 \begin{tabular}{lrrrr}
 \toprule
@@ -184,6 +184,12 @@ PatchTST event classifier & 0.054 & 0.615          & 0.095 & 0.178          \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\subsection{Lead-Time Analysis}
+
+Fig.~\ref{fig:exp:lead_time} shows the distribution of lead times for all true-positive detections across the 36-patient cohort. The lead time is defined as the elapsed time from alarm issuance to the first hypoglycaemic step in the prediction window. The LSTM classifier has a median lead time of 5~minutes and a mean of 12.4~minutes. Of its 2{,}610 true positives, 1{,}293 (49.5\%) fire at lead time zero, meaning the alarm is issued at the moment when the patient has already crossed the 70~mg/dL threshold. The PatchTST classifier has a median lead time of 15~minutes and a mean of 18.3~minutes. Of its 2{,}243 true positives, 802 (35.8\%) are reactive, with the remainder distributed more evenly across the 5-to-55 minute range.
+
+These results indicate that the LSTM classifier responds largely to an ongoing glucose decline rather than anticipating a future one. Despite achieving higher F2, the majority of its true-positive alarms provide little or no advance warning. The PatchTST classifier, while weaker in overall detection performance, produces a higher proportion of genuine advance warnings. This distinction is relevant for clinical use, where a warning issued after the event has already begun is of limited practical value.
 
 \begin{figure}[H]
     \centering
@@ -196,15 +202,19 @@ PatchTST event classifier & 0.054 & 0.615          & 0.095 & 0.178          \\
 % ================================================================
 \section{Overall Comparison} \label{sec:exp:overall}
 % ================================================================
-\begin{planned}
-    \item Descriptive summary of the global metrics across all tested configurations (see Table~\ref{tab:exp:overall}).
-    \item Final structural recommendation motivating a decoupled dual-model system. The results show that the best event detection is achieved by the LSTM direct classifier (F2~=~0.463), while the best trajectory quality is achieved by the PatchTST multi-step model (lowest RMSE among PatchTST variants, best forecasting F2). These two strengths come from different architectures, which suggests that a system using both models in combination would outperform any single model on its own.
-\end{planned}
+
+Table~\ref{tab:exp:overall} summarises all ten model configurations across the full set of evaluation metrics. The results show that no single configuration dominates across both forecasting quality and event detection performance.
+
+Among the eight forecast-derived configurations, LSTM multi-step achieves the best trajectory accuracy with an RMSE of 35.59~mg/dL and an MAE of 26.80~mg/dL. PatchTST multi-step achieves the highest event detection F2 among forecast-derived configurations at 0.085. However, all forecast-derived F2 scores remain below 0.09, which indicates that threshold-based detection on a regression output is fundamentally limited regardless of the training strategy.
+
+The direct event classifiers stand apart from the forecasting configurations. The LSTM event classifier achieves an F2 of 0.463 and a recall of 0.693, which is more than five times the best forecast-derived F2 value. This demonstrates that a task-specific training objective addresses the detection failure far more effectively than any modification to the forecasting loss or output structure.
+
+The best trajectory quality and the best event detection performance are achieved by different model configurations. LSTM multi-step leads on RMSE and MAE, while LSTM direct classifier leads on recall, F1, and F2. These two strengths do not overlap in a single configuration, which indicates that trajectory forecasting and event detection measure fundamentally different aspects of model behaviour. A practical system that requires both a high-quality glucose forecast and reliable hypoglycaemia warnings would need to deploy the two best-performing models separately, with each used for the task it is optimised for.
 
 \begin{table}[H]
 \centering
 \small
-\caption{Comprehensive summary of all ten model configurations. The first eight rows show the forecast-derived detectors; the final two rows show the direct binary event classifiers. Bold values mark the best result per column. Lag is the average absolute shift in minutes that minimises per-patient RMSE ($|\Delta^*| \times 5$~min). RMSE and MAE are in mg/dL; for forecasting models, event-detection metrics are derived by thresholding each 60-min prediction at 70~mg/dL. Dashes indicate metrics that are not applicable to classifiers. Means over 36 patients.}
+\caption{Comprehensive summary of all ten model configurations. The first eight rows show the forecast-derived detectors; the final two rows show the direct binary event classifiers. Bold values mark the best result per column. Lag is the average absolute shift in minutes that minimises per-patient RMSE ($|\Delta^*| \times 5$~min). RMSE and MAE are in mg/dL; for forecasting models, event-detection metrics are derived by thresholding each 60-min prediction at 70~mg/dL with $\tau = 15$~min. Dashes indicate metrics that are not applicable to classifiers. Means over 36 patients.}
 \label{tab:exp:overall}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{llrrrrrrr}
@@ -229,4 +239,3 @@ Architecture & Training & RMSE & Lag (min) & MAE & Precision & Recall & F1 & F2 
 \bottomrule
 \end{tabular}}
 \end{table}
-
