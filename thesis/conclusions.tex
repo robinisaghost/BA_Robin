@@ -9,7 +9,7 @@ This chapter summarizes the central empirical findings of the ablation study dis
 % ================================================================
 
 \begin{planned}
-    \item Conclusion regarding the systematic time shift anomaly confirming that modifying the optimization criteria alone does not resolve the predictive delay.
+    \item Conclusion regarding the systematic time shift anomaly confirming that modifying the optimisation criteria alone does not resolve the predictive delay.
     \item Identification of the fundamental tracking information deficit where univariate data structures lack access to exogenous causal factors.
     \item Summary of Objective 1 indicating that bounded lag and soft dynamic time warping criteria expand temporal variance without improving underlying shape alignment.
     \item Summary of Objective 2 showing that multi-step sequence supervision gives the best forecasting accuracy in terms of RMSE and MAE, but does not meaningfully improve event detection performance. The gain in trajectory quality does not translate into a gain in detecting hypoglycaemia events.
@@ -25,6 +25,7 @@ This chapter summarizes the central empirical findings of the ablation study dis
     \item Acknowledgment of the strictly univariate constraint which bounds the predictive capacity during sudden metabolic fluctuations. A model that only sees glucose values cannot know about a recent insulin dose or a meal, both of which directly cause glucose changes.
     \item Discussion of the short advance warning window shown in Fig.~\ref{fig:exp:lead_time}. The LSTM classifier fires too late in almost half of all cases, which limits its usefulness for a patient who needs time to act. Discuss why this happens: the model responds to an ongoing decline rather than anticipating a future one.
     \item Evaluation of the severe class imbalance which restricts overall precision and causes many false alarms. Only 5.7\% of all windows contain a hypoglycaemia event, which makes the problem structurally difficult regardless of the model architecture.
+    \item Acknowledgment that hyperparameters were tuned on a single patient (patient 85202) rather than on the full cohort, for computational reasons. The resulting configuration may not be optimal for all 36 patients and limits the generalisability of architecture-specific conclusions.
 \end{planned}
 
 % ================================================================
@@ -34,7 +35,7 @@ This chapter summarizes the central empirical findings of the ablation study dis
 
 \begin{planned}
     \item Proposal to integrate multimodal tracking sequences including logged insulin administration and carbohydrate consumption to eliminate the information deficit.
-    \item Recommendation to evaluate expanded bounded lag optimization windows to fully encompass the observed systematic delay component.
+    \item Recommendation to evaluate expanded bounded lag optimisation windows to fully encompass the observed systematic delay component.
     \item Suggestion to implement specialized focal loss functions to directly address minority class representation during neural network training.
     \item Perspective on transitioning to leave one out population configurations to measure cross patient generalizability.
 \end{planned}

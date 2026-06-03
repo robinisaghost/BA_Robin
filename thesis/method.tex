@@ -51,11 +51,11 @@ The event detection task is highly imbalanced. Across the full cohort, 57{,}680 
     \label{fig:method:class_imbalance}
 \end{figure}
 
-\subsection{Train/Val/Test Splits and Hyperparameter Optimization} \label{sec:method:setup:splits}
+\subsection{Train/Val/Test Splits and Hyperparameter Optimisation} \label{sec:method:setup:splits}
 
 Each patient's time series is partitioned chronologically into training (60\%), validation (20\%), and test (20\%) sets. Temporal order is strictly preserved to prevent future information from entering the training set. All models are trained and evaluated independently per patient, and the reported metrics are cohort means across all 36 patients.
 
-Hyperparameters are determined using the Optuna automated search framework~\citep{akiba2019optuna} with 50 trials conducted on a single designated tuning patient (ID~85202). The resulting configuration is fixed for all three research objectives; only the loss function or output head changes between objectives. Table~\ref{tab:method:hyperparams} lists the final hyperparameter values for both architectures. All models are optimised with the AdamW optimiser~\citep{loshchilov2019adamw}.
+Hyperparameters are determined using the Optuna automated search framework~\citep{akiba2019optuna} with 50 trials conducted on a single designated tuning patient (ID~85202). Restricting the search to one patient reduces the computational cost by a factor of 36 relative to a full-cohort search; this is a pragmatic compromise, and the resulting configuration may not be globally optimal for all patients (see Section~\ref{sec:conc:limitations}). The resulting configuration is fixed for all three research objectives; only the loss function or output head changes between objectives. Table~\ref{tab:method:hyperparams} lists the final hyperparameter values for both architectures. All models are optimised with the AdamW optimiser~\citep{loshchilov2019adamw}.
 
 \begin{table}[H]
 \centering

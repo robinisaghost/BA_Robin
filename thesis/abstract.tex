@@ -1,40 +1,11 @@
 \begin{abstract}
 
-\begin{planned}
-    \item \textbf{Problem.} Deep learning models trained with mean squared error (MSE)
-          on univariate CGM data produce glucose predictions that are systematically
-          delayed by about 50 to 55 minutes. This time-shift artefact causes
-          hypoglycemia events (glucose below 70~mg/dL) to be detected too late
-          or not at all.
+Deep learning models trained with mean squared error (MSE) on univariate continuous glucose monitoring (CGM) data produce predictions that are systematically delayed by approximately 50 to 55~minutes relative to the true signal. This time-shift artefact causes hypoglycaemia events---glucose values falling below 70~mg/dL---to be detected too late or missed entirely. This thesis evaluates three strategies for mitigating the delay in a controlled ablation study on the T1DATA cohort of 36 adults with Type~1 diabetes, using LSTM and PatchTST architectures throughout.
 
-    \item \textbf{Methods.} Three objectives are evaluated in a controlled ablation
-          study. Only one factor changes per objective; all other settings are identical
-          to the baseline.
-          \begin{itemize}
-              \item Objective 1: offset-aware loss functions, specifically
-                    Bounded-Lag ($D{=}3$ steps, $\pm$15~min) and Soft-DTW ($\gamma{=}1.0$)
-              \item Objective 2: multi-step forecasting with simultaneous prediction
-                    of all $H{=}12$ steps              \item Objective 3: event-centric evaluation with a
-                    $\tau$-sweep ($\tau \in \{1,\ldots,6\}$ steps) and a direct
-                    binary event classifier (BCE loss)
-          \end{itemize}
+Objective~1 replaces MSE with offset-aware loss functions: Bounded-Lag (tolerance $D{=}3$ steps) and Soft-DTW ($\gamma{=}1.0$). Objective~2 extends single-endpoint supervision to simultaneous prediction of all $H{=}12$ future steps. Objective~3 introduces event-centric evaluation via a tolerance-window sweep and trains dedicated binary classifiers for direct event detection. Exactly one component changes per objective; all other settings are fixed.
 
-    \item \textbf{Forecasting results.} Multi-step MSE achieves the lowest lag\_rmse
-          of all tested methods (LSTM: 20.74~mg/dL, PatchTST: 14.53~mg/dL).
-          Loss function changes alone do not reduce the time-shift artefact.
+Multi-step MSE training achieves the best lag-adjusted trajectory accuracy, with RMSE$^*$~= 20.74~mg/dL for LSTM and 14.53~mg/dL for PatchTST. Loss function modifications alone reduce the mean prediction delay by at most 5.2~minutes, without producing clinically meaningful improvements in event detection. Direct binary classifiers substantially outperform all forecast-derived detectors: the LSTM classifier achieves F1~= 0.334 and recall~= 0.693, representing approximately a 67-fold improvement in F1 over the forecast-derived MSE baseline (F1~= 0.005). The PatchTST classifier achieves only F1~= 0.095, because its Reversible Instance Normalisation removes absolute glucose level information that is essential for threshold-based classification.
 
-    \item \textbf{Event detection results.} The LSTM binary classifier achieves
-          F1~$= 0.334$, a 62-fold improvement over forecast-derived detection
-          (F1~$= 0.005$). Recall~$= 0.693$ means 69\,\% of hypoglycemia events
-          are correctly detected. The PatchTST classifier achieves only
-          F1~$= 0.095$ due to very low precision caused by its
-          Reversible Instance Normalization removing absolute glucose level
-          information.
-
-    \item \textbf{Conclusion.} Forecasting and event detection work best as two
-          separate tasks. The recommended setup is a multi-step MSE model for
-          glucose trajectory prediction and an LSTM binary classifier for
-          hypoglycemia early warning.
-\end{planned}
+These results indicate that glucose trajectory prediction and hypoglycaemia detection are best addressed as separate tasks. The recommended configuration combines a multi-step MSE model for trajectory forecasting with a dedicated LSTM binary classifier for hypoglycaemia detection support.
 
 \end{abstract}
