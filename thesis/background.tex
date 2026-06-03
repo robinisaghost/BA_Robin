@@ -5,11 +5,21 @@ This chapter provides the theoretical foundation for the thesis, focusing strict
 \section{Deep Learning for Time Series Forecasting} \label{sec:bg:models}
 % ================================================================
 \subsection{Long Short-Term Memory Networks} \label{sec:bg:models:lstm}
-\begin{planned}
-    \item Theoretical foundation of recurrent neural networks for sequential data and the resolution of the vanishing gradient problem.
-    \item Mathematical mechanics of the input, forget, and output gating mechanisms.
-    \item Brief specification of the chosen baseline recurrent network topology (two stacked layers, hidden size 256), illustrated in Fig.~\ref{fig:bg:lstm_arch}.
-\end{planned}
+
+Standard recurrent neural networks (RNNs) process sequential data by maintaining a hidden state $h_t \in \mathbb{R}^d$ that is updated at each time step as a function of the current input $x_t$ and the previous state $h_{t-1}$. However, vanilla RNNs suffer from the vanishing gradient problem~\citep{hochreiter1997lstm}: during backpropagation through time, gradients are multiplied by the recurrent weight matrix at each step, causing them to decay exponentially for long sequences and preventing the network from learning dependencies beyond a few steps.
+
+Long Short-Term Memory networks (LSTMs)~\citep{hochreiter1997lstm} resolve this by introducing a cell state $c_t$ that runs through the sequence with only additive interactions, protected by three learnable gating mechanisms. The forget gate $f_t$ determines what fraction of the previous cell state to retain; the input gate $i_t$ and candidate activation $\tilde{c}_t$ control what new information is written to the cell state; and the output gate $o_t$ controls what part of the updated cell state is exposed as the hidden state:
+\begin{align}
+    f_t &= \sigma\!\left(W_f [h_{t-1},\, x_t] + b_f\right) \label{eq:lstm_forget} \\
+    i_t &= \sigma\!\left(W_i [h_{t-1},\, x_t] + b_i\right) \label{eq:lstm_input} \\
+    \tilde{c}_t &= \tanh\!\left(W_c [h_{t-1},\, x_t] + b_c\right) \label{eq:lstm_candidate} \\
+    c_t &= f_t \odot c_{t-1} + i_t \odot \tilde{c}_t \label{eq:lstm_cell} \\
+    o_t &= \sigma\!\left(W_o [h_{t-1},\, x_t] + b_o\right) \label{eq:lstm_output} \\
+    h_t &= o_t \odot \tanh(c_t) \label{eq:lstm_hidden}
+\end{align}
+where $\sigma(\cdot)$ is the logistic sigmoid function, $\odot$ denotes element-wise multiplication, $[h_{t-1}, x_t]$ denotes vector concatenation, and $W_{\{f,i,c,o\}}$, $b_{\{f,i,c,o\}}$ are learnable weight matrices and biases. The cell state $c_t$ forms a gradient highway along which information can flow over many time steps without exponential decay, making LSTMs effective for tasks with long-range temporal dependencies such as CGM forecasting.
+
+The LSTM baseline used in this study consists of two stacked LSTM layers with hidden size 256, followed by a linear output projection. Dropout with rate 0.159 is applied between layers. The complete architecture is illustrated in Fig.~\ref{fig:bg:lstm_arch}.
 
 \begin{figure}[H]
     \centering
@@ -19,11 +29,31 @@ This chapter provides the theoretical foundation for the thesis, focusing strict
 \end{figure}
 
 \subsection{PatchTST} \label{sec:bg:models:patchtst}
-\begin{planned}
-    \item Review of self-attention mechanisms and the core design of the PatchTST architecture (segmentation into overlapping patches), illustrated in Fig.~\ref{fig:bg:patchtst_arch}.
-    \item Mathematical framework of Reversible Instance Normalisation (RevIN) utilised to stabilise training.
-    \item Analysis of the structural consequence of instance normalisation, which strips absolute level info and compromises classification against static boundaries.
-\end{planned}
+
+Transformer-based architectures model sequence data using scaled dot-product self-attention~\citep{vaswani2017attention}, which computes pairwise dependencies between all positions in the input:
+\begin{equation}
+    \text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V
+    \label{eq:attention}
+\end{equation}
+where $Q$, $K$, $V \in \mathbb{R}^{n \times d_k}$ are the query, key, and value matrices obtained from learned linear projections of the input tokens, and $d_k$ is the key dimension used for scaling to prevent gradient saturation of the softmax.
+
+PatchTST~\citep{nie2023patchtst} adapts this framework for time series by replacing individual time steps with fixed-length overlapping \emph{patches} as attention tokens. Treating patches rather than scalars as tokens reduces the effective sequence length seen by the attention layers and improves the capture of local temporal patterns. In the configuration used here, the 24-step lookback window is divided into 4-step patches with stride 2, yielding 12 patch tokens of dimension $d_\text{model} = 64$, attended to by 4 heads across 3 transformer layers.
+
+To handle the heterogeneous glucose profiles across patients---which differ substantially in baseline level and amplitude---PatchTST uses Reversible Instance Normalisation (RevIN)~\citep{kim2022revin}. Before each forward pass, RevIN normalises the input sequence instance-wise to zero mean and unit variance:
+\begin{equation}
+    \hat{x}_i = \frac{x_i - \mu}{\sigma + \varepsilon}, \qquad
+    \mu = \frac{1}{L}\sum_{i=1}^{L} x_i, \quad
+    \sigma = \sqrt{\frac{1}{L}\sum_{i=1}^{L}(x_i - \mu)^2}
+    \label{eq:revin_norm}
+\end{equation}
+where $L$ is the lookback length and $\varepsilon > 0$ is a small constant for numerical stability. After the model produces a normalised output $\hat{\mathbf{y}}^\text{norm}$, the original scale is restored by reversing the same transformation:
+\begin{equation}
+    \hat{y}_i = \hat{y}_i^\text{norm} \cdot \sigma + \mu
+    \label{eq:revin_denorm}
+\end{equation}
+This instance-wise normalisation stabilises training across patients with different glycaemic profiles and reduces distribution shift between train and test windows. However, it has a structural consequence for threshold-based classification: during the forward pass, the model operates on scale-free inputs and has no access to the absolute glucose level. A classifier trained on RevIN-normalised inputs cannot reliably associate a given input pattern with the fixed 70~mg/dL hypoglycaemia threshold, since the absolute scale is removed before any computation takes place. The empirical consequences of this property are examined in Sections~\ref{sec:exp:obj1} and~\ref{sec:exp:obj3}.
+
+The full PatchTST architecture is illustrated in Fig.~\ref{fig:bg:patchtst_arch}.
 
 \begin{figure}[H]
     \centering
@@ -37,10 +67,15 @@ This chapter provides the theoretical foundation for the thesis, focusing strict
 % ================================================================
 
 \subsection{Mean Squared Error} \label{sec:bg:losses:mse}
-\begin{planned}
-    \item Definition of MSE as the average squared difference between each predicted and true value.
-    \item Key limitation: MSE penalises a prediction that is correct in shape but slightly shifted in time just as harshly as a completely wrong prediction.
-\end{planned}
+
+Let $\mathbf{y} = (y_1, \ldots, y_n)$ denote the ground-truth glucose values and $\hat{\mathbf{y}} = (\hat{y}_1, \ldots, \hat{y}_n)$ the model predictions. The Mean Squared Error loss is defined as:
+\begin{equation}
+    \mathcal{L}_\text{MSE}(\hat{\mathbf{y}},\, \mathbf{y}) = \frac{1}{n}\sum_{t=1}^{n}\bigl(\hat{y}_t - y_t\bigr)^2
+    \label{eq:mse_loss}
+\end{equation}
+MSE is differentiable, computationally efficient, and penalises large deviations heavily due to the squaring operation, making it a natural default for regression tasks.
+
+In the CGM forecasting setting, however, MSE has a critical limitation: it penalises a prediction that is temporally correct in shape but displaced by a few steps exactly as harshly as a structurally incorrect prediction. This is illustrated in Fig.~\ref{fig:loss_mse}. Because consecutive glucose readings are highly correlated (lag-1 autocorrelation $> 0.98$), a model trained with MSE can minimise its loss by reproducing recent history---effectively predicting the present rather than the future---rather than anticipating genuine glucose changes. This mechanism is the primary cause of the systematic prediction delay described in Section~\ref{sec:intro:timeshift}.
 
 \begin{figure}[H]
     \centering
@@ -50,9 +85,13 @@ This chapter provides the theoretical foundation for the thesis, focusing strict
 \end{figure}
 
 \subsection{Bounded Lag Loss} \label{sec:bg:losses:bl}
-\begin{planned}
-    \item Description of the Bounded Lag loss, which accepts a prediction as correct if it falls within a fixed time window of the true value, removing the penalty for small timing offsets.
-\end{planned}
+
+The Bounded Lag loss addresses the temporal rigidity of MSE by tolerating small timing offsets: instead of comparing each predicted value $\hat{y}_t$ only against the true value at the same time step $y_t$, it selects the best-matching true value within a local window of $D$ steps in either direction:
+\begin{equation}
+    \mathcal{L}_\text{BL}(\hat{\mathbf{y}},\, \mathbf{y}) = \frac{1}{n}\sum_{t=1}^{n}\;\min_{|k| \leq D}\;\bigl(\hat{y}_t - y_{t+k}\bigr)^2
+    \label{eq:bl_loss}
+\end{equation}
+Predictions that fall within the tolerance window $D$ contribute zero additional penalty regardless of their precise timing, as illustrated in Fig.~\ref{fig:loss_bl}. In this study, $D = 3$ steps ($\pm$15~minutes) is used, matching the standard event-detection tolerance $\tau$ described in Section~\ref{sec:bg:metrics}. The rationale is that if a prediction is structurally correct but arrives within one quarter-hour of the true event, it should not be penalised as a failure. The hypothesis is that removing this penalty reduces the model's incentive to track recent history and encourages earlier threshold crossings.
 
 \begin{figure}[H]
     \centering
@@ -62,10 +101,23 @@ This chapter provides the theoretical foundation for the thesis, focusing strict
 \end{figure}
 
 \subsection{Soft DTW: Differentiable Dynamic Time Warping} \label{sec:bg:losses:sdtw}
-\begin{planned}
-    \item Description of Soft DTW, which aligns two sequences by warping the time axis to match their shapes, allowing one-to-many correspondences between time steps.
-    \item Trade-off: focusing on shape matching reduces the penalty for timing errors but can increase overall amplitude error.
-\end{planned}
+
+Dynamic Time Warping (DTW) measures the similarity between two sequences by finding an optimal monotone alignment that permits one-to-many correspondences between time steps, thereby accommodating local timing differences that rigid pointwise comparisons cannot tolerate. Given a cost matrix $\Delta(\mathbf{a}, \mathbf{b}) \in \mathbb{R}^{n \times m}$ with entries $\Delta_{ij} = (a_i - b_j)^2$, the standard DTW distance is:
+\begin{equation}
+    \text{DTW}(\mathbf{a},\, \mathbf{b}) = \min_{\mathbf{A} \in \mathcal{A}_{n,m}} \langle \mathbf{A},\, \Delta(\mathbf{a}, \mathbf{b}) \rangle
+    \label{eq:dtw}
+\end{equation}
+where $\mathcal{A}_{n,m}$ is the set of binary alignment matrices satisfying the boundary and monotonicity constraints of DTW. Because the $\min$ operator is not differentiable, this objective cannot be used directly as a training loss.
+
+\citet{cuturi2017softdtw} propose Soft-DTW, which replaces the hard minimum with a differentiable soft minimum parametrised by a temperature $\gamma > 0$:
+\begin{equation}
+    \text{sdtw}_\gamma(\mathbf{a},\, \mathbf{b}) = \min^\gamma_{\mathbf{A} \in \mathcal{A}_{n,m}} \langle \mathbf{A},\, \Delta(\mathbf{a}, \mathbf{b}) \rangle, \qquad
+    \min^\gamma(\mathbf{z}) = -\gamma \log \sum_j \exp\!\left(-\tfrac{z_j}{\gamma}\right)
+    \label{eq:sdtw}
+\end{equation}
+As $\gamma \to 0$, Soft-DTW recovers the standard DTW; as $\gamma \to \infty$, it averages over all alignments. In this study, $\gamma = 1.0$ is used. The resulting alignment and its effect on two sequences are illustrated in Fig.~\ref{fig:loss_dtw}.
+
+By optimising shape correspondence rather than pointwise accuracy, Soft-DTW reduces the gradient penalty for temporally displaced predictions more aggressively than the Bounded Lag loss. The trade-off is that shape alignment is independent of absolute amplitude: a prediction that matches the shape of the target but at the wrong absolute level incurs little penalty. For PatchTST, which normalises input sequences with RevIN, this trade-off is particularly pronounced, as discussed in Section~\ref{sec:exp:obj1}.
 
 \begin{figure}[H]
     \centering
@@ -77,11 +129,55 @@ This chapter provides the theoretical foundation for the thesis, focusing strict
 % ================================================================
 \section{Evaluation Metrics} \label{sec:bg:metrics}
 % ================================================================
-\begin{planned}
-    \item Mathematical definitions of RMSE and MAE.
-    \item Definition of the \texttt{lag\_rmse} diagnostic metric to quantitatively isolate temporal delay components.
-    \item Derivation of precision, recall, and harmonic F1/F2 score metrics adapted to the evaluation of highly skewed event detection tasks.
-\end{planned}
+
+\subsection*{Pointwise Forecasting Accuracy}
+
+Let $g_{1:n}$ and $\hat{g}_{1:n}$ denote the ground-truth and predicted glucose sequences over $n$ test windows. The Root Mean Squared Error and Mean Absolute Error are:
+\begin{equation}
+    \text{RMSE} = \sqrt{\frac{1}{n}\sum_{t=1}^{n}(g_t - \hat{g}_t)^2}, \qquad
+    \text{MAE} = \frac{1}{n}\sum_{t=1}^{n}|g_t - \hat{g}_t|
+    \label{eq:rmse_mae}
+\end{equation}
+Both are reported in mg/dL. RMSE weights large errors more heavily due to squaring, while MAE provides a linear, scale-consistent measure of average deviation. In the presence of a systematic prediction delay, both metrics are inflated because the predicted trajectory is structurally accurate but temporally displaced.
+
+\subsection*{Lag-Adjusted RMSE (RMSE\texorpdfstring{$^*$}{*})}
+
+To separate the timing component of prediction error from structural inaccuracy, a diagnostic metric is used that searches for the optimal constant temporal shift $\Delta^*$ and computes RMSE after applying it:
+\begin{equation}
+    \Delta^* = \operatorname*{arg\,min}_{k \,\in\, \{-K,\ldots,K\}} \text{RMSE}\bigl(g_{1:n},\; \text{shift}(\hat{g}_{1:n}, k)\bigr)
+    \label{eq:best_lag}
+\end{equation}
+\begin{equation}
+    \text{RMSE}^* = \text{RMSE}\bigl(g_{1:n},\; \text{shift}(\hat{g}_{1:n}, \Delta^*)\bigr)
+    \label{eq:lag_rmse}
+\end{equation}
+where $\text{shift}(\hat{g}, k)$ denotes the prediction sequence shifted by $k$ steps and the search range is $K = 12$ steps ($\pm$60~minutes). RMSE$^*$ quantifies the residual prediction error once the systematic delay is corrected: the difference RMSE~$-$~RMSE$^*$ isolates the fraction of raw error attributable purely to the temporal displacement. A low RMSE$^*$ indicates that the model produces structurally accurate predictions that are shifted in time, rather than fundamentally wrong ones.
+
+\subsection*{Event Detection Metrics}
+
+Hypoglycaemia detection is evaluated as a binary classification problem. For a given test set, the standard confusion matrix quantities are:
+\begin{itemize}
+    \item \textbf{True Positives (TP)}: a hypoglycaemia event is correctly detected.
+    \item \textbf{False Positives (FP)}: an alarm is issued but no event occurs.
+    \item \textbf{False Negatives (FN)}: an event occurs but is not detected.
+\end{itemize}
+From these, precision $P$, recall $R$, and the $F_\beta$ score are defined as:
+\begin{equation}
+    P = \frac{\text{TP}}{\text{TP} + \text{FP}}, \qquad
+    R = \frac{\text{TP}}{\text{TP} + \text{FN}}, \qquad
+    F_\beta = (1 + \beta^2)\cdot\frac{P \cdot R}{\beta^2 \cdot P + R}
+    \label{eq:f_score}
+\end{equation}
+The $F_1$ score ($\beta = 1$) is the harmonic mean of precision and recall. The $F_2$ score ($\beta = 2$) weights recall twice as heavily as precision, which is appropriate in the hypoglycaemia detection setting: a missed event (FN) is clinically more serious than a false alarm (FP), as a missed hypoglycaemia episode can result in loss of consciousness~\citep{idf2021atlas}.
+
+\subsection*{Tolerance Window $\tau$ for Forecast-Derived Detection}
+
+For forecast-derived detectors---models trained as regressors whose predicted trajectory is thresholded at 70~mg/dL---a strict match between predicted and true threshold crossings is often too rigid. A tolerance window $\tau$ is introduced: a predicted crossing $p_c$ is counted as a TP if it falls within $\tau$ minutes of the true crossing $t_c$:
+\begin{equation}
+    \text{TP: } |t_c - p_c| \leq \tau
+    \label{eq:tau_match}
+\end{equation}
+as illustrated in Fig.~\ref{fig:bg:tau_tolerance}. The standard evaluation in this thesis uses $\tau = 15$~minutes (3 steps). A sweep over $\tau \in \{0, 5, \ldots, 60\}$~minutes is used in Section~\ref{sec:exp:obj3} to characterise how much of the detection failure is attributable to timing mismatch versus structural inability to predict the event.
 
 \begin{figure}[H]
     \centering
