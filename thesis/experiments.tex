@@ -160,6 +160,7 @@ The sweep reveals a fundamental architectural difference. For PatchTST, the F1 s
 \end{figure}
 
 \subsection{Direct Binary Event Classifiers}
+\label{sec:exp:obj3:classifiers}
 
 Direct binary classifiers~\citep{shao2024hypoglycemia, cinar2025hypoclassification} are trained end-to-end on the event label defined in Equation~\ref{eq:eventlabel}, using a weighted binary cross-entropy loss to address the class imbalance (Section~\ref{sec:method:setup:cgm}). Tab.~\ref{tab:exp:classifiers} and Fig.~\ref{fig:exp:classifier_traces} report the results.
 
@@ -190,10 +191,13 @@ PatchTST event classifier & 0.054 & 0.615          & 0.095 & 0.178          \\
 \end{table}
 
 \subsection{Lead-Time Analysis}
+\label{sec:exp:obj3:leadtime}
 
 Fig.~\ref{fig:exp:lead_time} shows the distribution of lead times for all true-positive detections across the 36-patient cohort. The lead time is defined as the elapsed time from alarm issuance to the first hypoglycaemic step in the prediction window. The LSTM classifier has a median lead time of 5~minutes and a mean of 12.4~minutes. Of its 2{,}610 true positives, 1{,}293 (49.5\%) fire at lead time zero, meaning the alarm is issued at the moment when the patient has already crossed the 70~mg/dL threshold. The PatchTST classifier has a median lead time of 15~minutes and a mean of 18.3~minutes. Of its 2{,}243 true positives, 802 (35.8\%) are reactive, with the remainder distributed more evenly across the 5-to-55 minute range.
 
 These results indicate that the LSTM classifier responds largely to an ongoing glucose decline rather than anticipating a future one. Despite achieving higher F2, the majority of its true-positive alarms provide little or no advance warning. The PatchTST classifier, while weaker in overall detection performance, produces a higher proportion of genuine advance warnings. This distinction is relevant for clinical use, where a warning issued after the event has already begun is of limited practical value.
+
+Taken together, the lead-time distribution qualifies the interpretation of the F2 results in Section~\ref{sec:exp:obj3:classifiers}. The high recall of the LSTM classifier is driven to a substantial degree by detections that coincide with the onset of hypoglycaemia rather than precede it: with 49.5\% of true positives issued at zero lead time, close to half of the LSTM alarms confirm an ongoing event instead of anticipating a future one. A high F2 score therefore does not by itself establish that the classifier has learned to anticipate hypoglycaemia, as it partly reflects the detection of glucose values that are already low at the moment of the alarm. The PatchTST classifier exhibits the opposite profile, trading lower overall detection performance for a larger share of genuinely anticipatory alarms. Detection performance and anticipatory capability are thus distinct properties that F2 alone does not jointly capture, a distinction that must be accounted for when reading the classifier results as evidence of predictive rather than reactive behaviour.
 
 \begin{figure}[tbp]
     \centering
@@ -211,9 +215,9 @@ Tab.~\ref{tab:exp:overall} summarises all ten model configurations across the fu
 
 Among the eight forecast-derived configurations, LSTM multi-step achieves the best trajectory accuracy with an RMSE of 35.59~mg/dL and an MAE of 26.80~mg/dL. PatchTST multi-step achieves the highest event detection F2 among forecast-derived configurations at 0.085. However, all forecast-derived F2 scores remain below 0.09, which indicates that threshold-based detection on a regression output is fundamentally limited regardless of the training strategy.
 
-The direct event classifiers stand apart from the forecasting configurations. The LSTM event classifier achieves an F2 of 0.463 and a recall of 0.693, which is more than five times the best forecast-derived F2 value (PatchTST Multi-step: F2~=~0.085); classifier superiority over forecast-derived detection is confirmed statistically for both architectures (Tests~1--2; Tab.~\ref{tab:exp:significance}). This indicates that a task-specific training objective addresses the detection failure far more effectively than any modification to the forecasting loss or output structure.
+The direct event classifiers stand apart from the forecasting configurations. The LSTM event classifier achieves an F2 of 0.463 and a recall of 0.693, which is more than five times the best forecast-derived F2 value (PatchTST Multi-step: F2~=~0.085); classifier superiority over forecast-derived detection is confirmed statistically for both architectures (Tests~1--2; Tab.~\ref{tab:exp:significance}). This statistical superiority concerns the recall-weighted F2 criterion; as the lead-time analysis in Section~\ref{sec:exp:obj3:leadtime} shows, a substantial fraction of the LSTM classifier's true positives are reactive rather than anticipatory, so the gain in F2 should not be read as evidence of reliable advance warning. This indicates that a task-specific training objective addresses the detection failure far more effectively than any modification to the forecasting loss or output structure.
 
-The best trajectory quality and the best event detection performance are achieved by different model configurations. LSTM multi-step leads on RMSE and MAE, while LSTM direct classifier leads on recall, F1, and F2. These two strengths do not overlap in a single configuration, which indicates that trajectory forecasting and event detection measure fundamentally different aspects of model behaviour. A practical system that requires both a high-quality glucose forecast and reliable hypoglycaemia warnings would need to deploy the two best-performing models separately, with each used for the task it is optimised for.
+The best trajectory quality and the best event detection performance are achieved by different model configurations. LSTM multi-step leads on RMSE and MAE, while LSTM direct classifier leads on recall, F1, and F2. These two strengths do not overlap in a single configuration, which indicates that trajectory forecasting and event detection measure fundamentally different aspects of model behaviour. A practical system that requires both a high-quality glucose forecast and hypoglycaemia detection support would need to deploy the two best-performing models separately, with each used for the task it is optimised for; the limited lead time and high false-alarm rate of the classifier (Sections~\ref{sec:exp:obj3:leadtime} and~\ref{sec:conc:limitations}) constrain the degree to which it can serve as an anticipatory warning system.
 
 \begin{table}[tbp]
 \centering
