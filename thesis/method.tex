@@ -24,7 +24,7 @@ For multi-step supervision (Objective~2), the output head is extended to predict
     \label{eq:multistep}
 \end{equation}
 
-For binary event classification (Objective~3), a window is labeled positive if the glucose level falls below the hypoglycaemia threshold at any point within the 60-minute prediction horizon:
+For binary event classification (Objective~3), a window is labelled positive if the glucose level falls below the hypoglycaemia threshold at any point within the 60-minute prediction horizon:
 \begin{equation}
     y_t = \begin{cases} 1 & \text{if } \min_{h=1}^{H}\, g_{t+h} < 70\;\text{mg/dL} \\ 0 & \text{otherwise} \end{cases}
     \label{eq:eventlabel}
@@ -44,7 +44,7 @@ A defining statistical property of the CGM signal is its high temporal autocorre
 
 The event detection task is highly imbalanced. Across the full cohort, 57{,}680 labelled windows are negative and only 3{,}462 are positive, corresponding to a cohort-mean positive rate of 5.7\%. Fig.~\ref{fig:method:class_imbalance} shows the per-patient distribution and illustrates that the positive rate varies considerably across patients, reflecting differences in individual glycaemic control. This imbalance motivates two design choices: the F2 metric (Section~\ref{sec:bg:metrics}), which weights recall twice as heavily as precision, and a positive class weight of $w_{+} = N_\text{neg} / N_\text{pos} \approx 16.7$ applied to the binary cross-entropy loss when training direct classifiers.
 
-\begin{figure}[H]
+\begin{figure}[tbp]
     \centering
     \includegraphics[width=\textwidth]{class_imbalance.png}
     \caption{Class distribution of the hypoglycaemia detection task across the 36-patient T1DATA cohort. \textit{Left:} stacked bars show the percentage of positive (red, glucose falls below 70~mg/dL within the next 60~min) and negative (blue) windows per patient, sorted by ascending positive rate; the dashed line marks the cohort mean of 5.7\%. \textit{Right:} absolute window counts aggregated across all patients (57{,}680 negative vs.\ 3{,}462 positive).}
@@ -55,9 +55,9 @@ The event detection task is highly imbalanced. Across the full cohort, 57{,}680 
 
 Each patient's time series is partitioned chronologically into training (60\%), validation (20\%), and test (20\%) sets. Temporal order is strictly preserved to prevent future information from entering the training set. All models are trained and evaluated independently per patient, and the reported metrics are cohort means across all 36 patients.
 
-Hyperparameters are determined using the Optuna automated search framework~\citep{akiba2019optuna} with 50 trials conducted on a single designated tuning patient (ID~85202). Restricting the search to one patient reduces the computational cost by a factor of 36 relative to a full-cohort search; this is a pragmatic compromise, and the resulting configuration may not be globally optimal for all patients (see Section~\ref{sec:conc:limitations}). The resulting configuration is fixed for all three research objectives; only the loss function or output head changes between objectives. Table~\ref{tab:method:hyperparams} lists the final hyperparameter values for both architectures. All models are optimised with the AdamW optimiser~\citep{loshchilov2019adamw}.
+Hyperparameters are determined using the Optuna automated search framework~\citep{akiba2019optuna} with 50 trials conducted on a single designated tuning patient (ID~85202). Restricting the search to one patient reduces the computational cost by a factor of 36 relative to a full-cohort search; this is a pragmatic compromise, and the resulting configuration may not be globally optimal for all patients (see Section~\ref{sec:conc:limitations}). The resulting configuration is fixed for all three research objectives; only the loss function or output head changes between objectives. Tab.~\ref{tab:method:hyperparams} lists the final hyperparameter values for both architectures. All models are optimised with the AdamW optimiser~\citep{loshchilov2019adamw}.
 
-\begin{table}[H]
+\begin{table}[tbp]
 \centering
 \caption[Optuna-tuned hyperparameters]{Optuna-tuned hyperparameters for the LSTM and PatchTST architectures. The search was conducted on the validation set of patient 85202 only. Identical hyperparameters are used for all training objectives (MSE, Bounded-Lag, Soft-DTW, Multi-Step); only the loss function or output head is modified per objective.}
 \label{tab:method:hyperparams}
@@ -79,6 +79,8 @@ Optuna trials                        & \multicolumn{2}{c}{50} \\
 \end{tabular}
 \end{table}
 
+\paragraph{Statistical Analysis.}
+Three paired comparisons are assessed using the Wilcoxon signed-rank test~\citep{wilcoxon1945} with two-sided hypotheses and Holm--Bonferroni correction for multiple comparisons~\citep{holm1979}. The test is applied to per-patient F2 score differences: LSTM event classifier versus best LSTM forecast-derived detector (Bounded-Lag, Test~1); PatchTST event classifier versus best PatchTST forecast-derived detector (Multi-step, Test~2); and LSTM versus PatchTST event classifiers (Test~3). Rank-biserial correlation $r$ is reported as the effect size. The significance threshold is $\alpha = 0.05$ after correction. Results are reported in Tab.~\ref{tab:exp:significance}.
 
 % ================================================================
 \section{Training Objectives} \label{sec:method:objectives}

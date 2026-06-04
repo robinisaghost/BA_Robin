@@ -1,41 +1,45 @@
 \chapter{Conclusions and Future Work}
 \label{ch:conclusions}
 
-This chapter summarizes the central empirical findings of the ablation study discusses the underlying methodological limitations and outlines strategic directions for subsequent research. Section~\ref{sec:conc:summary} aggregates the core insights from all three research objectives. Section~\ref{sec:conc:limitations} assesses the architectural and structural boundaries of the evaluated frameworks, and Section~\ref{sec:conc:futurework} establishes clear vectors for future investigative work.
+This chapter summarises the central empirical findings of the ablation study, discusses the underlying methodological limitations, and outlines strategic directions for subsequent research. Section~\ref{sec:conc:summary} aggregates the core insights from all three research objectives. Section~\ref{sec:conc:limitations} assesses the structural boundaries of the evaluated framework, and Section~\ref{sec:conc:futurework} identifies directions for future investigative work.
 
 % ================================================================
 \section{Summary of Findings}
 \label{sec:conc:summary}
 % ================================================================
 
-\begin{planned}
-    \item Conclusion regarding the systematic time shift anomaly confirming that modifying the optimisation criteria alone does not resolve the predictive delay.
-    \item Identification of the fundamental tracking information deficit where univariate data structures lack access to exogenous causal factors.
-    \item Summary of Objective 1 indicating that bounded lag and soft dynamic time warping criteria expand temporal variance without improving underlying shape alignment.
-    \item Summary of Objective 2 showing that multi-step sequence supervision gives the best forecasting accuracy in terms of RMSE and MAE, but does not meaningfully improve event detection performance. The gain in trajectory quality does not translate into a gain in detecting hypoglycaemia events.
-    \item Summary of Objective 3 demonstrating the clear performance advantage of the specialized recurrent binary event classifier over standard regression thresholding.
-\end{planned}
+The experiments confirm that the systematic prediction delay is a structural consequence of training regression models with MSE on a highly autocorrelated glucose signal, and that it cannot be resolved by modifying the loss function alone. Under standard MSE training, both the LSTM and PatchTST architectures produce predictions displaced by approximately 50 to 55 minutes relative to the true signal, consistent with the lag-1 autocorrelation exceeding 0.98 in the T1DATA cohort.
+
+Objective~1 tests whether offset-aware loss functions reduce this delay. Both the Bounded-Lag loss and Soft-DTW achieve modest reductions (at most 5.2 minutes for the LSTM under Soft-DTW), but the lag-adjusted RMSE (RMSE$^*$) increases relative to the MSE baseline for both architectures and both loss variants. For LSTM, RMSE$^*$ rises from 21.65~mg/dL (MSE) to 25.25~mg/dL (Bounded-Lag) and 28.67~mg/dL (Soft-DTW); for PatchTST, from 14.21 to 16.70 and 24.01~mg/dL respectively. The offset-aware losses achieve partial temporal realignment at the cost of prediction shape accuracy: the model learns to tolerate timing errors rather than to anticipate future glucose changes. Event detection improvements are correspondingly negligible, with all forecast-derived F2 scores remaining below 0.09 across all configurations.
+
+Objective~2 shows that multi-step supervision yields the most accurate glucose trajectories. For the LSTM, multi-step MSE training achieves the best RMSE$^*$ of 20.74~mg/dL across all LSTM configurations. For PatchTST, the single-step MSE baseline achieves the globally best RMSE$^*$ of 14.21~mg/dL, marginally lower than the multi-step variant at 14.53~mg/dL, indicating that multi-step supervision does not consistently improve lag-adjusted accuracy for the attention-based architecture. Despite improved trajectory quality, the mean prediction lag decreases by at most 1.1~minutes and event detection F2 scores remain below 0.09. Trajectory accuracy and event detection performance are therefore dissociable: the configuration that best reproduces the glucose trajectory is not the configuration that best detects threshold crossings.
+
+Objective~3 establishes that dedicated binary classifiers substantially outperform all forecast-derived detectors. The LSTM event classifier achieves F2~=~0.463 (sd~0.175) and recall~=~0.693, compared to a best forecast-derived F2 of 0.013 for the LSTM under Bounded-Lag loss, a 35-fold increase. The PatchTST event classifier achieves F2~=~0.178 (sd~0.137) and recall~=~0.615, compared to a best forecast-derived F2 of 0.085 under multi-step training. Both improvements are statistically significant after Holm--Bonferroni correction (Tab.~\ref{tab:exp:significance}). A performance inversion is observed across architectures: the LSTM, which is the weaker forecaster by RMSE, is the stronger classifier by F2. This inversion is explained by the Reversible Instance Normalisation in PatchTST, which removes the absolute glucose level information required for reliable threshold-based classification, while the LSTM operates directly on the raw glucose values and can learn proximity to the 70~mg/dL threshold. The lead-time analysis (Fig.~\ref{fig:exp:lead_time}) nonetheless reveals an important qualification: 49.5\% of the LSTM classifier's true-positive alarms fire at lead time zero, indicating that the classifier responds largely to an ongoing hypoglycaemic episode rather than anticipating a future one. The PatchTST classifier, despite its lower overall F2, produces a higher proportion of genuine advance warnings and a median lead time of 15~minutes versus 5~minutes for the LSTM.
+
+Taken together, the results indicate that glucose trajectory forecasting and hypoglycaemia event detection are best addressed as separate tasks with distinct training objectives. The recommended configuration for a system requiring both capabilities is a multi-step MSE model for trajectory forecasting, paired with a dedicated LSTM binary classifier for hypoglycaemia detection support.
 
 % ================================================================
 \section{Methodological Limitations}
 \label{sec:conc:limitations}
 % ================================================================
 
-\begin{planned}
-    \item Acknowledgment of the strictly univariate constraint which bounds the predictive capacity during sudden metabolic fluctuations. A model that only sees glucose values cannot know about a recent insulin dose or a meal, both of which directly cause glucose changes.
-    \item Discussion of the short advance warning window shown in Fig.~\ref{fig:exp:lead_time}. The LSTM classifier fires too late in almost half of all cases, which limits its usefulness for a patient who needs time to act. Discuss why this happens: the model responds to an ongoing decline rather than anticipating a future one.
-    \item Evaluation of the severe class imbalance which restricts overall precision and causes many false alarms. Only 5.7\% of all windows contain a hypoglycaemia event, which makes the problem structurally difficult regardless of the model architecture.
-    \item Acknowledgment that hyperparameters were tuned on a single patient (patient 85202) rather than on the full cohort, for computational reasons. The resulting configuration may not be optimal for all 36 patients and limits the generalisability of architecture-specific conclusions.
-\end{planned}
+Several structural constraints bound the conclusions of this study. First, all models operate exclusively on the univariate glucose signal and have no access to exogenous causal inputs such as insulin administration records or carbohydrate intake logs. Rapid glucose changes caused by a recent bolus dose or a meal cannot be anticipated from the glucose signal alone, which places a fundamental ceiling on predictive performance regardless of the model architecture or training objective employed.
+
+Second, the lead-time analysis reveals that the LSTM classifier, despite achieving the highest F2, fires reactively in nearly half of all true-positive detections. A clinical alarm issued at the moment of hypoglycaemia onset provides limited actionable advance warning; the practical utility of this configuration for a patient who needs time to respond is therefore more restricted than the F2 score alone indicates.
+
+Third, the event detection task is severely class-imbalanced, with only 5.7\% of labelled windows containing a positive event. This imbalance restricts achievable precision across all configurations and means that even a classifier with recall of 0.693 produces a large volume of false alarms, a factor that would require dedicated mitigation before any clinical deployment.
+
+Finally, hyperparameters for both architectures were tuned on a single designated patient (ID~85202) rather than the full cohort, for computational reasons. The resulting configuration may not be optimal for all 36 patients, and this pragmatic compromise limits the generalisability of architecture-specific conclusions drawn from the study.
 
 % ================================================================
 \section{Future Work}
 \label{sec:conc:futurework}
 % ================================================================
 
-\begin{planned}
-    \item Proposal to integrate multimodal tracking sequences including logged insulin administration and carbohydrate consumption to eliminate the information deficit.
-    \item Recommendation to evaluate expanded bounded lag optimisation windows to fully encompass the observed systematic delay component.
-    \item Suggestion to implement specialized focal loss functions to directly address minority class representation during neural network training.
-    \item Perspective on transitioning to leave one out population configurations to measure cross patient generalizability.
-\end{planned}
+Several directions follow directly from the limitations identified above. The most consequential extension would be the integration of multimodal inputs, specifically logged insulin doses and carbohydrate records, to eliminate the information deficit that bounds the univariate approach. Such inputs would allow a model to anticipate glucose excursions driven by exogenous factors that are entirely invisible to a glucose-only model, and could substantially reduce the number of reactive alarms.
+
+Within the offset-aware loss framework, evaluating wider Bounded-Lag tolerance windows (extending towards $D = 12$ steps to fully encompass the observed 50--55 minute systematic delay) may produce more substantial lag reductions than the $D = 3$ setting used here. Whether such extended windows still permit the model to learn meaningful temporal structure, rather than simply tolerating arbitrarily large offsets, warrants empirical investigation.
+
+The class imbalance problem could be addressed through two complementary strategies: replacing the weighted binary cross-entropy with a focal loss formulation that down-weights easy negative examples during training, and augmenting the positive class through oversampling or synthetic data generation. Either approach may improve the precision side of the F2 score without sacrificing the recall gains achieved by the current classifiers.
+
+Finally, a leave-one-out or cross-validated evaluation protocol would provide a more robust assessment of generalisation across the cohort than the single-patient hyperparameter tuning used in this study, and would enable a rigorous comparison of per-patient variability in model performance.

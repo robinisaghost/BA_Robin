@@ -5,21 +5,21 @@
 % ================================================================
 This appendix contains supplementary figures and numerical tables that support the findings presented in Chapter~\ref{ch:experiments}.
 
-\begin{figure}[H]
+\begin{figure}[tbp]
     \centering
     \includegraphics[width=0.85\textwidth]{confusion_counts.png}
     \caption[Confusion counts for direct event classifiers]{Absolute confusion counts (TP, FP, FN; log scale) for the LSTM and PatchTST direct event classifiers evaluated across the full 36-patient cohort. Counts are aggregated over all patients; the logarithmic scale is used to make the smaller TP bars visible alongside the larger FP counts. Corresponding precision, recall, and F-scores are reported in Table~\ref{tab:exp:classifiers}.}
     \label{fig:app:confusion_counts}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[tbp]
     \centering
     \includegraphics[width=0.9\textwidth]{pr_paradox.png}
     \caption[Precision--Recall space: forecast-derived vs.\ direct classifiers]{Precision--Recall space for all four detector configurations. Hollow markers represent forecast-derived detectors (threshold applied to the regression output); filled markers represent direct binary classifiers. Circles correspond to LSTM, squares to PatchTST. Each point is the cohort-mean operating point at the standard detection threshold.}
     \label{fig:app:pr_paradox}
 \end{figure}
 
-\begin{table}[H]
+\begin{table}[tbp]
 \centering
 \small
 \caption[$\tau$-sweep numerical breakdown: LSTM]{Cohort-mean Precision, Recall, F1, and F2 of the forecast-derived hypoglycaemia detector for all four LSTM training strategies as a function of the tolerance window $\tau$. The corresponding curves are shown in Figs.~\ref{fig:exp:tau_sweep_plot} and~\ref{fig:exp:tau_sweep_lstm}.}
@@ -43,7 +43,7 @@ $\tau$ (min) & P & R & F1 & F2 & P & R & F1 & F2 & P & R & F1 & F2 & P & R & F1 
 \end{tabular}}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[tbp]
 \centering
 \small
 \caption[$\tau$-sweep numerical breakdown: PatchTST]{Cohort-mean Precision, Recall, F1, and F2 of the forecast-derived hypoglycaemia detector for all four PatchTST training strategies as a function of the tolerance window $\tau$. The corresponding curves are shown in Figs.~\ref{fig:exp:tau_sweep_plot} and~\ref{fig:exp:tau_sweep_patchtst}.}
@@ -68,5 +68,30 @@ $\tau$ (min) & P & R & F1 & F2 & P & R & F1 & F2 & P & R & F1 & F2 & P & R & F1 
 \end{table}
 
 
+
+% ================================================================
+\chapter{Wilcoxon Signed-Rank Test: Full Results} \label{appendix:wilcoxon}
+% ================================================================
+
+This appendix provides the complete output of the three Wilcoxon signed-rank tests reported in Tab.~\ref{tab:exp:significance}. The test statistic $W$ is the sum of positive ranks across the 36 patients. For Tests~1 and~3, $r = 1.00$ implies that all 36 patients show a positive difference, so $W = \sum_{i=1}^{36} i = 666$ (the theoretical maximum). For Test~2, $W$ is derived from the rank-biserial formula $r = (W^+ - W^-)/(n(n+1)/2)$ with $n = 36$.
+
+Raw $p$-values are computed before Holm--Bonferroni correction. Tests~1 and~3 share the smallest raw $p$-values and receive the correction factor $\times 3$ (rank positions 1 and 2 out of $m = 3$ hypotheses); Test~2 is the largest raw $p$-value and receives correction factor $\times 1$, leaving it unchanged. All three tests remain significant at $\alpha = 0.05$ after correction.
+
+\begin{table}[tbp]
+\centering
+\small
+\caption[Wilcoxon signed-rank tests: full output]{Complete Wilcoxon signed-rank test output for all three paired comparisons ($n = 36$ patients, two-sided). $W$ is the sum of positive ranks; $r$ is the rank-biserial correlation. Raw $p$-values are listed alongside Holm--Bonferroni corrected values; the correction factor applied to each test is shown in the rightmost column.}
+\label{tab:app:wilcoxon}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrr}
+\toprule
+Comparison & $n$ & $W$ & $r$ & $p$ (raw) & $p$ (Holm) & Correction \\
+\midrule
+LSTM classifier vs.\ LSTM Bounded-Lag (Test~1)           & 36 & 666 & 1.00 & $1.8 \times 10^{-7}$ & $5.3 \times 10^{-7}$ & $\times 3$ \\
+PatchTST classifier vs.\ PatchTST Multi-step (Test~2)    & 36 & 533 & 0.60 & $1.5 \times 10^{-3}$ & $1.5 \times 10^{-3}$ & $\times 1$ \\
+LSTM classifier vs.\ PatchTST classifier (Test~3)         & 36 & 666 & 1.00 & $1.8 \times 10^{-7}$ & $5.3 \times 10^{-7}$ & $\times 3$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
 
 \end{appendix}
