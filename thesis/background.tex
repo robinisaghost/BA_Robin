@@ -78,10 +78,13 @@ MSE is differentiable, computationally efficient, and penalises large deviations
 In the CGM forecasting setting, however, MSE has a critical limitation: it penalises a prediction that is temporally correct in shape but displaced by a few steps exactly as harshly as a structurally incorrect prediction. This is illustrated in Fig.~\ref{fig:loss_mse}. Because consecutive glucose readings are highly correlated (lag-1 autocorrelation $> 0.98$), a model trained with MSE can minimise its loss by reproducing recent history (in effect, predicting the present rather than the future) rather than anticipating genuine glucose changes. This mechanism is the primary cause of the systematic prediction delay described in Section~\ref{sec:intro:timeshift}.
 
 \begin{figure}[tbp]
-    \centering
-    \includegraphics[width=0.75\textwidth]{loss_mse.png}
-    \caption{Visual representation of the Mean Squared Error (MSE). The loss is computed as the squared vertical distance between each predicted value and the corresponding true value at the same time step.}
-    \label{fig:loss_mse}
+\centering
+\subfigure[MSE]{\includegraphics[width=0.31\textwidth]{loss_mse.png}\label{fig:loss_mse}}
+\hfill
+\subfigure[Bounded Lag ($D{=}3$)]{\includegraphics[width=0.31\textwidth]{loss_bounded_lag.png}\label{fig:loss_bl}}
+\hfill
+\subfigure[Soft-DTW ($\gamma{=}1.0$)]{\includegraphics[width=0.31\textwidth]{loss_dtw_alignment.png}\label{fig:loss_dtw}}
+\caption[Geometric interpretation of the three training losses]{Geometric interpretation of the three training losses. In all panels the solid curve is the ground-truth glucose trajectory and the dashed curve is the model prediction. (a)~MSE penalises the squared vertical distance at each time step equally, regardless of temporal displacement. (b)~Bounded Lag tolerates shifts of up to $D$ steps; predictions within the window incur no additional timing penalty. (c)~Soft-DTW finds an optimal many-to-one sequence alignment, reducing the penalty for predictions that are temporally displaced but structurally similar to the target.}
 \end{figure}
 
 \subsection{Bounded Lag Loss} \label{sec:bg:losses:bl}
@@ -93,12 +96,6 @@ The Bounded Lag loss addresses the temporal rigidity of MSE by tolerating small 
 \end{equation}
 Predictions that fall within the tolerance window $D$ contribute zero additional penalty regardless of their precise timing, as illustrated in Fig.~\ref{fig:loss_bl}. In this study, $D = 3$ steps ($\pm$15~minutes) is used, matching the standard event-detection tolerance $\tau$ described in Section~\ref{sec:bg:metrics}. The rationale is that if a prediction is structurally correct but arrives within one quarter-hour of the true event, it should not be penalised as a failure. The hypothesis is that removing this penalty reduces the model's incentive to track recent history and encourages earlier threshold crossings.
 
-\begin{figure}[tbp]
-    \centering
-    \includegraphics[width=0.75\textwidth]{loss_bounded_lag.png}
-    \caption{Visual representation of the Bounded Lag Loss. Temporal shifts within a predefined local neighbourhood are tolerated without penalty.}
-    \label{fig:loss_bl}
-\end{figure}
 
 \subsection{Soft DTW: Differentiable Dynamic Time Warping} \label{sec:bg:losses:sdtw}
 
@@ -119,12 +116,6 @@ As $\gamma \to 0$, Soft-DTW recovers the standard DTW; as $\gamma \to \infty$, i
 
 By optimising shape correspondence rather than pointwise accuracy, Soft-DTW reduces the gradient penalty for temporally displaced predictions more aggressively than the Bounded Lag loss. The trade-off is that shape alignment is independent of absolute amplitude: a prediction that matches the shape of the target but at the wrong absolute level incurs little penalty. For PatchTST, which normalises input sequences with RevIN, this trade-off is particularly pronounced, as discussed in Section~\ref{sec:exp:obj1}.
 
-\begin{figure}[tbp]
-    \centering
-    \includegraphics[width=0.75\textwidth]{loss_dtw_alignment.png}
-    \caption{Visual representation of the Soft DTW Loss. The algorithm dynamically warps the time axis to match structural shapes using one-to-many alignments.}
-    \label{fig:loss_dtw}
-\end{figure}
 
 % ================================================================
 \section{Evaluation Metrics} \label{sec:bg:metrics}
