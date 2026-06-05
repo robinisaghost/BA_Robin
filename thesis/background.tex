@@ -75,7 +75,7 @@ Let $\mathbf{y} = (y_1, \ldots, y_n)$ denote the ground-truth glucose values and
 \end{equation}
 MSE is differentiable, computationally efficient, and penalises large deviations heavily due to the squaring operation, making it a natural default for regression tasks.
 
-In the CGM forecasting setting, however, MSE has a critical limitation: it penalises a prediction that is temporally correct in shape but displaced by a few steps exactly as harshly as a structurally incorrect prediction. This is illustrated in Fig.~\ref{fig:loss_mse}. Because consecutive glucose readings are highly correlated (lag-1 autocorrelation $> 0.98$), a model trained with MSE can minimise its loss by reproducing recent history (in effect, predicting the present rather than the future) rather than anticipating genuine glucose changes. This mechanism is the primary cause of the systematic prediction delay described in Section~\ref{sec:intro:timeshift}.
+In the CGM forecasting setting, however, MSE has a critical limitation: it penalises a prediction that is temporally correct in shape but displaced by a few steps exactly as harshly as a structurally incorrect prediction. This is illustrated in Fig.~\ref{fig:loss_mse}. Because consecutive glucose readings are highly correlated (Section~\ref{sec:intro:timeshift}), a model trained with MSE can minimise its loss by reproducing recent history rather than anticipating genuine glucose changes, which is the primary cause of the systematic prediction delay.
 
 \begin{figure}[tbp]
 \centering

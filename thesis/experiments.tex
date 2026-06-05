@@ -54,7 +54,7 @@ The Soft-DTW loss~\citep{cuturi2017softdtw} (Section~\ref{sec:bg:losses:sdtw}) a
 
 For the LSTM, Soft-DTW produces the largest lag reduction of all evaluated strategies: the mean lag decreases from 51.2 to 46.0~minutes, a reduction of 5.2~minutes. However, this comes at a cost: RMSE increases from 36.09 to 37.23~mg/dL (+3.2\%) and MAE increases from 27.12 to 28.76~mg/dL. Event detection does not improve; the F2 score of 0.010 is similar to the MSE baseline (0.004), and recall decreases from 0.004 to 0.009. The elastic alignment during training shifts the prediction closer in time to the true trajectory, but this does not translate into a meaningful gain in detecting threshold crossings.
 
-For PatchTST, the behaviour is different. The lag decreases by only 0.9~minutes (55.3 to 54.4~min) while RMSE increases substantially from 39.27 to 43.24~mg/dL (+10.1\%). This amplitude degradation is attributable to the Reversible Instance Normalisation~\citep{kim2022revin} in PatchTST: RevIN normalises each input window to zero mean and unit variance before processing, then restores the original scale during inference. During Soft-DTW training, the shape alignment objective is applied to the normalised sequences; the resulting error signal is therefore inconsistent with the restored absolute scale, producing large, incoherent gradient updates that degrade amplitude accuracy without reducing temporal displacement. A further consequence of RevIN, namely its removal of absolute glucose level information for threshold-based classification, is discussed in Section~\ref{sec:exp:obj3}.
+For PatchTST, the behaviour is different. The lag decreases by only 0.9~minutes (55.3 to 54.4~min) while RMSE increases substantially from 39.27 to 43.24~mg/dL (+10.1\%). This amplitude degradation is attributable to the Reversible Instance Normalisation~\citep{kim2022revin} in PatchTST (Section~\ref{sec:bg:models:patchtst}): because Soft-DTW aligns shapes on the RevIN-normalised sequences, the resulting error signal is inconsistent with the restored absolute scale, producing large, incoherent gradient updates that degrade amplitude accuracy without reducing temporal displacement. A further consequence of RevIN for threshold-based classification is discussed in Section~\ref{sec:exp:obj3}.
 
 \begin{figure}[tbp]
     \centering
@@ -166,7 +166,7 @@ Direct binary classifiers~\citep{shao2024hypoglycemia, cinar2025hypoclassificati
 
 Both classifiers substantially outperform the best forecast-derived detectors. The LSTM event classifier achieves a recall of 0.693 and an F2 of 0.463, compared to a best forecast-derived F2 of 0.013 for the LSTM under Bounded-Lag loss. The PatchTST event classifier achieves a recall of 0.615 and an F2 of 0.178, compared to a best forecast-derived F2 of 0.085. The large gains in recall indicate that a task-specific training objective is far more effective at detecting hypoglycaemia than threshold-based detection on a regression output. Both improvements are statistically significant after Holm--Bonferroni correction: for LSTM, median $\Delta F2 = 0.460$ [IQR 0.319--0.575], $r = 1.00$, $p = 5.3 \times 10^{-7}$ (Test~1); for PatchTST, median $\Delta F2 = 0.108$ [IQR 0.001--0.199], $r = 0.60$, $p = 1.5 \times 10^{-3}$ (Test~2); see Tab.~\ref{tab:exp:significance}.
 
-A performance inversion is observed between the two architectures. In the forecasting tasks, the LSTM consistently achieves lower RMSE (36.09~mg/dL) than PatchTST (39.27~mg/dL). In the classification task, this ordering reverses: the LSTM event classifier achieves F2~=~0.463, substantially higher than the PatchTST classifier at F2~=~0.178 (median $\Delta F2 = 0.288$ [IQR 0.206--0.346], $r = 1.00$, $p = 5.3 \times 10^{-7}$; Test~3, Tab.~\ref{tab:exp:significance}). This inversion is explained by the Reversible Instance Normalisation (RevIN)~\citep{kim2022revin} used in PatchTST, introduced in Section~\ref{sec:exp:obj1}. While RevIN normalises each input window before processing and restores the original scale during inference, a design choice that aids forecasting accuracy, it is directly detrimental to threshold-based classification: a classifier operating on scale-free inputs cannot reliably associate a window with the absolute glucose level of 70~mg/dL required to trigger a positive label. The LSTM, which processes the raw glucose values without normalisation, can directly learn to detect proximity to the clinical threshold.
+A performance inversion is observed between the two architectures. In the forecasting tasks, the LSTM consistently achieves lower RMSE (36.09~mg/dL) than PatchTST (39.27~mg/dL). In the classification task, this ordering reverses: the LSTM event classifier achieves F2~=~0.463, substantially higher than the PatchTST classifier at F2~=~0.178 (median $\Delta F2 = 0.288$ [IQR 0.206--0.346], $r = 1.00$, $p = 5.3 \times 10^{-7}$; Test~3, Tab.~\ref{tab:exp:significance}). This inversion is explained by the Reversible Instance Normalisation (RevIN)~\citep{kim2022revin} used in PatchTST (Section~\ref{sec:bg:models:patchtst}): a classifier operating on its scale-free inputs cannot reliably associate a window with the absolute 70~mg/dL threshold required to trigger a positive label, whereas the LSTM processes the raw glucose values and can directly learn proximity to the clinical threshold.
 
 \begin{figure}[tbp]
     \centering
@@ -228,7 +228,7 @@ Taken together, the lead-time distribution qualifies the interpretation of the F
 \section{Overall Comparison} \label{sec:exp:overall}
 % ================================================================
 
-Tab.~\ref{tab:exp:overall} summarises all ten model configurations across the full set of evaluation metrics. The results show that no single configuration dominates across both forecasting quality and event detection performance.
+Across all ten configurations (Tabs.~\ref{tab:exp:baseline}--\ref{tab:exp:classifiers}), no single configuration dominates both forecasting quality and event detection performance.
 
 Among the eight forecast-derived configurations, LSTM multi-step achieves the best trajectory accuracy with an RMSE of 35.59~mg/dL and an MAE of 26.80~mg/dL. PatchTST multi-step achieves the highest event detection F2 among forecast-derived configurations at 0.085. However, all forecast-derived F2 scores remain below 0.09, which indicates that threshold-based detection on a regression output is fundamentally limited regardless of the training strategy.
 
@@ -236,31 +236,3 @@ The direct event classifiers stand apart from the forecasting configurations. Th
 
 The best trajectory quality and the best event detection performance are achieved by different model configurations. LSTM multi-step leads on RMSE and MAE, while LSTM direct classifier leads on recall, F1, and F2. These two strengths do not overlap in a single configuration, which indicates that trajectory forecasting and event detection measure fundamentally different aspects of model behaviour. A practical system that requires both a high-quality glucose forecast and hypoglycaemia detection support would need to deploy the two best-performing models separately, with each used for the task it is optimised for; the limited lead time and high false-alarm rate of the classifier (Sections~\ref{sec:exp:obj3:leadtime} and~\ref{sec:conc:limitations}) constrain the degree to which it can serve as an anticipatory warning system.
 
-\begin{table}[tbp]
-\centering
-\small
-\caption{Comprehensive summary of all ten model configurations. The first eight rows show the forecast-derived detectors; the final two rows show the direct binary event classifiers. Bold values mark the global best per column. RMSE$^*$ is the lag-adjusted RMSE after the optimal per-patient temporal shift $\Delta^*$. Lag is the average absolute shift in minutes ($|\Delta^*| \times 5$~min). RMSE, RMSE$^*$, and MAE are in mg/dL; for forecasting models, event-detection metrics are derived by thresholding each 60-min prediction at 70~mg/dL with $\tau = 15$~min. Dashes indicate metrics not applicable to classifiers. Means over 36 patients.}
-\label{tab:exp:overall}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{llrrrrrrrr}
-\toprule
-Architecture & Training & RMSE & RMSE$^*$ & Lag (min) & MAE & Precision & Recall & F1 & F2 \\
-\midrule
-\multicolumn{10}{l}{\textit{LSTM}} \\[2pt]
- & MSE (baseline) & 36.09 & 21.65          & 51.2          & 27.12          & 0.010 & 0.004 & 0.005 & 0.004 \\
- & Bounded-Lag    & 36.14 & 25.25          & 48.6          & 27.57          & 0.017 & 0.012 & 0.014 & 0.013 \\
- & Soft-DTW       & 37.23 & 28.67          & \textbf{46.0} & 28.76          & 0.039 & 0.009 & 0.014 & 0.010 \\
- & Multi-step     & \textbf{35.59} & 20.74 & 50.1          & \textbf{26.80} & 0.011 & 0.009 & 0.010 & 0.010 \\
-\midrule
-\multicolumn{10}{l}{\textit{PatchTST}} \\[2pt]
- & MSE (baseline) & 39.27 & \textbf{14.21} & 55.3          & 29.00          & 0.048 & 0.089 & 0.061 & 0.074 \\
- & Bounded-Lag    & 39.30 & 16.70          & 54.6          & 29.03          & 0.055 & 0.095 & 0.066 & 0.080 \\
- & Soft-DTW       & 43.24 & 24.01          & 54.4          & 32.25          & 0.056 & 0.129 & 0.062 & 0.084 \\
- & Multi-step     & 39.05 & 14.53          & 54.6          & 28.84          & 0.060 & 0.103 & 0.072 & 0.085 \\
-\midrule
-\multicolumn{10}{l}{\textit{Direct Event Classifiers}} \\[2pt]
- & LSTM            & ---   & ---            & ---           & ---            & \textbf{0.237} & \textbf{0.693} & \textbf{0.334} & \textbf{0.463} \\
- & PatchTST        & ---   & ---            & ---           & ---            & 0.054 & 0.615 & 0.095 & 0.178 \\
-\bottomrule
-\end{tabular}}
-\end{table}
