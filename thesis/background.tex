@@ -6,7 +6,7 @@ This chapter provides the theoretical foundation for the thesis, focusing strict
 % ================================================================
 \subsection{Long Short-Term Memory Networks} \label{sec:bg:models:lstm}
 
-Standard recurrent neural networks (RNNs) process sequential data by maintaining a hidden state $h_t \in \mathbb{R}^d$ that is updated at each time step as a function of the current input $x_t$ and the previous state $h_{t-1}$. However, vanilla RNNs suffer from the vanishing gradient problem~\citep{hochreiter1997lstm}: during backpropagation through time, gradients are multiplied by the recurrent weight matrix at each step, causing them to decay exponentially for long sequences and preventing the network from learning dependencies beyond a few steps.
+Standard recurrent neural networks (RNNs) process sequential data by maintaining a hidden state $h_t \in \mathbb{R}^d$ that is updated at each time step as a function of the current input $x_t$ and the previous state $h_{t-1}$. However, vanilla RNNs suffer from the vanishing gradient problem~\citep{bengio1994vanishing}: during backpropagation through time, gradients are multiplied by the recurrent weight matrix at each step, causing them to decay exponentially for long sequences and preventing the network from learning dependencies beyond a few steps.
 
 Long Short-Term Memory networks (LSTMs)~\citep{hochreiter1997lstm} resolve this by introducing a cell state $c_t$ that runs through the sequence with only additive interactions, protected by three learnable gating mechanisms. The forget gate $f_t$ determines what fraction of the previous cell state to retain; the input gate $i_t$ and candidate activation $\tilde{c}_t$ control what new information is written to the cell state; and the output gate $o_t$ controls what part of the updated cell state is exposed as the hidden state:
 \begin{align}
@@ -89,7 +89,7 @@ In the CGM forecasting setting, however, MSE has a critical limitation: it penal
 
 \subsection{Bounded Lag Loss} \label{sec:bg:losses:bl}
 
-The Bounded Lag loss addresses the temporal rigidity of MSE by tolerating small timing offsets: instead of comparing each predicted value $\hat{y}_t$ only against the true value at the same time step $y_t$, it selects the best-matching true value within a local window of $D$ steps in either direction:
+The Bounded Lag loss~\citep{prg_glucose_proposal} addresses the temporal rigidity of MSE by tolerating small timing offsets: instead of comparing each predicted value $\hat{y}_t$ only against the true value at the same time step $y_t$, it selects the best-matching true value within a local window of $D$ steps in either direction:
 \begin{equation}
     \mathcal{L}_\text{BL}(\hat{\mathbf{y}},\, \mathbf{y}) = \frac{1}{n}\sum_{t=1}^{n}\;\min_{|k| \leq D}\;\bigl(\hat{y}_t - y_{t+k}\bigr)^2
     \label{eq:bl_loss}
@@ -133,7 +133,7 @@ Both are reported in mg/dL. RMSE weights large errors more heavily due to squari
 
 \subsection*{Lag-Adjusted RMSE (RMSE\texorpdfstring{$^*$}{*})}
 
-To separate the timing component of prediction error from structural inaccuracy, a diagnostic metric is used that searches for the optimal constant temporal shift $\Delta^*$ and computes RMSE after applying it:
+To separate the timing component of prediction error from structural inaccuracy, a diagnostic metric~\citep{prg_glucose_proposal} is used that searches for the optimal constant temporal shift $\Delta^*$ and computes RMSE after applying it:
 \begin{equation}
     \Delta^* = \operatorname*{arg\,min}_{k \,\in\, \{-K,\ldots,K\}} \text{RMSE}\bigl(g_{1:n},\; \text{shift}(\hat{g}_{1:n}, k)\bigr)
     \label{eq:best_lag}
