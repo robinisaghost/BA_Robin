@@ -163,7 +163,7 @@ The $F_1$ score ($\beta = 1$) is the harmonic mean of precision and recall. The 
 
 \subsection*{Tolerance Window $\tau$ for Forecast-Derived Detection}
 
-For forecast-derived detectors (models trained as regressors whose predicted trajectory is thresholded at 70~mg/dL), a strict match between predicted and true threshold crossings is often too rigid. A tolerance window $\tau$ is introduced: a predicted crossing $p_c$ is counted as a TP if it falls within $\tau$ minutes of the true crossing $t_c$:
+For forecast-derived detectors (models trained as regressors whose predicted trajectory is thresholded at 70~mg/dL), a strict match between predicted and true threshold crossings is often too rigid. Following \citet{prg_glucose_proposal}, a tolerance window $\tau$ is introduced: a predicted crossing $p_c$ is counted as a TP if it falls within $\tau$ minutes of the true crossing $t_c$:
 \begin{equation}
     \text{TP: } |t_c - p_c| \leq \tau
     \label{eq:tau_match}
@@ -173,7 +173,7 @@ as illustrated in Fig.~\ref{fig:bg:tau_tolerance}. The standard evaluation in th
 \begin{figure}[tbp]
     \centering
     \includegraphics[width=0.7\textwidth]{tau_tolerance.png}
-    \caption{Illustration of the event-detection tolerance window $\tau$. The true threshold crossing $t_c$ and the predicted crossing $p_c$ are considered a matched detection if $|t_c - p_c| \leq \tau$. The shaded $\pm\tau$ band around $t_c$ defines the acceptance region; predictions falling outside this window are counted as false positives or misses.}
+    \caption{Illustration of the event-detection tolerance window $\tau$~\citep{prg_glucose_proposal}. The true threshold crossing $t_c$ and the predicted crossing $p_c$ are considered a matched detection if $|t_c - p_c| \leq \tau$. The shaded $\pm\tau$ band around $t_c$ defines the acceptance region; predictions falling outside this window are counted as false positives or misses.}
     \label{fig:bg:tau_tolerance}
 \end{figure}
 
