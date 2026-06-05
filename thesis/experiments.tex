@@ -190,6 +190,23 @@ PatchTST event classifier & 0.054 & 0.615          & 0.095 & 0.178          \\
 \end{tabular}
 \end{table}
 
+\begin{table}[tbp]
+\centering
+\small
+\caption{Wilcoxon signed-rank tests (two-sided, Holm--Bonferroni corrected, $\alpha = 0.05$) comparing per-patient F2 scores for three paired comparisons. $r$ is the rank-biserial correlation (effect size); $p$ is the Holm-corrected $p$-value. All three tests are significant at $\alpha = 0.05$.}
+\label{tab:exp:significance}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrr}
+\toprule
+Comparison & Median $\Delta F2$ [IQR] & $r$ & $p$ (Holm) \\
+\midrule
+LSTM classifier vs.\ LSTM Bounded-Lag (Test~1) & 0.460 [0.319--0.575] & 1.00 & $5.3 \times 10^{-7}$ \\
+PatchTST classifier vs.\ PatchTST Multi-step (Test~2) & 0.108 [0.001--0.199] & 0.60 & $1.5 \times 10^{-3}$ \\
+LSTM classifier vs.\ PatchTST classifier (Test~3) & 0.288 [0.206--0.346] & 1.00 & $5.3 \times 10^{-7}$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
 \subsection{Lead-Time Analysis}
 \label{sec:exp:obj3:leadtime}
 
@@ -244,23 +261,6 @@ Architecture & Training & RMSE & RMSE$^*$ & Lag (min) & MAE & Precision & Recall
 \multicolumn{10}{l}{\textit{Direct Event Classifiers}} \\[2pt]
  & LSTM            & ---   & ---            & ---           & ---            & \textbf{0.237} & \textbf{0.693} & \textbf{0.334} & \textbf{0.463} \\
  & PatchTST        & ---   & ---            & ---           & ---            & 0.054 & 0.615 & 0.095 & 0.178 \\
-\bottomrule
-\end{tabular}}
-\end{table}
-
-\begin{table}[tbp]
-\centering
-\small
-\caption{Wilcoxon signed-rank tests (two-sided, Holm--Bonferroni corrected, $\alpha = 0.05$) comparing per-patient F2 scores for three paired comparisons. $r$ is the rank-biserial correlation (effect size); $p$ is the Holm-corrected $p$-value. All three tests are significant at $\alpha = 0.05$.}
-\label{tab:exp:significance}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{lrrr}
-\toprule
-Comparison & Median $\Delta F2$ [IQR] & $r$ & $p$ (Holm) \\
-\midrule
-LSTM classifier vs.\ LSTM Bounded-Lag (Test~1) & 0.460 [0.319--0.575] & 1.00 & $5.3 \times 10^{-7}$ \\
-PatchTST classifier vs.\ PatchTST Multi-step (Test~2) & 0.108 [0.001--0.199] & 0.60 & $1.5 \times 10^{-3}$ \\
-LSTM classifier vs.\ PatchTST classifier (Test~3) & 0.288 [0.206--0.346] & 1.00 & $5.3 \times 10^{-7}$ \\
 \bottomrule
 \end{tabular}}
 \end{table}
