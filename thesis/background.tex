@@ -99,7 +99,7 @@ Predictions that fall within the tolerance window $D$ contribute zero additional
 
 \subsection{Soft DTW: Differentiable Dynamic Time Warping} \label{sec:bg:losses:sdtw}
 
-Dynamic Time Warping (DTW) measures the similarity between two sequences by finding an optimal monotone alignment that permits one-to-many correspondences between time steps, thereby accommodating local timing differences that rigid pointwise comparisons cannot tolerate. Given a cost matrix $\Delta(\mathbf{a}, \mathbf{b}) \in \mathbb{R}^{n \times m}$ with entries $\Delta_{ij} = (a_i - b_j)^2$, the standard DTW distance is:
+Dynamic Time Warping (DTW)~\citep{sakoe1978dtw, berndt1994dtw} measures the similarity between two sequences by finding an optimal monotone alignment that permits one-to-many correspondences between time steps, thereby accommodating local timing differences that rigid pointwise comparisons cannot tolerate. Given a cost matrix $\Delta(\mathbf{a}, \mathbf{b}) \in \mathbb{R}^{n \times m}$ with entries $\Delta_{ij} = (a_i - b_j)^2$, the standard DTW distance is:
 \begin{equation}
     \text{DTW}(\mathbf{a},\, \mathbf{b}) = \min_{\mathbf{A} \in \mathcal{A}_{n,m}} \langle \mathbf{A},\, \Delta(\mathbf{a}, \mathbf{b}) \rangle
     \label{eq:dtw}
