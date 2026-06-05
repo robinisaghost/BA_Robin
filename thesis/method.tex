@@ -40,7 +40,7 @@ Forecasting models are also evaluated as event detectors by applying the same th
 
 The experiments are conducted on the T1DATA dataset~\citep{garciatirado2023t1d}, a randomised crossover clinical trial in which adults with Type~1 diabetes used Dexcom G6 continuous glucose monitoring devices. The dataset provides glucose measurements from 36 anonymised patients recorded at 5-minute intervals over approximately 30 days per patient. Missing values in the raw signal are imputed by linear interpolation before model training.
 
-A defining statistical property of the CGM signal is its high temporal autocorrelation (Section~\ref{sec:intro:timeshift}), the primary mechanism behind the time-shift artefact that motivates this work.
+A defining statistical property of the CGM signal is its high temporal autocorrelation (Chapter~\ref{ch:introduction}), the primary mechanism behind the time-shift artefact that motivates this work.
 
 The event detection task is highly imbalanced. Across the full cohort, 57{,}680 labelled windows are negative and only 3{,}462 are positive, corresponding to a cohort-mean positive rate of 5.7\%. Fig.~\ref{fig:method:class_imbalance} shows the per-patient distribution and illustrates that the positive rate varies considerably across patients, reflecting differences in individual glycaemic control. This imbalance motivates two design choices: the F2 metric (Section~\ref{sec:bg:metrics}), which weights recall twice as heavily as precision, and a positive class weight of $w_{+} = N_\text{neg} / N_\text{pos} \approx 16.7$ applied to the binary cross-entropy loss when training direct classifiers.
 

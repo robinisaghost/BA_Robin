@@ -1,24 +1,9 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
-This chapter motivates the presented research, introduces the central problem of the systematic time-shift artefact in machine-learned glucose predictions, and defines the three core research objectives. Section~\ref{sec:intro:context} introduces the clinical context and the time-shift problem that motivates this work. Section~\ref{sec:intro:objectives} reviews related work and defines the scope, research questions, and contributions of the thesis. Section~\ref{sec:intro:structure} outlines the organisation of the remaining chapters.
-
-% ================================================================
-\section{Motivation and Problem Statement}
-\label{sec:intro:context}
-% ================================================================
-
-This section establishes the clinical and technical context of the thesis. Section~\ref{sec:intro:motivation} introduces Type~1 diabetes and the role of continuous glucose monitoring; Section~\ref{sec:intro:timeshift} explains the systematic time-shift artefact that motivates the ablation study.
-
-\subsection{Clinical Motivation}
-\label{sec:intro:motivation}
-
 Type~1 diabetes mellitus is an autoimmune condition in which the immune system destroys the insulin-producing beta cells of the pancreas, eliminating endogenous insulin secretion and necessitating lifelong external insulin administration. The global scale of the condition is substantial: the IDF Diabetes Atlas reports that approximately 537 million adults were living with diabetes in 2021~\citep{idf2021atlas}, with Type~1 accounting for a significant proportion of paediatric and young-adult cases. Managing blood glucose within safe limits is a continuous and technically demanding task for patients and clinicians alike.
 
 Continuous glucose monitoring (CGM) devices address this challenge by measuring interstitial glucose every five minutes, providing a dense real-time signal that serves as the foundational input for modern automated insulin delivery systems. A critical clinical target is the hypoglycaemia threshold of 70~mg/dL: glucose values below this level can rapidly progress to seizures, loss of consciousness, and, in severe cases, death~\citep{battelino2019}. Pharmacodynamic delays of 15 to 45 minutes between an insulin dose and its glycaemic effect mean that a hypoglycaemia event must be anticipated in advance to allow timely intervention. A missed event carries far greater clinical risk than a false alarm, which motivates the use of recall-weighted evaluation metrics; the F2 score used throughout this thesis is formally introduced in Section~\ref{sec:bg:metrics}.
-
-\subsection{The Time-Shift Problem in Glucose Forecasting}
-\label{sec:intro:timeshift}
 
 Deep learning models trained with mean squared error on the glucose signal systematically produce predictions that are structurally correct but displaced forward in time by approximately 50 to 55~minutes, an effect first observed in preliminary PRG experiments~\citep{prg_glucose_proposal}. The root cause is mathematical: the lag-1 autocorrelation of the CGM signal exceeds 0.98, meaning the glucose value one step ahead is nearly identical to the current value. MSE training therefore rewards a model that reproduces recent glucose history rather than learning to anticipate future changes, because copying the past incurs almost no penalty under a pointwise loss. The result is a prediction curve that mirrors the true trajectory at a temporal offset, as illustrated in Fig.~\ref{fig:intro:timeshift_demo}.
 
@@ -36,24 +21,9 @@ The clinical consequence is direct: if the predicted threshold crossing occurs 5
     \label{fig:intro:timeshift_demo}
 \end{figure}
 
-% ================================================================
-\section{Research Context and Objectives}
-\label{sec:intro:objectives}
-% ================================================================
-
-This section positions the work relative to existing literature and defines the research objectives. Section~\ref{sec:intro:relwork} reviews related work and identifies the gap addressed by this thesis; Section~\ref{sec:intro:scope} specifies the scope, research questions, and contributions.
-
-\subsection{Related Work and Research Gap}
-\label{sec:intro:relwork}
-
-The closest related work at the University of Bern is the bachelor thesis of \citet{huni2023glucose}, which evaluated LSTM and Graph Attention Networks~\citep{velickovic2018gat} for hypoglycaemia prediction on CGM data. That study did not isolate or quantify the time-shift artefact as a distinct phenomenon, which is the primary focus of the present work.
-
-At the architecture level, \citet{lim2021tsforecast} survey deep learning for time-series forecasting and document the progression from recurrent models to attention-based architectures~\citep{vaswani2017attention}. PatchTST~\citep{nie2023patchtst} extends this line of work by treating fixed-length patches as attention tokens and uses Reversible Instance Normalisation~\citep{kim2022revin} to handle heterogeneous patient profiles; the structural consequences of this normalisation strategy for threshold-based classification are analysed in Section~\ref{sec:exp:obj3}.
+The closest related work at the University of Bern is the bachelor thesis of \citet{huni2023glucose}, which evaluated LSTM and Graph Attention Networks~\citep{velickovic2018gat} for hypoglycaemia prediction on CGM data. That study did not isolate or quantify the time-shift artefact as a distinct phenomenon, which is the primary focus of the present work. At the architecture level, \citet{lim2021tsforecast} survey deep learning for time-series forecasting and document the progression from recurrent models to attention-based architectures~\citep{vaswani2017attention}. PatchTST~\citep{nie2023patchtst} extends this line of work by treating fixed-length patches as attention tokens and uses Reversible Instance Normalisation~\citep{kim2022revin} to handle heterogeneous patient profiles; the structural consequences of this normalisation strategy for threshold-based classification are analysed in Section~\ref{sec:exp:obj3}.
 
 In the blood glucose domain, \citet{fox2018multioutput} demonstrate that supervising on the full future trajectory rather than a single endpoint improves forecast accuracy, forming the basis of Objective~2. For direct event detection, \citet{shao2024hypoglycemia} and \citet{cinar2025hypoclassification} show that end-to-end binary classifiers outperform threshold-based regression detection, motivating Objective~3. Regarding the time-shift specifically, \citet{wolff2025cgpm} argue for clinically relevant evaluation criteria beyond accuracy and include temporal gain within composite metrics; \citet{sun2026futureaware} address the prediction delay through future-aware training strategies. Neither work treats the temporal delay as the primary subject of a controlled ablation study, nor employs a dedicated lag-adjusted metric to isolate the timing component from shape error, which is the gap this thesis addresses.
-
-\subsection{Scope, Research Questions, and Contributions}
-\label{sec:intro:scope}
 
 The experiments are conducted on the T1DATA cohort~\citep{garciatirado2023t1d}, comprising CGM records from 36 anonymised adults with Type~1 diabetes recorded over approximately 30 days per patient using Dexcom G6 devices. All models are trained and evaluated independently per patient; cohort means are reported throughout. Two architectures serve as parallel baselines: a recurrent Long Short-Term Memory network and the patch-based PatchTST Transformer. A strictly univariate input is used throughout to deliberately isolate the temporal predictive capacity of the glucose signal itself. Exactly one configuration variable is modified per research objective, enabling clean attribution of any observed differences in performance.
 
@@ -73,10 +43,5 @@ This thesis makes the following contributions in addressing these questions:
     \item A tolerance-window sweep protocol ($\tau \in \{0, 5, \ldots, 60\}$~minutes) that characterises how much of the detection failure is attributable to timing mismatch rather than structural inability to anticipate events.
     \item Empirical evidence that glucose trajectory forecasting and hypoglycaemia event detection are best treated as separate tasks, and that the performance ranking of architectures inverts between the two objectives.
 \end{itemize}
-
-% ================================================================
-\section{Thesis Structure}
-\label{sec:intro:structure}
-% ================================================================
 
 Chapter~\ref{ch:background} establishes the theoretical foundations: the LSTM and PatchTST architectures, the evaluated loss functions, and the evaluation metrics. Chapter~\ref{ch:method} defines the mathematical problem formulation, describes the T1DATA dataset, and specifies the three training objectives of the ablation study. Chapter~\ref{ch:experiments} presents the empirical results for each objective and an overall comparative summary across all ten model configurations. Chapter~\ref{ch:conclusions} summarises the findings, identifies methodological limitations, and outlines directions for future research.
