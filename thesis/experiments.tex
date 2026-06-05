@@ -54,7 +54,7 @@ The Soft-DTW loss~\citep{cuturi2017softdtw} (Section~\ref{sec:bg:losses:sdtw}) a
 
 For the LSTM, Soft-DTW produces the largest lag reduction of all evaluated strategies: the mean lag decreases from 51.2 to 46.0~minutes, a reduction of 5.2~minutes. However, this comes at a cost: RMSE increases from 36.09 to 37.23~mg/dL (+3.2\%) and MAE increases from 27.12 to 28.76~mg/dL. Event detection does not improve; the F2 score of 0.010 is similar to the MSE baseline (0.004), and recall decreases from 0.004 to 0.009. The elastic alignment during training shifts the prediction closer in time to the true trajectory, but this does not translate into a meaningful gain in detecting threshold crossings.
 
-For PatchTST, the behaviour is different. The lag decreases by only 0.9~minutes (55.3 to 54.4~min) while RMSE increases substantially from 39.27 to 43.24~mg/dL (+10.1\%). This amplitude degradation is attributable to the Reversible Instance Normalisation~\citep{kim2022revin} in PatchTST (Section~\ref{sec:bg:models:patchtst}): because Soft-DTW aligns shapes on the RevIN-normalised sequences, the resulting error signal is inconsistent with the restored absolute scale, producing large, incoherent gradient updates that degrade amplitude accuracy without reducing temporal displacement. A further consequence of RevIN for threshold-based classification is discussed in Section~\ref{sec:exp:obj3}.
+For PatchTST, the behaviour is different. The lag decreases by only 0.9~minutes (55.3 to 54.4~min) while RMSE increases substantially from 39.27 to 43.24~mg/dL (+10.1\%). This amplitude degradation stems from PatchTST's Reversible Instance Normalisation (Section~\ref{sec:bg:models:patchtst}): Soft-DTW aligns shapes in the scale-free normalised space, so the resulting gradient updates are incoherent with the restored absolute scale and degrade amplitude accuracy without reducing temporal displacement. The consequences of RevIN for threshold-based classification are examined in Section~\ref{sec:exp:obj3}.
 
 \begin{figure}[tbp]
     \centering
@@ -134,28 +134,21 @@ This section evaluates hypoglycaemia detection from two complementary perspectiv
 
 \subsection{Forecast-Derived Detection: Tolerance Sweep}
 
-The tolerance sweep evaluates how forecast-derived event detection changes as the acceptance window $\tau$ is widened from 0 to 60~minutes in 5-minute steps (Section~\ref{sec:bg:metrics}). Full numerical results are provided in Tabs.~\ref{tab:app:tau_sweep_lstm} and~\ref{tab:app:tau_sweep_patchtst} in Appendix~\ref{appendix:detailed_metrics}. Fig.~\ref{fig:exp:tau_sweep_plot} summarises the F1 curves; Figs.~\ref{fig:exp:tau_sweep_lstm} and~\ref{fig:exp:tau_sweep_patchtst} show per-metric breakdowns for all training strategies.
+The tolerance sweep evaluates how forecast-derived event detection changes as the acceptance window $\tau$ is widened from 0 to 60~minutes in 5-minute steps (Section~\ref{sec:bg:metrics}). Full numerical results are provided in Tabs.~\ref{tab:app:tau_sweep_lstm} and~\ref{tab:app:tau_sweep_patchtst} in Appendix~\ref{appendix:detailed_metrics}. Figs.~\ref{fig:exp:tau_sweep_lstm} and~\ref{fig:exp:tau_sweep_patchtst} show the Precision, Recall, and F2 curves for all training strategies, separately for LSTM and PatchTST.
 
-The sweep reveals a fundamental architectural difference. For PatchTST, the F1 score rises steeply as $\tau$ increases: the MSE baseline rises from 0.061 at $\tau = 15$~min to 0.551 at $\tau = 60$~min. For LSTM, the same strategy rises only from 0.005 to 0.113 over the same range. This contrast indicates that PatchTST produces predicted threshold crossings that are structurally present but temporally displaced, while the LSTM rarely produces threshold crossings at all, regardless of how wide the tolerance window becomes. Offset-aware training strategies do not resolve this pattern: even the Soft-DTW LSTM, which achieves the largest lag reduction, reaches only F1 = 0.082 at $\tau = 60$~min, compared to 0.551 for PatchTST MSE.
-
-\begin{figure}[tbp]
-    \centering
-    \includegraphics[width=\textwidth]{tau_sweep_comparison.png}
-    \caption{F1 as a function of the tolerance window $\tau$ for all four training strategies, shown separately for LSTM (left) and PatchTST (right). Each curve corresponds to one training objective (MSE, Bounded-Lag, Soft-DTW, Multi-step) and shows how F1 changes as $\tau$ is widened from 0 to 60~minutes. Per-metric breakdowns (F1, Precision, Recall) are shown in Figs.~\ref{fig:exp:tau_sweep_lstm} and~\ref{fig:exp:tau_sweep_patchtst}. Detailed numerical tables are provided in Appendix~\ref{appendix:detailed_metrics}.}
-    \label{fig:exp:tau_sweep_plot}
-\end{figure}
+The sweep reveals a fundamental architectural difference. For PatchTST, the F2 score rises steeply as $\tau$ increases: the MSE baseline rises from 0.074 at $\tau = 15$~min to 0.640 at $\tau = 60$~min. For LSTM, the same strategy rises only from 0.004 to 0.092 over the same range. This contrast indicates that PatchTST produces predicted threshold crossings that are structurally present but temporally displaced, while the LSTM rarely produces threshold crossings at all, regardless of how wide the tolerance window becomes. Offset-aware training strategies do not resolve this pattern: even the Soft-DTW LSTM, which achieves the largest lag reduction, reaches only F2 = 0.065 at $\tau = 60$~min, compared to 0.640 for PatchTST MSE.
 
 \begin{figure}[tbp]
     \centering
     \includegraphics[width=\textwidth]{tau_sweep_appendix_lstm.png}
-    \caption{Cohort-mean F1, Precision, and Recall as a function of the tolerance window $\tau$ for all four LSTM training strategies (MSE, Bounded-Lag, Soft-DTW, Multi-step). Each panel shows one metric; line colours and styles correspond to the training objective as indicated in the legend.}
+    \caption{Cohort-mean Precision, Recall, and F2 as a function of the tolerance window $\tau$ for all four LSTM training strategies (MSE, Bounded-Lag, Soft-DTW, Multi-step). Each panel shows one metric; line colours and styles correspond to the training objective as indicated in the legend. Detailed numerical values are in Tab.~\ref{tab:app:tau_sweep_lstm}.}
     \label{fig:exp:tau_sweep_lstm}
 \end{figure}
 
 \begin{figure}[tbp]
     \centering
     \includegraphics[width=\textwidth]{tau_sweep_appendix_patchtst.png}
-    \caption{Cohort-mean F1, Precision, and Recall as a function of the tolerance window $\tau$ for all four PatchTST training strategies (MSE, Bounded-Lag, Soft-DTW, Multi-step). Each panel shows one metric; line colours and styles correspond to the training objective as indicated in the legend.}
+    \caption{Cohort-mean Precision, Recall, and F2 as a function of the tolerance window $\tau$ for all four PatchTST training strategies (MSE, Bounded-Lag, Soft-DTW, Multi-step). Each panel shows one metric; line colours and styles correspond to the training objective as indicated in the legend. Detailed numerical values are in Tab.~\ref{tab:app:tau_sweep_patchtst}.}
     \label{fig:exp:tau_sweep_patchtst}
 \end{figure}
 
@@ -166,7 +159,7 @@ Direct binary classifiers~\citep{shao2024hypoglycemia, cinar2025hypoclassificati
 
 Both classifiers substantially outperform the best forecast-derived detectors. The LSTM event classifier achieves a recall of 0.693 and an F2 of 0.463, compared to a best forecast-derived F2 of 0.013 for the LSTM under Bounded-Lag loss. The PatchTST event classifier achieves a recall of 0.615 and an F2 of 0.178, compared to a best forecast-derived F2 of 0.085. The large gains in recall indicate that a task-specific training objective is far more effective at detecting hypoglycaemia than threshold-based detection on a regression output. Both improvements are statistically significant after Holm--Bonferroni correction: for LSTM, median $\Delta F2 = 0.460$ [IQR 0.319--0.575], $r = 1.00$, $p = 5.3 \times 10^{-7}$ (Test~1); for PatchTST, median $\Delta F2 = 0.108$ [IQR 0.001--0.199], $r = 0.60$, $p = 1.5 \times 10^{-3}$ (Test~2); see Tab.~\ref{tab:exp:significance}.
 
-A performance inversion is observed between the two architectures. In the forecasting tasks, the LSTM consistently achieves lower RMSE (36.09~mg/dL) than PatchTST (39.27~mg/dL). In the classification task, this ordering reverses: the LSTM event classifier achieves F2~=~0.463, substantially higher than the PatchTST classifier at F2~=~0.178 (median $\Delta F2 = 0.288$ [IQR 0.206--0.346], $r = 1.00$, $p = 5.3 \times 10^{-7}$; Test~3, Tab.~\ref{tab:exp:significance}). This inversion is explained by the Reversible Instance Normalisation (RevIN)~\citep{kim2022revin} used in PatchTST (Section~\ref{sec:bg:models:patchtst}): a classifier operating on its scale-free inputs cannot reliably associate a window with the absolute 70~mg/dL threshold required to trigger a positive label, whereas the LSTM processes the raw glucose values and can directly learn proximity to the clinical threshold.
+A performance inversion is observed between the two architectures. In the forecasting tasks, the LSTM consistently achieves lower RMSE (36.09~mg/dL) than PatchTST (39.27~mg/dL). In the classification task, this ordering reverses: the LSTM event classifier achieves F2~=~0.463, substantially higher than the PatchTST classifier at F2~=~0.178 (median $\Delta F2 = 0.288$ [IQR 0.206--0.346], $r = 1.00$, $p = 5.3 \times 10^{-7}$; Test~3, Tab.~\ref{tab:exp:significance}). This inversion is explained by PatchTST's Reversible Instance Normalisation (Section~\ref{sec:bg:models:patchtst}), which removes absolute scale from the inputs: the classifier cannot reliably associate a normalised window with the fixed 70~mg/dL threshold, whereas the LSTM operates on raw glucose values and can directly learn proximity to the clinical threshold.
 
 \begin{figure}[tbp]
     \centering

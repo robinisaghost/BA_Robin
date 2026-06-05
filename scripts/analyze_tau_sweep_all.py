@@ -97,8 +97,8 @@ def make_figure45(all_results: dict):
 
 
 def make_appendix_figure(all_results: dict, arch: str, fname: str):
-    """Appendix: 1x3 panel (F1, Precision, Recall) for one architecture, all strategies."""
-    metrics = [("F1", "f1"), ("Precision", "precision"), ("Recall", "recall")]
+    """Appendix: 1x3 panel (Precision, Recall, F2) for one architecture, all strategies."""
+    metrics = [("Precision", "precision"), ("Recall", "recall"), ("F2", "f2")]
     fig, axes = plt.subplots(1, 3, figsize=(11, 3.5), sharey=False)
 
     for ax, (metric_label, metric_key) in zip(axes, metrics):

@@ -45,6 +45,12 @@
 
 \graphicspath{{img/}}
 
+%% float placement tuning — prevents pure float pages in the main body
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.7}
+\renewcommand{\textfraction}{0.15}
+\renewcommand{\floatpagefraction}{0.75}
+
 %% planned content environment
 %% Shows a visible framed box listing the content planned for a section.
 %% Each \item is one bullet point. Remove once the section is written.
