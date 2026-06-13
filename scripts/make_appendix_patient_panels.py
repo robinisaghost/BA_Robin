@@ -34,16 +34,16 @@ WIN = 120  # 120 steps x 5 min = 10-hour display window
 # Two pages, two patients each (LSTM + PatchTST panels per patient).
 GROUPS = [["85102", "85116"], ["85215", "85217"]]
 
-TRUE_STYLE = dict(color="#000000", linestyle="-", linewidth=1.8, zorder=5)
+TRUE_STYLE = dict(color="#000000", linestyle="-", linewidth=2.0, zorder=6)
 VARIANTS = [
-    # label,            file-stem,      colour,     linestyle
-    ("MSE (baseline)",  "60min",        "#0072B2",  "-"),
-    ("Bounded-Lag",     "bounded_lag",  "#E69F00",  (0, (5, 1.5))),
-    ("Soft-DTW",        "dtw",          "#009E73",  (0, (3, 1, 1, 1))),
-    ("Multi-step",      "multistep",    "#CC79A7",  (0, (1, 1))),
+    # label,            file-stem,      colour (Okabe-Ito, solid)
+    ("MSE (baseline)",  "60min",        "#0072B2"),
+    ("Bounded-Lag",     "bounded_lag",  "#E69F00"),
+    ("Soft-DTW",        "dtw",          "#009E73"),
+    ("Multi-step",      "multistep",    "#CC79A7"),
 ]
 ARCHS = [("LSTM", "lstm"), ("PatchTST", "patchtst")]
-THRESHOLD_COLOR = "#777777"
+THRESHOLD_COLOR = "#C2185B"  # muted magenta, distinct from all variant colours
 
 
 def find_hypo_window(y_true, win_size=WIN):
@@ -86,13 +86,12 @@ def load_trace(arch_stem, var_stem, pid, key):
 
 
 def legend_handles():
-    h = [Line2D([0], [0], color="#000000", linestyle="-", linewidth=1.8,
-                marker="o", markersize=3, label="Ground truth")]
-    h += [Line2D([0], [0], color=c, linestyle=ls, linewidth=1.5,
-                 marker="o", markersize=3, label=lab)
-          for lab, _, c, ls in VARIANTS]
-    h.append(Line2D([0], [0], color=THRESHOLD_COLOR, linestyle=(0, (4, 3)),
-                    linewidth=1.0, label="70 mg/dL threshold"))
+    h = [Line2D([0], [0], color="#000000", linestyle="-", linewidth=2.0,
+                label="Ground truth")]
+    h += [Line2D([0], [0], color=c, linestyle="-", linewidth=1.6, label=lab)
+          for lab, _, c in VARIANTS]
+    h.append(Line2D([0], [0], color=THRESHOLD_COLOR, linestyle=(0, (5, 3)),
+                    linewidth=1.2, label="70 mg/dL threshold"))
     return h
 
 
@@ -109,28 +108,28 @@ def make_page(patients, out_path):
         t = np.arange(e - s) * SAMPLING_MIN  # minutes within window
 
         gt = test_portion(load_trace(arch_stem, "60min", pid, "true"))
-        ax.plot(t, gt[s:e], marker="o", markersize=2.4, markevery=1,
-                label="Ground truth", **TRUE_STYLE)
-        for _, var_stem, color, ls in VARIANTS:
+        ax.plot(t, gt[s:e], label="Ground truth", **TRUE_STYLE)
+        for _, var_stem, color in VARIANTS:
             pred = test_portion(load_trace(arch_stem, var_stem, pid, "pred"))
             m = min(len(pred), e) - s
-            ax.plot(t[:m], pred[s:s + m], color=color, linestyle=ls,
-                    linewidth=1.3, marker="o", markersize=2.0, markevery=1,
-                    alpha=0.95)
+            ax.plot(t[:m], pred[s:s + m], color=color, linestyle="-",
+                    linewidth=1.4, alpha=0.95)
 
-        ax.axhline(HYPO_THRESHOLD, color=THRESHOLD_COLOR, linestyle=(0, (4, 3)),
-                   linewidth=1.0, zorder=1)
+        ax.axhline(HYPO_THRESHOLD, color=THRESHOLD_COLOR, linestyle=(0, (5, 3)),
+                   linewidth=1.2, zorder=2)
         ax.set_title(f"Patient {pid} — {arch_lab}", fontsize=10,
                      fontweight="bold", loc="left")
         ax.set_ylabel("Glucose [mg/dL]")
+        # Major ticks/labels every hour; small minor ticks mark the 5-min steps.
         ax.xaxis.set_major_locator(MultipleLocator(60))
         ax.xaxis.set_minor_locator(MultipleLocator(5))
-        ax.grid(which="major", axis="x", color="0.85", linewidth=0.6)
-        ax.grid(which="minor", axis="x", color="0.93", linewidth=0.4)
+        ax.grid(which="major", color="white", linewidth=1.0)  # seaborn-style grid
+        ax.tick_params(which="major", length=0)
+        ax.tick_params(which="minor", axis="x", length=3, color="#9aa0b5")
         ax.set_xlim(t[0], t[-1])
         ax.margins(y=0.08)
 
-    axes[-1].set_xlabel("Time [min]  (5-minute samples)")
+    axes[-1].set_xlabel("Time [min]")
     fig.legend(handles=legend_handles(), loc="lower center", ncol=3,
                frameon=False, bbox_to_anchor=(0.5, -0.004))
     fig.tight_layout(rect=(0.0, 0.05, 1.0, 1.0))
@@ -148,9 +147,22 @@ def main():
         "axes.labelsize": 9,
         "xtick.labelsize": 8,
         "ytick.labelsize": 8,
+        "figure.dpi": 200,
+        # seaborn-darkgrid-style aesthetic
+        "figure.facecolor": "white",
+        "axes.facecolor": "#EAEAF2",
+        "axes.edgecolor": "white",
+        "axes.linewidth": 0.0,
+        "axes.grid": True,
+        "axes.axisbelow": True,
+        "grid.color": "white",
+        "grid.linewidth": 1.0,
+        "xtick.color": "#555555",
+        "ytick.color": "#555555",
         "axes.spines.top": False,
         "axes.spines.right": False,
-        "figure.dpi": 200,
+        "axes.spines.left": False,
+        "axes.spines.bottom": False,
     })
     for i, patients in enumerate(GROUPS, start=1):
         make_page(patients, OUT_TMPL.format(i))
