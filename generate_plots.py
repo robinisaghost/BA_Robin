@@ -37,7 +37,7 @@ def setup_plot(title):
 y_mse_true = shape_true
 y_mse_pred = shape_pred
 
-fig, ax = plt.subplots(figsize=(8, 5))
+fig, ax = plt.subplots(figsize=(8, 6))
 ax.plot(t, y_mse_true, color="black",    linewidth=2.5, label="True ($y$)")
 ax.plot(t, y_mse_pred, color="tab:blue", linewidth=2.5, label="Predicted ($\\hat{y}$)")
 ax.set_title("MSE Loss", pad=15, fontsize=14)
@@ -62,7 +62,7 @@ for idx in sample_indices:
     )
 
 fig.tight_layout()
-fig.savefig("loss_mse.png", dpi=300, bbox_inches="tight")
+fig.savefig("thesis/img/loss_mse.png", dpi=300, bbox_inches="tight")
 plt.close()
 print("Erfolgreich generiert: loss_mse.png")
 
@@ -71,7 +71,7 @@ print("Erfolgreich generiert: loss_mse.png")
 y_bl_true = shape_true
 y_bl_pred = shape_pred
 
-fig, ax = plt.subplots(figsize=(8, 5))
+fig, ax = plt.subplots(figsize=(8, 6))
 ax.plot(t, y_bl_true, color="black",    linewidth=2.5, label="True ($y$)")
 ax.plot(t, y_bl_pred, color="tab:blue", linewidth=2.5, label="Predicted ($\\hat{y}$)")
 ax.set_title("Bounded-Lag Loss", pad=15, fontsize=14)
@@ -109,7 +109,7 @@ for zt, zp in zip(zc_true_bl, zc_pred_bl):
     ax.plot([t[zt], t[zp]], [y_val, y_val], **line_kw)
 
 fig.tight_layout()
-fig.savefig("loss_bounded_lag.png", dpi=300, bbox_inches="tight")
+fig.savefig("thesis/img/loss_bounded_lag.png", dpi=300, bbox_inches="tight")
 plt.close()
 print("Erfolgreich generiert: loss_bounded_lag.png")
 
@@ -173,7 +173,7 @@ u = np.linspace(0, 1, n)
 t2_angle = (u + 0.28 * np.sin(np.pi * u)) * 4 * np.pi
 sig2 = 2.0 * np.sin(t2_angle) - 0.6
 
-fig, ax = plt.subplots(figsize=(8, 5))
+fig, ax = plt.subplots(figsize=(8, 6))
 ax.plot(x, sig1, color="black",    linewidth=2.5, label="True ($y$)")
 ax.plot(x, sig2, color="tab:blue", linewidth=2.5, label="Predicted ($\\hat{y}$)")
 
@@ -221,6 +221,6 @@ for idx1, idx2 in path_align:
     )
 
 fig.tight_layout()
-file_name = "loss_dtw_alignment.png"
+file_name = "thesis/img/loss_dtw_alignment.png"
 fig.savefig(file_name, dpi=300, bbox_inches="tight")
 print(f"Erfolgreich generiert: {file_name}")

@@ -7,18 +7,18 @@ This chapter presents the empirical results of all experimental configurations e
 
 Under standard MSE training, the T1DATA cohort results reproduce the systematic prediction delay described in Chapter~\ref{ch:introduction} and anticipated by preliminary PRG experiments~\citep{prg_glucose_proposal}: across both architectures the predicted trajectory is structurally close to the true signal but displaced forward in time, as the mechanism derived in Section~\ref{sec:bg:losses:mse} predicts. The baseline thus instantiates the known failure mode under controlled conditions and serves as the reference point for the ablation study.
 
-Fig.~\ref{fig:exp:baseline_curves} illustrates this effect for a representative 10-hour segment. In both panels the predicted trajectory follows the shape of the ground truth closely, but the descent toward the 70~mg/dL hypoglycaemia threshold occurs visibly later in the prediction than in the true signal, and the predicted trough is similarly displaced. The offset is not specific to the hypoglycaemic episode: it appears in both the rising and falling phases before and after the event, suggesting a persistent property of the training objective rather than an isolated response to a particular glucose pattern.
+Fig.~\ref{fig:exp:baseline_curves} illustrates this effect for a representative 10-hour segment. In both panels the predicted trajectory follows the shape of the ground truth closely, but the descent toward the 70~mg/dL hypoglycaemia threshold occurs visibly later in the prediction than in the true signal, and the predicted trough is similarly displaced. The offset is not specific to the hypoglycaemic episode but appears throughout the rising and falling phases, indicating a persistent property of the training objective rather than a response to a particular glucose pattern.
 
 \begin{figure}[tbp]
     \centering
     \includegraphics[width=0.9\textwidth]{patient_85102.png}
-    \caption[Baseline 60min prediction]{Baseline 60-minute forecasting trajectories for patient 85102 over a representative 10-hour window containing a hypoglycaemia episode. LSTM (left) and PatchTST (right) are shown side by side. The black line is the ground truth CGM signal; the blue dashed line is the model prediction. The red dashed line marks the 70~mg/dL hypoglycaemia threshold.}
+    \caption[Baseline 60min prediction]{Baseline 60-minute forecasting trajectories for patient 85102 over a representative 10-hour window containing a hypoglycaemia episode. LSTM (left) and PatchTST (right) are shown side by side. The bold black line is the ground truth CGM signal and the blue line the model prediction; the dashed line marks the 70~mg/dL hypoglycaemia threshold.}
     \label{fig:exp:baseline_curves}
 \end{figure}
 
 Tab.~\ref{tab:exp:baseline} quantifies what Fig.~\ref{fig:exp:baseline_curves} shows visually. Both architectures produce mean lags of approximately the full 60-minute forecast horizon: the model effectively reproduces the input window shifted forward in time. The gap between RMSE and RMSE$^*$ shows that a substantial fraction of the raw prediction error is attributable purely to the temporal displacement and disappears once alignment is applied; this fraction is proportionally larger for PatchTST than for LSTM despite similar absolute lags, suggesting that PatchTST's raw error is more dominated by the timing offset.
 
-That this delay is representative of the full cohort is shown by Fig.~\ref{fig:exp:lag_dist}, the per-patient distribution of $\Delta^*$ across all 36 patients: both distributions are compact and almost entirely positive, with only a few patients deviating substantially from the cohort median. This consistency in direction and magnitude supports the interpretation that the delay is a systematic consequence of the MSE objective on the highly autocorrelated signal rather than a patient-specific artefact.
+That this delay is representative of the full cohort is shown by Fig.~\ref{fig:exp:lag_dist}, the per-patient distribution of $\Delta^*$ across all 36 patients: both distributions are compact and almost entirely positive, with only a few patients deviating substantially from the cohort median. This consistency supports interpreting the delay as a systematic consequence of the MSE objective on the autocorrelated signal rather than a patient-specific artefact.
 
 \begin{figure}[tbp]
     \centering
@@ -27,7 +27,7 @@ That this delay is representative of the full cohort is shown by Fig.~\ref{fig:e
     \label{fig:exp:lag_dist}
 \end{figure}
 
-The event detection columns of Tab.~\ref{tab:exp:baseline}, derived by thresholding the 60-minute prediction at 70~mg/dL with $\tau = 15$~minutes, reflect the direct clinical consequence of the timing offset: with the predicted trajectory displaced by approximately the full forecast horizon, the threshold crossing tends to arrive at or after the true hypoglycaemic onset rather than in advance of it. The two architectures show notably different baseline detection behaviour: the LSTM triggers alarms at near-zero frequency, while PatchTST produces more alarms but at markedly low precision. Whether this divergence is driven by the MSE objective or by architectural properties is examined in Section~\ref{sec:exp:obj3}.
+The event detection columns of Tab.~\ref{tab:exp:baseline} ($\tau = 15$~minutes) reflect the clinical consequence of the timing offset: with the prediction displaced by nearly the full horizon, the threshold crossing tends to arrive at or after the true onset rather than before it. The two architectures show notably different baseline detection behaviour: the LSTM triggers alarms at near-zero frequency, while PatchTST produces more alarms but at markedly low precision. Whether this divergence is driven by the MSE objective or by architectural properties is examined in Section~\ref{sec:exp:obj3}.
 
 \begin{table}[tbp]
 \centering
@@ -74,7 +74,7 @@ The Bounded-Lag loss produced no such asymmetry, since both architectures showed
 \begin{figure}[tbp]
     \centering
     \includegraphics[width=\textwidth]{obj1_all_predictions.png}
-    \caption{Prediction trajectories for all three Objective~1 training strategies on a representative patient window (patient 85102, 10-hour window containing a hypoglycaemia episode). LSTM (left) and PatchTST (right) are shown side by side; all three predictions are overlaid against the ground truth CGM signal. Line colours and styles distinguish the three training objectives as indicated in the legend.}
+    \caption{Prediction trajectories for all three Objective~1 training strategies on a representative patient window (patient 85102, 10-hour window containing a hypoglycaemia episode). LSTM (left) and PatchTST (right) are shown side by side; all three predictions are overlaid against the ground truth CGM signal. Line colours distinguish the three training objectives as indicated in the legend.}
     \label{fig:exp:obj1_predictions}
 \end{figure}
 
@@ -114,7 +114,7 @@ Fig.~\ref{fig:exp:multistep_plot} shows the predicted trajectories for both arch
 \begin{figure}[tbp]
     \centering
     \includegraphics[width=\textwidth]{multistep_vs_baseline_trace.png}
-    \caption{Prediction trajectories for LSTM (left) and PatchTST (right) on a representative patient window (patient 85102) containing a hypoglycaemia episode. The single-step baseline and multi-step predictions are overlaid against the ground truth CGM signal. Line colours and styles are as indicated in the legend.}
+    \caption{Prediction trajectories for LSTM (left) and PatchTST (right) on a representative patient window (patient 85102) containing a hypoglycaemia episode. The single-step baseline and multi-step predictions are overlaid against the ground truth CGM signal. Line colours are as indicated in the legend.}
     \label{fig:exp:multistep_plot}
 \end{figure}
 

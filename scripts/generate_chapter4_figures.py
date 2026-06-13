@@ -15,6 +15,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from matplotlib.ticker import MultipleLocator
 
 sys.path.insert(0, "src")
 from ba_baseline.metrics.metrics import best_lag_rmse
@@ -32,6 +33,34 @@ plt.rcParams.update({
     "axes.spines.top": False,
     "axes.spines.right": False,
 })
+
+# Seaborn-darkgrid trajectory style, shared with the appendix patient panels.
+# Variant -> colour is fixed across every trajectory figure (Okabe-Ito palette).
+THRESHOLD_COLOR = "#C2185B"
+VAR_COLOR = {
+    "MSE (baseline)":         "#0072B2",
+    "Single-step (baseline)": "#0072B2",
+    "Prediction":             "#0072B2",
+    "Bounded-Lag":            "#E69F00",
+    "Soft-DTW":               "#009E73",
+    "Multi-step":             "#CC79A7",
+}
+
+
+def style_trajectory_axis(ax, t):
+    """Apply the seaborn-darkgrid look (grey panel, white major grid, no spines)
+    and mark the 5-minute samples with small minor ticks on the time axis."""
+    ax.set_facecolor("#EAEAF2")
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.set_axisbelow(True)
+    ax.grid(True, which="major", color="white", linewidth=1.0)
+    ax.xaxis.set_major_locator(MultipleLocator(60))
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    ax.tick_params(which="major", length=0, colors="#555555")
+    ax.tick_params(which="minor", axis="x", length=3, color="#9aa0b5")
+    ax.set_xlim(t[0], t[-1])
+
 
 HYPO_LINE  = 70.0   # mg/dL clinical threshold
 OUT_DIR    = "thesis/img"
@@ -149,12 +178,6 @@ def make_obj1_all_predictions():
         }),
     ]
 
-    pred_styles = {
-        "MSE (baseline)": dict(color="#1565C0", linestyle="--",  linewidth=1.8, alpha=1.0),
-        "Bounded-Lag":    dict(color="#E65100", linestyle="-.",  linewidth=1.8, alpha=1.0),
-        "Soft-DTW":       dict(color="#00695C", linestyle=":",   linewidth=2.4, alpha=1.0),
-    }
-
     fig, axes = plt.subplots(1, 2, figsize=(8.5, 3.8), sharey=False, sharex=True)
 
     for ax, (arch, preds) in zip(axes, arch_preds):
@@ -162,16 +185,17 @@ def make_obj1_all_predictions():
         y_lo = min(v.min() for v in all_vals) - 8
         y_hi = max(v.max() for v in all_vals) + 12
 
-        ax.fill_between(t, y_lo, HYPO_LINE, alpha=0.08, color="#C44E52", zorder=0)
-        ax.axhline(HYPO_LINE, color="#C44E52", linewidth=0.9, linestyle="--",
-                   alpha=0.7, label="70 mg/dL threshold")
-        ax.plot(t, true_w, color="black", linewidth=2.5, label="Ground truth", zorder=4)
+        ax.axhline(HYPO_LINE, color=THRESHOLD_COLOR, linewidth=1.2,
+                   linestyle=(0, (5, 3)), label="70 mg/dL threshold", zorder=2)
+        ax.plot(t, true_w, color="black", linewidth=2.0, label="Ground truth", zorder=4)
         for label, pred in preds.items():
-            ax.plot(t, pred, label=label, zorder=3, **pred_styles[label])
+            ax.plot(t, pred, label=label, color=VAR_COLOR[label],
+                    linewidth=1.4, zorder=3)
 
         ax.set_xlabel("Time (minutes, relative)")
         ax.set_ylim(y_lo, y_hi)
         ax.set_title(arch)
+        style_trajectory_axis(ax, t)
 
     axes[0].set_ylabel("Blood glucose (mg/dL)")
 
@@ -211,11 +235,6 @@ def make_multistep_vs_baseline_trace():
         }),
     ]
 
-    pred_styles = {
-        "Single-step (baseline)": dict(color="#1565C0", linestyle="--", linewidth=1.8, alpha=1.0),
-        "Multi-step":             dict(color="#E65100", linestyle="-.", linewidth=1.8, alpha=1.0),
-    }
-
     fig, axes = plt.subplots(1, 2, figsize=(8.5, 3.8), sharey=False, sharex=True)
 
     for ax, (arch, preds) in zip(axes, arch_preds):
@@ -223,16 +242,17 @@ def make_multistep_vs_baseline_trace():
         y_lo = min(v.min() for v in all_vals) - 8
         y_hi = max(v.max() for v in all_vals) + 12
 
-        ax.fill_between(t, y_lo, HYPO_LINE, alpha=0.08, color="#C44E52", zorder=0)
-        ax.axhline(HYPO_LINE, color="#C44E52", linewidth=0.9, linestyle="--",
-                   alpha=0.7, label="70 mg/dL threshold")
-        ax.plot(t, true_w, color="black", linewidth=2.5, label="Ground truth", zorder=4)
+        ax.axhline(HYPO_LINE, color=THRESHOLD_COLOR, linewidth=1.2,
+                   linestyle=(0, (5, 3)), label="70 mg/dL threshold", zorder=2)
+        ax.plot(t, true_w, color="black", linewidth=2.0, label="Ground truth", zorder=4)
         for label, pred in preds.items():
-            ax.plot(t, pred, label=label, zorder=3, **pred_styles[label])
+            ax.plot(t, pred, label=label, color=VAR_COLOR[label],
+                    linewidth=1.4, zorder=3)
 
         ax.set_xlabel("Time (minutes, relative)")
         ax.set_ylim(y_lo, y_hi)
         ax.set_title(arch)
+        style_trajectory_axis(ax, t)
 
     axes[0].set_ylabel("Blood glucose (mg/dL)")
 
@@ -309,15 +329,15 @@ def make_baseline_trajectory_comparison():
     for ax, pred, title in zip(axes,
                                 [pred_lstm_w, pred_ptst_w],
                                 ["LSTM", "PatchTST"]):
-        ax.fill_between(t, y_lo, HYPO_LINE, alpha=0.10, color="#C44E52", zorder=0)
-        ax.axhline(HYPO_LINE, color="#C44E52", linewidth=0.9, linestyle="--",
-                   alpha=0.7, label="70 mg/dL threshold")
-        ax.plot(t, true_w, color="black",   linewidth=1.5, label="Ground truth", zorder=3)
-        ax.plot(t, pred,   color="#4878CF", linewidth=1.2, linestyle="--",
-                label="Prediction", alpha=0.9, zorder=2)
+        ax.axhline(HYPO_LINE, color=THRESHOLD_COLOR, linewidth=1.2,
+                   linestyle=(0, (5, 3)), label="70 mg/dL threshold", zorder=2)
+        ax.plot(t, true_w, color="black", linewidth=2.0, label="Ground truth", zorder=4)
+        ax.plot(t, pred, color=VAR_COLOR["Prediction"], linewidth=1.4,
+                label="Prediction", zorder=3)
         ax.set_title(title)
         ax.set_xlabel("Time (minutes, relative)")
         ax.set_ylim(y_lo, max(true_w.max(), pred.max()) + 12)
+        style_trajectory_axis(ax, t)
 
     axes[0].set_ylabel("Blood glucose (mg/dL)")
 

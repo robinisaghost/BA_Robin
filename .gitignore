@@ -50,3 +50,6 @@ docs/*.log
 .claude/
 BA_thesis/
 
+
+# stray root-level loss schematic (unused; generate_plots.py writes the used ones to thesis/img/)
+loss_dtw_english.png

@@ -72,11 +72,11 @@ In the CGM forecasting setting, however, the pointwise structure of Equation~\re
 
 \begin{figure}[tbp]
 \centering
-\subfigure[MSE]{\includegraphics[width=0.31\textwidth]{loss_mse.png}\label{fig:loss_mse}}
+\subfigure[MSE]{\includegraphics[width=0.32\textwidth]{loss_mse.png}\label{fig:loss_mse}}
 \hfill
-\subfigure[Bounded Lag ($D{=}3$)]{\includegraphics[width=0.31\textwidth]{loss_bounded_lag.png}\label{fig:loss_bl}}
+\subfigure[Bounded Lag ($D{=}3$)]{\includegraphics[width=0.32\textwidth]{loss_bounded_lag.png}\label{fig:loss_bl}}
 \hfill
-\subfigure[Soft-DTW ($\gamma{=}1.0$)]{\includegraphics[width=0.31\textwidth]{loss_dtw_alignment.png}\label{fig:loss_dtw}}
+\subfigure[Soft-DTW ($\gamma{=}1.0$)]{\includegraphics[width=0.32\textwidth]{loss_dtw_alignment.png}\label{fig:loss_dtw}}
 \caption[Geometric interpretation of the three forecasting losses]{Geometric interpretation of the three forecasting losses. In all panels the black curve is the ground truth, the blue curve the prediction, and the orange lines the correspondences each loss forms between them. (a)~MSE compares the curves at the same time step, so a shape-correct but displaced prediction is penalised as heavily as a structurally wrong one. (b)~Bounded Lag links each predicted feature to the nearest true feature within $\pm D$ steps, incurring no penalty for offsets in that range. (c)~Soft-DTW forms an optimal many-to-one alignment, reducing the penalty for predictions that are temporally displaced but structurally similar to the target.}
 \end{figure}
 
