@@ -47,19 +47,52 @@ VAR_COLOR = {
 }
 
 
-def style_trajectory_axis(ax, t):
+def style_trajectory_axis(ax, t, major=60, minor=5):
     """Apply the seaborn-darkgrid look (grey panel, white major grid, no spines)
-    and mark the 5-minute samples with small minor ticks on the time axis."""
+    and mark time steps with small minor ticks on the time axis. ``major`` and
+    ``minor`` set the tick spacing in minutes (use coarser values for long
+    overview windows)."""
     ax.set_facecolor("#EAEAF2")
     for spine in ax.spines.values():
         spine.set_visible(False)
     ax.set_axisbelow(True)
     ax.grid(True, which="major", color="white", linewidth=1.0)
-    ax.xaxis.set_major_locator(MultipleLocator(60))
-    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    ax.xaxis.set_major_locator(MultipleLocator(major))
+    if minor:
+        ax.xaxis.set_minor_locator(MultipleLocator(minor))
+        ax.tick_params(which="minor", axis="x", length=3, color="#9aa0b5")
     ax.tick_params(which="major", length=0, colors="#555555")
-    ax.tick_params(which="minor", axis="x", length=3, color="#9aa0b5")
     ax.set_xlim(t[0], t[-1])
+
+
+def hypo_window(y_true, win_size=288):
+    """Start/end index of a window (within the array) that best captures a
+    descent toward hypoglycaemia, mirroring the selection used elsewhere."""
+    y = np.asarray(y_true)
+    n = len(y)
+    if n <= win_size:
+        return 0, n
+    crossings = [i for i in range(1, n)
+                 if y[i - 1] >= HYPO_LINE and y[i] < HYPO_LINE]
+    if crossings:
+        best_score, best_t = -np.inf, crossings[len(crossings) // 2]
+        for c in crossings:
+            s = max(0, c - win_size // 2)
+            e = min(n, s + win_size)
+            score = float(np.std(y[s:e]))
+            if score > best_score:
+                best_score, best_t = score, c
+        center = best_t
+    else:
+        best_mean, center = np.inf, win_size // 2
+        for s in range(0, n - win_size, max(1, win_size // 4)):
+            m = float(np.mean(y[s:s + win_size]))
+            if m < best_mean:
+                best_mean, center = m, s + win_size // 2
+    start = max(0, center - win_size // 2)
+    end = min(n, start + win_size)
+    start = max(0, end - win_size)
+    return start, end
 
 
 HYPO_LINE  = 70.0   # mg/dL clinical threshold
@@ -354,6 +387,49 @@ def make_baseline_trajectory_comparison():
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+# FIGURE 1.1 – timeshift_demo.png  (intro motivation, LSTM top / PatchTST bottom)
+# ═══════════════════════════════════════════════════════════════════════════
+
+def make_timeshift_demo():
+    print("Generating timeshift_demo.png (Figure 1.1) ...")
+    lstm = load_traces("reports/results/lstm_60min_traces_all_patients.npz")
+    ptst = load_traces("reports/results/patchtst_60min_traces_all_patients.npz")
+
+    pid = "85106"
+    y_true, y_lstm = lstm[pid]
+    y_pt = ptst[pid][1]
+    n = min(len(y_true), len(y_lstm), len(y_pt))
+    y_true, y_lstm, y_pt = y_true[:n], y_lstm[:n], y_pt[:n]
+
+    # show unseen (test) data, then a window capturing a hypoglycaemic descent
+    ts = int(0.8 * n)
+    y_true, y_lstm, y_pt = y_true[ts:], y_lstm[ts:], y_pt[ts:]
+    s, e = hypo_window(y_true, win_size=288)
+    t = np.arange(e - s) * 5
+
+    fig, axes = plt.subplots(2, 1, figsize=(9, 5.2), sharex=True)
+    for ax, pred, title in zip(axes, [y_lstm, y_pt], ["LSTM", "PatchTST"]):
+        ax.axhline(HYPO_LINE, color=THRESHOLD_COLOR, linewidth=1.2,
+                   linestyle=(0, (5, 3)), label="70 mg/dL threshold", zorder=2)
+        ax.plot(t, y_true[s:e], color="black", linewidth=2.0,
+                label="Ground truth", zorder=4)
+        ax.plot(t, pred[s:e], color=VAR_COLOR["Prediction"], linewidth=1.4,
+                label="Prediction", zorder=3)
+        ax.set_ylabel("Glucose [mg/dL]")
+        ax.set_title(title, loc="left", fontweight="bold")
+        style_trajectory_axis(ax, t, major=240, minor=60)
+
+    axes[1].set_xlabel("Time [min]")
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=3, fontsize=8,
+               bbox_to_anchor=(0.5, -0.03), frameon=False)
+    fig.tight_layout(rect=(0, 0.04, 1, 1))
+    fig.savefig(f"{OUT_DIR}/timeshift_demo.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+    print("  saved.")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
 # MEAN LAG – all 8 configurations (for table column)
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -380,6 +456,7 @@ def compute_mean_lag_all_configs():
 # ═══════════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
+    make_timeshift_demo()
     make_baseline_trajectory_comparison()
     make_lag_distribution()
     make_obj1_all_predictions()
