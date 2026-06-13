@@ -5,14 +5,7 @@ This chapter defines the formal problem setting, describes the dataset and the d
 \section{Problem Formulation} \label{sec:method:problem}
 % ================================================================
 
-The forecasting task operates on a univariate continuous glucose monitoring signal sampled at 5-minute intervals. At each time step $t$, a lookback window of $L = 24$ consecutive readings is assembled into an input vector:
-\begin{equation}
-    \mathbf{x}_t = (g_{t-L+1},\; \ldots,\; g_t) \in \mathbb{R}^{L}
-    \label{eq:input}
-\end{equation}
-where $g_i$ denotes the glucose concentration in mg/dL at step $i$. The window spans 120 minutes of past CGM history.
-
-For the single-step forecasting baseline, the model maps $\mathbf{x}_t$ to a single predicted glucose value at the forecast horizon $H = 12$ steps, corresponding to 60 minutes ahead:
+The forecasting task operates on a univariate continuous glucose monitoring signal sampled at 5-minute intervals. At each time step $t$, a lookback window of $L = 24$ consecutive readings, spanning 120 minutes of past CGM history, is assembled into an input vector $\mathbf{x}_t = (g_{t-L+1}, \ldots, g_t) \in \mathbb{R}^{L}$, where $g_i$ denotes the glucose concentration in mg/dL at step $i$. For the single-step forecasting baseline, the model maps $\mathbf{x}_t$ to a single predicted glucose value at the forecast horizon $H = 12$ steps, corresponding to 60 minutes ahead:
 \begin{equation}
     \hat{g}_{t+H} = f_\theta(\mathbf{x}_t)
     \label{eq:singlestep}
@@ -40,11 +33,11 @@ For direct binary event classification (Objective~3), a window is labelled posit
 
 \subsection{The T1DATA Cohort} \label{sec:method:setup:cgm}
 
-The experiments are conducted on the T1DATA dataset~\citep{garciatirado2023t1d}, a randomised crossover clinical trial in which adults with Type~1 diabetes used Dexcom G6 continuous glucose monitoring devices. The dataset provides glucose measurements from 36 anonymised patients recorded at 5-minute intervals over approximately 30 days per patient. Missing values in the raw signal are imputed by linear interpolation before model training.
+Throughout this thesis, \emph{T1DATA} denotes the continuous glucose monitoring dataset of \citet{garciatirado2023t1d}, on which all experiments are conducted. It comprises CGM data from 36 individual patients with Type~1 diabetes, collected over approximately 30 days per patient at a 5-minute sampling interval, for a total of 314{,}194 glucose readings. The same dataset was used in earlier hypoglycaemia-prediction work at the University of Bern~\citep{huni2023glucose}. Missing values in the raw signal are imputed by linear interpolation before model training.
 
 A defining statistical property of the CGM signal is its high temporal autocorrelation. Across the 36 patients in this cohort, the lag-1 autocorrelation of the raw CGM signal has a mean of 0.985 (SD~0.029), confirming that consecutive 5-minute readings are nearly identical for virtually all patients. This property is the primary driver of the systematic prediction delay described in Chapter~\ref{ch:introduction}: under MSE training, a model that reproduces recent history forward incurs almost no gradient penalty, because the next glucose value is so close to the current one.
 
-For the event detection task, each lookback window is assigned the binary event label of Equation~\ref{eq:eventlabel}: positive if a hypoglycaemic value occurs anywhere within the following 60 minutes, negative otherwise. Because hypoglycaemia is a comparatively rare event, the resulting classification dataset is severely imbalanced, with a cohort-mean positive rate of only 5.7\%. Fig.~\ref{fig:method:class_imbalance} reports both the aggregate class counts and the per-patient breakdown; the positive rate is low throughout the cohort but varies considerably between patients, reflecting differences in individual glycaemic control. An imbalance of this severity is a problem because it would let a model reach high apparent accuracy simply by predicting the negative class almost everywhere, while failing at the actual goal of detecting the rare positive cases. Two design choices counteract this. First, the F2 metric (Section~\ref{sec:bg:metrics:event}) weights recall twice as heavily as precision and therefore rewards the detection of positive events rather than overall accuracy. Second, the direct classifiers are trained with the weighted binary cross-entropy of Section~\ref{sec:bg:losses:bce}, using a positive class weight $w_{+} = N_\text{neg} / N_\text{pos} \approx 16.7$ to offset the imbalance. Both the metric and the loss weighting are derived from the same cohort statistic reported here.
+For the event detection task, each lookback window is assigned the binary event label of Equation~\ref{eq:eventlabel}: positive if a hypoglycaemic value occurs anywhere within the following 60 minutes, negative otherwise. Because hypoglycaemia is comparatively rare, the resulting dataset is severely imbalanced, with a cohort-mean positive rate of only 5.7\% (Fig.~\ref{fig:method:class_imbalance}); a model could thus reach high apparent accuracy by predicting the negative class almost everywhere. Two design choices counteract this: the F2 metric (Section~\ref{sec:bg:metrics:event}) rewards recall over overall accuracy, and the direct classifiers are trained with the weighted binary cross-entropy of Section~\ref{sec:bg:losses:bce}, using a positive class weight $w_{+} = N_\text{neg}/N_\text{pos} \approx 16.7$ derived from the same cohort statistic.
 
 \begin{figure}[tbp]
     \centering
@@ -57,9 +50,9 @@ For the event detection task, each lookback window is assigned the binary event 
 
 Each patient's time series is partitioned chronologically into training (60\%), validation (20\%), and test (20\%) sets. Temporal order is strictly preserved to prevent future information from entering the training set. All models are trained and evaluated independently per patient, and the reported metrics are cohort means across all 36 patients.
 
-Hyperparameters are determined using the Optuna automated search framework~\citep{akiba2019optuna} with 50 trials conducted on a single designated tuning patient (ID~85202). Restricting the search to one patient reduces the computational cost by a factor of 36 relative to a full-cohort search; this is a pragmatic compromise, and the resulting configuration may not be globally optimal for all patients (see Section~\ref{sec:conc:limitations}). The resulting configuration is then fixed for all three research objectives; only the loss function or output head changes between objectives, so that any observed performance difference can be attributed to that single change rather than to incidental differences in tuning.
+Hyperparameters are determined with the Optuna search framework~\citep{akiba2019optuna} using 50 trials on a single designated tuning patient (ID~85202), reducing the computational cost by a factor of 36 relative to a full-cohort search (a pragmatic compromise that may not be globally optimal; see Section~\ref{sec:conc:limitations}). The resulting configuration is fixed for all three objectives, so any performance difference can be attributed to the single change of loss or output head rather than to differences in tuning.
 
-Tab.~\ref{tab:method:hyperparams} reports the resulting configurations. The search converged on markedly different settings for the two architectures: the LSTM uses a comparatively wide hidden state with moderate dropout across few layers, whereas PatchTST uses a smaller model dimension distributed over more layers with almost no dropout, together with the attention-specific parameters (feed-forward dimension and number of heads) that have no LSTM counterpart and are therefore left blank. The input and output dimensions, in contrast, are not tuned but fixed by the problem definition of Section~\ref{sec:method:problem} and shared by both models: a lookback window of 24 steps and a forecast horizon of 12 steps. All models are optimised with the AdamW optimiser~\citep{loshchilov2019adamw}.
+Tab.~\ref{tab:method:hyperparams} reports the configurations. The search converged on markedly different settings: the LSTM uses a wide hidden state with moderate dropout across few layers, whereas PatchTST uses a smaller model dimension over more layers with almost no dropout. The input and output dimensions are not tuned but fixed by the problem definition of Section~\ref{sec:method:problem}; all models are optimised with AdamW~\citep{loshchilov2019adamw}.
 
 \begin{table}[tbp]
 \centering
@@ -74,8 +67,8 @@ Number of layers                     & 2       & 3 \\
 Dropout                              & 0.159   & 0.025 \\
 Learning rate                        & $9.61 \times 10^{-4}$ & $1.21 \times 10^{-4}$ \\
 Batch size                           & 128     & 128 \\
-Feed-forward dim.\ ($d_\text{ff}$)  & ---     & 256 \\
-Attention heads ($h$)                & ---     & 4 \\
+Feed-forward dim.\ ($d_\text{ff}$)  & n/a     & 256 \\
+Attention heads ($h$)                & n/a     & 4 \\
 Lookback window                      & \multicolumn{2}{c}{24 steps (120 min)} \\
 Forecast horizon                     & \multicolumn{2}{c}{12 steps (60 min)} \\
 Optuna trials                        & \multicolumn{2}{c}{50} \\
@@ -88,11 +81,11 @@ Optuna trials                        & \multicolumn{2}{c}{50} \\
 \section{Training Objectives} \label{sec:method:objectives}
 % ================================================================
 
-All three objectives follow a controlled ablation design: exactly one component of the training configuration is modified per objective while all other settings remain fixed. This ensures that observed differences in performance can be attributed to the specific change under investigation. Each objective operationalises one of the three research questions posed in Chapter~\ref{ch:introduction}: its experimental design is specified here, its results are reported in the corresponding section of Chapter~\ref{ch:experiments}, and the question itself is answered in Chapter~\ref{ch:conclusions}.
+All three objectives follow a controlled ablation design: exactly one component of the training configuration is modified per objective while all else remains fixed, so that observed differences can be attributed to that change. Each objective operationalises one research question from Chapter~\ref{ch:introduction}: its design is specified here, its results reported in Chapter~\ref{ch:experiments}, and the question answered in Chapter~\ref{ch:conclusions}.
 
 \subsection{Objective 1: Offset-Aware Loss Functions} \label{sec:method:obj1}
 
-Objective~1 addresses the first research question (Chapter~\ref{ch:introduction}): whether replacing the standard MSE loss with a loss function that tolerates small temporal offsets reduces the systematic prediction delay, and whether any such temporal gain improves hypoglycaemia event detection. Both architectures are retrained twice under otherwise identical conditions: once using the Bounded-Lag loss (Section~\ref{sec:bg:losses:bl}) and once using the Soft-DTW loss (Section~\ref{sec:bg:losses:sdtw}). Concretely, the experiment tests whether an offset-aware training objective produces predictions whose 70~mg/dL threshold crossings fall closer in time to the true hypoglycaemia onset.
+Objective~1 addresses the first research question (Chapter~\ref{ch:introduction}): whether replacing the standard MSE loss with a loss function that tolerates small temporal offsets reduces the systematic prediction delay, and whether any such temporal gain improves hypoglycaemia event detection. Both architectures are retrained twice under otherwise identical conditions: once using the Bounded-Lag loss (Section~\ref{sec:bg:losses:bl}) and once using the Soft-DTW loss (Section~\ref{sec:bg:losses:sdtw}).
 
 \subsection{Objective 2: Multi-Step Supervision} \label{sec:method:obj2}
 
@@ -100,10 +93,10 @@ Objective~2 addresses the second research question (Chapter~\ref{ch:introduction
 
 \subsection{Objective 3: Event-Centric Evaluation} \label{sec:method:obj3}
 
-Objective~3 addresses the third research question (Chapter~\ref{ch:introduction}): whether task-specific binary classifiers trained directly on the event label outperform threshold-based detection derived from regression forecasts. It approaches event detection from three complementary perspectives, which together establish not only whether the classifiers detect events but why forecast-derived detection falls short and what kind of warning the classifiers provide.
+Objective~3 addresses the third research question (Chapter~\ref{ch:introduction}): whether task-specific binary classifiers trained directly on the event label outperform threshold-based detection derived from regression forecasts. It approaches event detection from three complementary perspectives, establishing not only whether the classifiers detect events but why forecast-derived detection falls short and what kind of warning the classifiers provide.
 
-The first sweeps the event detection tolerance window $\tau$ from 0 to 60 minutes in 5-minute steps for all forecast-derived detectors. This quantifies how detection performance changes as the acceptance window is widened, separating the contribution of timing mismatch from other sources of detection failure.
+The first sweeps the tolerance window $\tau$ from 0 to 60 minutes in 5-minute steps for all forecast-derived detectors, separating the contribution of timing mismatch from other sources of detection failure.
 
-The second trains dedicated binary classifiers end-to-end on the event label $y_t$ of Equation~\ref{eq:eventlabel}. The classifier reuses the same LSTM and PatchTST backbones as the forecasting models (Section~\ref{sec:bg:models}) but replaces the regression head with a single output passed through a sigmoid, so that the model emits a probability $\hat{p}_t \in [0,1]$ that the window beginning at $t$ contains a hypoglycaemic step within the next 60 minutes. Training uses the weighted binary cross-entropy loss of Section~\ref{sec:bg:losses:bce}, with the positive class weight set to $w_{+} \approx 16.7$, the negative-to-positive window ratio of the cohort (Section~\ref{sec:method:setup:cgm}). At evaluation time a window is flagged positive when $\hat{p}_t > 0.5$, and the confusion-matrix counts are accumulated per window against $y_t$; the resulting precision, recall, and $F_\beta$ scores (Section~\ref{sec:bg:metrics:event}) are compared against those of the threshold-based forecast detectors to assess whether a task-specific training objective addresses the detection gap.
+The second trains dedicated binary classifiers end-to-end on the event label $y_t$ of Equation~\ref{eq:eventlabel}. The classifier reuses the LSTM and PatchTST backbones (Section~\ref{sec:bg:models}) but replaces the regression head with a single sigmoid output, emitting an event probability $\hat{p}_t \in [0,1]$ for each window. Training uses the weighted binary cross-entropy of Section~\ref{sec:bg:losses:bce} with positive class weight $w_{+} \approx 16.7$; at evaluation a window is flagged positive when $\hat{p}_t > 0.5$, and the resulting detection metrics are compared against the forecast-derived detectors.
 
-The third examines the lead-time distribution of true-positive detections from the direct classifiers. Lead time is defined as the elapsed time from alarm issuance to the first hypoglycaemic step in the prediction window. This analysis quantifies not only whether the classifiers detect events, but at what point relative to event onset — distinguishing alarms issued before the hypoglycaemic episode from those issued at the moment it has already begun.
+The third examines the lead-time distribution of the classifiers' true-positive detections, defined as the elapsed time from alarm to the first hypoglycaemic step, quantifying not just whether events are detected but at what point relative to onset.

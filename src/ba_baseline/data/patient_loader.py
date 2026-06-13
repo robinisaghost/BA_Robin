@@ -3,9 +3,9 @@ Patient data loader for CGM glucose time series.
 
 Loads continuous glucose monitoring (CGM) data from a CSV file and returns
 a per-patient dictionary of glucose time series. The data originates from
-the T1DATA dataset [9], a randomised crossover
-clinical trial in which 35 individuals with type 1 diabetes used Dexcom G6
-CGM devices recording glucose at 5-minute intervals over approximately 30 days.
+the T1DATA dataset of Garcia-Tirado et al. [9], comprising CGM data from
+36 individuals with type 1 diabetes recorded at 5-minute intervals over
+approximately 30 days per patient.
 
 References
 

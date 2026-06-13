@@ -1,0 +1,328 @@
+\documentclass[a4paper,10pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[a4paper, top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{lmodern}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{enumitem}
+\setlength{\parskip}{3pt}
+\setlength{\parindent}{0pt}
+
+\definecolor{clstm}{RGB}{31,119,180}
+\definecolor{cpatchtst}{RGB}{214,39,40}
+
+\captionsetup{font=small, labelfont=bf}
+
+\title{\textbf{Ergebniszusammenfassung -- Bachelor-Thesis}\\[0.2em]
+{\normalsize Mitigating Time-Shift Errors in CGM-based Glucose Forecasting\\
+and Hypoglycemia Event Prediction}}
+\author{Robin van den Hoek (22-127-641)\quad|\quad Supervisor: PD~Dr.\ Kaspar Riesen, Universität Bern}
+\date{Besprechung, 1.\ Mai 2026}
+
+\begin{document}
+\maketitle
+\vspace{-1em}
+\hrule
+\vspace{0.4em}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Baseline}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\textbf{Aufbau:} 36 Patienten, LSTM und PatchTST, Lookback\,=\,24 Schritte (2\,h), Horizont $h{=}11$ (60\,min), MSE-Verlust. Hyperparameter via Optuna auf Patient 85202 optimiert; alle Objectives verwenden identische Hyperparameter (\emph{Ablation: eine Variable ändert sich}).
+
+\textbf{lag\_rmse:} Minimaler RMSE nach optimaler konstanter Verschiebung $k^* \in [-12,\,12]$ --- misst, wie viel des Gesamtfehlers auf die reine Zeitverschiebung zurückzuführen ist.
+
+\begin{table}[h!]
+\centering
+\caption{Baseline-Resultate (Mittelwert über 36 Patienten)}
+\begin{tabular}{lcccc}
+\toprule
+Modell & RMSE (mg/dL) & MAE (mg/dL) & Hypo-$F_1$ & Ø Verschiebung \\
+\midrule
+LSTM MSE     & 36.09 & 27.12 & 0.005 & 10.2 Schritte ($\approx$51\,min) \\
+PatchTST MSE & 39.27 & 29.00 & 0.061 & 11.0 Schritte ($\approx$55\,min) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\vspace{-0.5em}
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  xlabel={Zeit (min)},
+  ylabel={Glukose (mg/dL)},
+  xmin=0, xmax=133, ymin=38, ymax=192,
+  xtick={0,30,60,90,120},
+  ytick={50,70,100,150,190},
+  width=0.92\textwidth, height=4.8cm,
+  legend pos=north east,
+  legend style={font=\footnotesize, cells={anchor=west}},
+  grid=both,
+  grid style={line width=0.2pt, draw=gray!25},
+  tick label style={font=\footnotesize},
+  label style={font=\small},
+]
+% Hypoglycemia threshold
+\addplot[red!65, thick, dashed, domain=0:133, samples=2, forget plot] {70};
+\node[red!60, font=\scriptsize] at (axis cs:6,74) {70 mg/dL};
+
+% Ground truth
+\addplot[clstm, very thick, smooth, mark=none] coordinates {
+  (0,175) (10,165) (20,148) (30,128) (40,105) (50,80)
+  (60,61) (65,56) (70,57) (80,66) (90,80) (100,97) (110,113) (120,127)
+};
+\addlegendentry{Ground Truth}
+
+% Prediction shifted ~55 min
+\addplot[cpatchtst, very thick, dashed, smooth, mark=none] coordinates {
+  (0,182) (10,180) (20,177) (30,173) (40,166) (50,155)
+  (60,143) (70,128) (80,110) (90,92) (100,76) (110,63)
+  (115,57) (120,56) (125,61) (130,70)
+};
+\addlegendentry{Vorhersage ($\approx$55\,min verschoben)}
+
+% Evaluation horizon
+\draw[gray!60, dashed, thick] (axis cs:60,38) -- (axis cs:60,192);
+\node[gray!70, font=\scriptsize, rotate=90] at (axis cs:57,100) {Eval.\ $t{=}60$\,min};
+
+% Dots at t=60
+\fill[clstm]     (axis cs:60,61)  circle (2.5pt);
+\fill[cpatchtst] (axis cs:60,143) circle (2.5pt);
+\node[clstm,     right, font=\scriptsize] at (axis cs:62,55)  {GT: 61 mg/dL};
+\node[cpatchtst, right, font=\scriptsize] at (axis cs:62,149) {Pred.: 143 mg/dL};
+
+% Shift arrow between minima
+\draw[<->, black!50, thick] (axis cs:65,43) -- (axis cs:120,43);
+\node[black!60, font=\scriptsize] at (axis cs:93,47) {$\approx$ 55\,min Verschiebung};
+
+\end{axis}
+\end{tikzpicture}
+\caption{Zeitverschiebungs-Artefakt: Die Vorhersage (rot, gestrichelt) ist eine um $\approx$55\,min verschobene Kopie des Glukoseverlaufs. Am Evaluationspunkt $t{=}60$\,min überschätzt das Modell massiv (143 vs.\ 61 mg/dL) --- der Hypoglykämie-Alarm wird verpasst.}
+\label{fig:timeshift}
+\end{figure}
+
+\textbf{Kernbefund:} Beide Modelle reproduzieren die Kurvenform korrekt, aber mit systematischer Zeitverzögerung. Die Hypoglykämieerkennung versagt ($F_1 < 0.07$).
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Objective~1 --- Verschiebungstolerante Verlustfunktionen}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\textbf{Bounded-Lag (1a):} $L = \min_{\Delta \in [-3,3]} \mathrm{MSE}(\hat{y},\, y_\Delta)$, $D{=}3$ Schritte (${\pm}15$\,min). \quad
+\textbf{Soft-DTW (1b):} Differenzierbares Dynamic Time Warping, $\gamma{=}1.0$.
+
+\begin{table}[h!]
+\centering
+\caption{Objective~1: Resultate (Mittelwert, 36 Patienten). Shift-Strafe = RMSE $-$ lag\_rmse.}
+\small
+\begin{tabular}{llccccc}
+\toprule
+Modell & Verlust & RMSE & lag\_rmse & Shift-Strafe & MAE & Hypo-$F_1$ \\
+\midrule
+LSTM     & MSE (Baseline)        & 36.09 & ---   & ---   & 27.12 & 0.005 \\
+LSTM     & Bounded-Lag ($D{=}3$) & 36.14 & 25.25 & 10.89 & 27.57 & 0.014 \\
+LSTM     & Soft-DTW ($\gamma{=}1$) & 37.23 & 28.67 & 8.57  & 28.76 & 0.014 \\
+\midrule
+PatchTST & MSE (Baseline)        & 39.27 & ---   & ---   & 29.00 & 0.061 \\
+PatchTST & Bounded-Lag ($D{=}3$) & 39.30 & \textbf{16.70} & 22.60 & 29.03 & 0.067 \\
+PatchTST & Soft-DTW ($\gamma{=}1$) & 43.24 & 24.01 & 19.23 & 32.25 & 0.062 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Kernbefunde:} Bounded-Lag: kaum RMSE-Verlust ($\Delta{<}0.05$ mg/dL); PatchTST lag\_rmse\,=\,16.70 (bestes Obj.-1-Ergebnis). Soft-DTW: RMSE-Regression (+1.1/+3.96 mg/dL für LSTM/PatchTST). Das Fenster $D{=}3$ deckt nur $\approx$30\,\% der tatsächlichen Verschiebung ab --- keine Variante eliminiert sie.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Objective~2 --- Multi-Step Forecasting ($H{=}12$)}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\textbf{DIRMO-Strategie:} Modell gibt alle 12 Schritte (5--60\,min) simultan aus; MSE über alle Positionen gemittelt. Evaluation bei $h{=}11$ (60\,min) für Vergleichbarkeit.
+
+\begin{table}[h!]
+\centering
+\caption{Objective~2: Resultate}
+\begin{tabular}{lcccc}
+\toprule
+Modell & RMSE & lag\_rmse & Shift-Strafe & Hypo-$F_1$ \\
+\midrule
+LSTM Multi-step     & \textbf{35.59} & \textbf{20.74} & 14.85 & 0.010 \\
+PatchTST Multi-step & \textbf{39.05} & \textbf{14.53} & 24.52 & 0.072 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Kernbefund:} Niedrigstes lag\_rmse aller getesteten Methoden (LSTM: 20.74, PatchTST: 14.53). Leichte RMSE-Verbesserung. Shift-Strafe bleibt 40--63\,\% des RMSE --- strukturelle Verschiebung reduziert, nicht eliminiert. Bester Ansatz für reine Prognosegenauigkeit.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Objective~3 --- Ereigniszentrierte Auswertung \& Direktklassifikation}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\textbf{(3a) $\tau$-Sweep:} Alle Prognosemodelle benötigen $\tau{>}5$ Schritte (25\,min) für nennenswerte Erkennungsrate. Bei $\tau{=}3$ (15\,min, klinisch relevant) versagen alle prognosebasierten Ansätze.
+
+\textbf{(3b) Binärklassifikator:} Sigmoid-Ausgabekopf, BCE-Verlust. Label\,=\,1 wenn $\min(y_{t\ldots t+11})<70$\,mg/dL.
+
+\begin{table}[h!]
+\centering
+\caption{Objective~3: Direktklassifikator vs.\ Prognose-Ableitung ($F_2$ gewichtet Recall 4$\times$ stärker)}
+\small
+\begin{tabular}{llcccc}
+\toprule
+Modell & Ansatz & Precision & Recall & $F_1$ & $F_2$ \\
+\midrule
+LSTM & Prognose (Baseline MSE)  & 0.010 & 0.004 & 0.005 & 0.004 \\
+LSTM & Prognose (Multi-step)    & 0.011 & 0.009 & 0.010 & --- \\
+\textbf{LSTM} & \textbf{Direkter Klassif.} & \textbf{0.237} & \textbf{0.693} & \textbf{0.334} & \textbf{0.463} \\
+\midrule
+PatchTST & Prognose (Baseline MSE) & 0.048 & 0.089 & 0.061 & 0.074 \\
+PatchTST & Prognose (Multi-step)   & 0.060 & 0.103 & 0.072 & --- \\
+\textbf{PatchTST} & \textbf{Direkter Klassif.} & \textbf{0.054} & \textbf{0.615} & \textbf{0.095} & \textbf{0.178} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Kernbefunde:} LSTM-Klassifikator: $F_1{=}0.334$ (\textbf{62$\times$ Verbesserung}, Recall\,=\,69\,\%). PatchTST: $F_1{=}0.095$ (Precision\,=\,0.054, sehr hohe Falschalarmrate). \emph{Architektur-Inversion:} LSTM ist schlechter bei der Prognose (RMSE 36.09 vs.\ 39.27), aber 3.5$\times$ besser bei der Klassifikation ($F_1$ 0.334 vs.\ 0.095).
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Gesamtvergleich und Empfehlung}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\begin{figure}[h!]
+\centering
+\begin{subfigure}[b]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[
+  ybar, bar width=5.5pt,
+  ylabel={RMSE (mg/dL)},
+  symbolic x coords={Baseline,B-Lag,DTW,Multi},
+  xtick=data,
+  xticklabel style={font=\scriptsize},
+  ymin=31, ymax=46,
+  width=\textwidth, height=4.2cm,
+  legend style={at={(0.5,-0.30)}, anchor=north, legend columns=2, font=\scriptsize},
+  ymajorgrids=true, grid style={dashed, gray!30},
+  title={\small RMSE (niedriger = besser)},
+  tick label style={font=\scriptsize},
+  label style={font=\small},
+]
+\addplot[fill=clstm, draw=clstm!80!black] coordinates {
+  (Baseline,36.09) (B-Lag,36.14) (DTW,37.23) (Multi,35.59)
+};
+\addplot[fill=cpatchtst, draw=cpatchtst!80!black] coordinates {
+  (Baseline,39.27) (B-Lag,39.30) (DTW,43.24) (Multi,39.05)
+};
+\legend{LSTM, PatchTST}
+\end{axis}
+\end{tikzpicture}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.47\textwidth}
+\begin{tikzpicture}
+\begin{axis}[
+  ybar, bar width=5.5pt,
+  ylabel={lag\_rmse (mg/dL)},
+  symbolic x coords={B-Lag,DTW,Multi},
+  xtick=data,
+  xticklabel style={font=\scriptsize},
+  ymin=0, ymax=33,
+  width=\textwidth, height=4.2cm,
+  legend style={at={(0.5,-0.30)}, anchor=north, legend columns=2, font=\scriptsize},
+  ymajorgrids=true, grid style={dashed, gray!30},
+  title={\small lag\_rmse (niedriger = weniger Zeitverschiebung)},
+  tick label style={font=\scriptsize},
+  label style={font=\small},
+]
+\addplot[fill=clstm, draw=clstm!80!black] coordinates {
+  (B-Lag,25.25) (DTW,28.67) (Multi,20.74)
+};
+\addplot[fill=cpatchtst, draw=cpatchtst!80!black] coordinates {
+  (B-Lag,16.70) (DTW,24.01) (Multi,14.53)
+};
+\legend{LSTM, PatchTST}
+\end{axis}
+\end{tikzpicture}
+\end{subfigure}
+\caption{RMSE-Vergleich (links) und lag\_rmse-Vergleich (rechts) aller Methoden. Multi-step ist in beiden Metriken am besten. B-Lag\,=\,Bounded-Lag.}
+\label{fig:rmse_lagrmse}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  ybar, bar width=7pt,
+  ylabel={Hypo-$F_1$},
+  symbolic x coords={Baseline,B-Lag,DTW,Multi,Event},
+  xtick=data,
+  xticklabel style={font=\small},
+  ymin=0, ymax=0.365,
+  width=0.72\textwidth, height=4.2cm,
+  legend style={at={(0.97,0.97)}, anchor=north east, font=\small},
+  ymajorgrids=true, grid style={dashed, gray!30},
+  title={\small Hypoglykämie-$F_1$ (höher = besser)},
+  tick label style={font=\small},
+  label style={font=\small},
+  nodes near coords,
+  nodes near coords style={font=\tiny, /pgf/number format/fixed, /pgf/number format/precision=3},
+]
+\addplot[fill=clstm, draw=clstm!80!black] coordinates {
+  (Baseline,0.005) (B-Lag,0.014) (DTW,0.014) (Multi,0.010) (Event,0.334)
+};
+\addplot[fill=cpatchtst, draw=cpatchtst!80!black] coordinates {
+  (Baseline,0.061) (B-Lag,0.067) (DTW,0.062) (Multi,0.072) (Event,0.095)
+};
+\legend{LSTM, PatchTST}
+\end{axis}
+\end{tikzpicture}
+\caption{Hypo-$F_1$ aller Methoden. Der direkte Binärklassifikator (Event) übertrifft alle prognosebasierten Ansätze dramatisch. LSTM Event: $F_1{=}0.334$ = \textbf{62$\times$ Verbesserung} gegenüber Baseline. B-Lag\,=\,Bounded-Lag.}
+\label{fig:f1}
+\end{figure}
+
+\begin{table}[h!]
+\centering
+\caption{Gesamtvergleich aller getesteten Methoden (Fettdruck = beste Ergebnisse je Kategorie)}
+\small
+\begin{tabular}{llccc}
+\toprule
+Modell & Verlust / Ansatz & RMSE & lag\_rmse & Hypo-$F_1$ \\
+\midrule
+LSTM     & MSE (Baseline)     & 36.09 & ---   & 0.005 \\
+LSTM     & Bounded-Lag        & 36.14 & 25.25 & 0.014 \\
+LSTM     & Soft-DTW           & 37.23 & 28.67 & 0.014 \\
+\textbf{LSTM} & \textbf{Multi-step} & \textbf{35.59} & \textbf{20.74} & 0.010 \\
+\textbf{LSTM} & \textbf{Event-Klassif.} & ---  & ---   & \textbf{0.334} \\
+\midrule
+PatchTST & MSE (Baseline)     & 39.27 & ---   & 0.061 \\
+PatchTST & Bounded-Lag        & 39.30 & 16.70 & 0.067 \\
+PatchTST & Soft-DTW           & 43.24 & 24.01 & 0.062 \\
+\textbf{PatchTST} & \textbf{Multi-step} & \textbf{39.05} & \textbf{14.53} & 0.072 \\
+PatchTST & Event-Klassif.     & ---   & ---   & 0.095 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Empfehlung}
+
+\begin{itemize}[nosep, leftmargin=1.5em]
+\item \textbf{Glukoseverlauf-Prognose:} LSTM Multi-step MSE --- bestes RMSE (35.59) + niedrigstes lag\_rmse (20.74)
+\item \textbf{Hypoglykämieerkennung:} LSTM Binärklassifikator --- $F_1{=}0.334$, Recall\,=\,69\,\%, $F_2{=}0.463$
+\end{itemize}
+
+\medskip
+\noindent\textbf{Kernbotschaft:} Prognose und Ereigniserkennung als zwei separate Aufgaben behandeln --- konsistent mit Hüni (2023).
+
+\end{document}

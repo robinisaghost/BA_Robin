@@ -38,6 +38,7 @@
 \usepackage{framed}
 \usepackage{float,pdflscape}
 \usepackage{url}
+\usepackage{xurl}
 \usepackage{color}
 \usepackage[margin=1.1in,bindingoffset=.2in]{geometry}
 \usepackage[hidelinks]{hyperref}
@@ -45,23 +46,11 @@
 
 \graphicspath{{img/}}
 
-%% float placement tuning — prevents pure float pages in the main body
+%% float placement tuning: prevents pure float pages in the main body
 \renewcommand{\topfraction}{0.85}
 \renewcommand{\bottomfraction}{0.7}
 \renewcommand{\textfraction}{0.15}
 \renewcommand{\floatpagefraction}{0.75}
-
-%% planned content environment
-%% Shows a visible framed box listing the content planned for a section.
-%% Each \item is one bullet point. Remove once the section is written.
-\newenvironment{planned}{%
-    \begin{framed}%
-    \noindent\textbf{Planned Content:}\vspace{4pt}%
-    \begin{itemize}\setlength{\itemsep}{3pt}%
-}{%
-    \end{itemize}%
-    \end{framed}%
-}
 
 \onehalfspacing
 \begin{document}
@@ -91,7 +80,6 @@
 \phantomsection
 \addcontentsline{toc}{chapter}{Bibliography}
 \bibliographystyle{unsrtnat}
-\nocite{*}
 \bibliography{lib}
 
 \end{document}

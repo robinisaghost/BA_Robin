@@ -8,14 +8,14 @@ This appendix contains supplementary figures and numerical tables that support t
 \begin{figure}[tbp]
     \centering
     \includegraphics[width=0.85\textwidth]{confusion_counts.png}
-    \caption[Confusion counts for direct event classifiers]{Absolute confusion counts (TP, FP, FN; log scale) for the LSTM and PatchTST direct event classifiers evaluated across the full 36-patient cohort. Counts are aggregated over all patients; the logarithmic scale is used to make the smaller TP bars visible alongside the larger FP counts. Corresponding precision, recall, and F-scores are reported in Table~\ref{tab:exp:classifiers}.}
+    \caption[Confusion counts for direct event classifiers]{Absolute confusion counts (TP, FP, FN; log scale) for the LSTM and PatchTST direct event classifiers evaluated across the full 36-patient cohort. Counts are aggregated over all patients; the logarithmic scale is used to make the smaller TP bars visible alongside the larger FP counts. Corresponding precision, recall, and F-scores are reported in Tab.~\ref{tab:exp:classifiers}.}
     \label{fig:app:confusion_counts}
 \end{figure}
 
 \begin{figure}[tbp]
     \centering
     \includegraphics[width=0.9\textwidth]{pr_paradox.png}
-    \caption[Precision--Recall space: forecast-derived vs.\ direct classifiers]{Precision--Recall space for all four detector configurations. Hollow markers represent forecast-derived detectors (threshold applied to the regression output); filled markers represent direct binary classifiers. Circles correspond to LSTM, squares to PatchTST. Each point is the cohort-mean operating point at the standard detection threshold.}
+    \caption[Precision-Recall space: forecast-derived vs.\ direct classifiers]{Precision-Recall space for all four detector configurations. Hollow markers represent forecast-derived detectors (threshold applied to the regression output); filled markers represent direct binary classifiers. Circles correspond to LSTM, squares to PatchTST. Each point is the cohort-mean operating point at the standard detection threshold.}
     \label{fig:app:pr_paradox}
 \end{figure}
 

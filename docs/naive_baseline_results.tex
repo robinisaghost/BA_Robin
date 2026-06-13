@@ -3,7 +3,7 @@
 \usepackage{booktabs}
 \usepackage[ngerman]{babel}
 
-\title{Hypoglykämie-Erkennung -- Ergebnisübersicht}
+\title{Hypoglykämie-Erkennung Explorationstudie}
 \author{Robin van den Hoek}
 \date{\today}
 
@@ -12,12 +12,8 @@
 
 \begin{table}[h]
 \centering
-\caption{Vergleich aller Modellvarianten zur Hypoglykämie-Erkennung (Kohortenmittel, 36 Patienten, Schwellenwert 70~mg/dL).
-\textit{Naive Baselines:} Regelbasierte Modelle ohne Training.
-\textit{Forecast-basierte Erkennung ($\tau = 60$~min):} Standard-Regressionsmodelle, die einen Alarm ausgeben wenn der Minimalwert der vorhergesagten Kurve innerhalb von 60~Minuten unter 70~mg/dL fällt.
-\textit{Direkte Event-Classifier (Any-time):} Binäre Klassifikatoren, die vorhersagen ob irgendwann innerhalb der nächsten 60~Minuten eine Hypoglykämie eintreten wird (Label~1 wenn Minimum der nächsten 12~Schritte unter 70~mg/dL).
-\textit{Direkte Point-Event-Classifier (At exactly 60~min):} Binäre Klassifikatoren, die vorhersagen ob genau bei Schritt~12 (60~Minuten) eine Hypoglykämie vorliegt (Label~1 wenn der Glukosewert zwischen Schritt~9 und~15, d.h.\ 45--75~min, unter 70~mg/dL fällt).
-F2 gewichtet Recall doppelt so stark wie Precision.}
+\caption{Vergleich aller Modellvarianten zur Hypoglykämie-Erkennung (Cohortmean, 36 Patienten, Schwellenwert 70~mg/dL).
+}
 \begin{tabular}{llrrrr}
 \toprule
 Gruppe & Modell & Precision & Recall & F1 & F2 \\

@@ -1,0 +1,850 @@
+% ============================================================
+% PRG Seminar Bachelor Thesis Presentation (v4 FINAL)
+% Robin van den Hoek | University of Bern
+% Supervisor: PD Dr. Kaspar Riesen
+% ============================================================
+%
+% Required image files in the same folder as this .tex:
+%   lstm_cell.png             (existing, from Phi 2018)
+%   patchtst_arch.png         (existing, from Nie et al. 2023)
+%   hypo_episode.png
+%   timeshift_demo.png
+%   tau_sweep.png
+%   pr_paradox.png
+%   classifier_predictions.png
+% ============================================================
+
+\begin{filecontents*}{references.bib}
+@misc{idf2021,
+  title={IDF Diabetes Atlas 10th edition},
+  author={{International Diabetes Federation}}, year={2021}}
+@misc{dexcom_g6,
+  title={Dexcom G6 CGM System},
+  author={{Dexcom Inc.}}, year={2026}}
+@article{garcia_tirado2023,
+  author = {Garcia-Tirado, J. and Colmegna, P. and Villard, O. and others},
+  title  = {Assessment of meal anticipation for improving fully automated insulin delivery in adults with type 1 diabetes},
+  journal = {Diabetes Care}, volume={46}, number={9}, pages={1652--1658}, year={2023}}
+@article{battelino2019,
+  title={Clinical Targets for Continuous Glucose Monitoring Data Interpretation: Recommendations From the International Consensus on Time in Range},
+  author={Battelino, Tadej and Danne, Thomas and Bergenstal, Richard M and others},
+  journal={Diabetes Care},
+  volume={42}, number={8}, pages={1593--1603}, year={2019},
+  doi={10.2337/dci19-0028}}
+@article{baxter2024iah,
+  title={Impaired awareness of hypoglycaemia remains prevalent in adults with type 1 diabetes and is associated with the risk of severe hypoglycaemia},
+  author={Baxter, Faye and Baillie, Nicola and Dover, Anna and Stimson, Roland H. and Gibb, Fraser and Forbes, Shareen},
+  journal={PLoS ONE}, year={2024},
+  doi={10.1371/journal.pone.0297601}}
+@article{nie2023patchtst,
+  title={A Time Series is Worth 64 Words: Long-term Forecasting with Transformers},
+  author={Nie, Yuqi and Nguyen, Nam H. and Sinthong, Phanwadee and Kalagnanam, Jayant},
+  journal={ICLR}, year={2023}}
+@article{vaswani2017attention,
+  title={Attention is All You Need},
+  author={Vaswani, Ashish and others}, journal={NeurIPS}, year={2017}}
+@inproceedings{kim2022revin,
+  title={Reversible Instance Normalization for Accurate Time-Series Forecasting against Distribution Shift},
+  author={Kim, Taesung and others}, booktitle={ICLR}, year={2022}}
+@inproceedings{cuturi2017sdtw,
+  title={Soft-DTW: a Differentiable Loss Function for Time-Series},
+  author={Cuturi, Marco and Blondel, Mathieu},
+  booktitle={ICML}, year={2017}}
+@article{sakoe1978dtw,
+  title={Dynamic Programming Algorithm Optimization for Spoken Word Recognition},
+  author={Sakoe, Hiroaki and Chiba, Seibi},
+  journal={IEEE Trans. Acoustics, Speech, and Signal Processing},
+  volume={26}, number={1}, pages={43--49}, year={1978}}
+@inproceedings{leguen2019dilate,
+  title={Shape and Time Distortion Loss for Training Deep Time Series Forecasting Models},
+  author={Le Guen, Vincent and Thome, Nicolas},
+  booktitle={NeurIPS}, year={2019}}
+@inproceedings{guo2017calibration,
+  title={On Calibration of Modern Neural Networks},
+  author={Guo, Chuan and Pleiss, Geoff and Sun, Yu and Weinberger, Kilian Q.},
+  booktitle={ICML}, year={2017}}
+@article{hochreiter1997lstm,
+  title={Long Short-Term Memory},
+  author={Hochreiter, Sepp and Schmidhuber, J{\"u}rgen},
+  journal={Neural Computation}, volume={9}, number={8}, pages={1735--1780}, year={1997}}
+@inproceedings{akiba2019optuna,
+  title={Optuna: A Next-generation Hyperparameter Optimization Framework},
+  author={Akiba, Takuya and others}, booktitle={ACM SIGKDD}, year={2019}}
+@misc{phi2018lstm,
+  author = {Phi, Michael},
+  title = {Illustrated Guide to {LSTM}'s and {GRU}'s: A step by step explanation},
+  year = {2018},
+  howpublished = {Online},
+  url = {https://youtu.be/8HyCNIVRbSU}}
+@thesis{huni2023,
+  author = {H{\"u}ni, Fabian},
+  title  = {Predicting Events of Hypoglycemia: A Comparison of {LSTM} and {GAT} Approaches},
+  type   = {Bachelor Thesis},
+  institution = {University of Bern, Faculty of Science (INF)},
+  year   = {2023}}
+@misc{prg_internal,
+  author = {{Pattern Recognition Group, UniBe}},
+  title = {Glucose prediction proposal},
+  howpublished = {Internal Proposal},
+  year = {2025}}
+\end{filecontents*}
+
+\documentclass[aspectratio=169,10pt]{beamer}
+
+\usetheme{UniBern}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage[style=numeric,sorting=none,backend=bibtex]{biblatex}
+\addbibresource{references.bib}
+
+\definecolor{unibe-blue}{RGB}{0,80,155}
+\definecolor{unibe-red}{RGB}{200,16,46}
+
+\setbeamercolor{frametitle}{fg=unibe-red, bg=}
+\addtobeamertemplate{frametitle}{\vspace*{-0.8cm}}{\vspace*{0.2cm}}
+\setbeamersize{text margin left=0.8cm, text margin right=0.8cm}
+
+\setbeamercolor{block title}{bg=unibe-blue, fg=white}
+\setbeamercolor{block body}{bg=gray!10, fg=black}
+\setbeamercolor{block title alerted}{bg=unibe-red, fg=white}
+\setbeamercolor{block body alerted}{bg=unibe-red!10, fg=black}
+
+\setbeamertemplate{frame numbering}[fraction]
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  \hbox{%
+    % \hspace* schiebt die Zahl vom linken Rand etwas nach rechts.
+    % 0.8cm entspricht deinem "text margin left" von oben.
+    \hspace*{0.4cm}\usebeamerfont{page number in head/foot}%
+    \insertframenumber/\inserttotalframenumber%
+  }%
+  % \vskip schiebt die Zahl vom unteren Rand etwas nach oben.
+  % Je höher die Zahl (z.B. 12pt, 16pt), desto weiter oben steht sie.
+  \vskip3pt%
+}
+
+\title{Mitigating Time-Shift Errors in CGM-based\\
+       Glucose Forecasting and Hypoglycemia Event Prediction}
+\author{Robin van den Hoek\\[6pt]
+        \normalsize Supervisor: \textbf{PD Dr.\ Kaspar Riesen}}
+\institute{University of Bern, Faculty of Science (INF)\\
+           Pattern Recognition Group}
+\date{PRG Seminar, May 2026}
+
+\begin{document}
+
+% =====================================================================
+% Slide 1: Title
+% =====================================================================
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+% =====================================================================
+% Slide 2: Motivation
+% =====================================================================
+\begin{frame}[t]{Hypoglycemia and the Need for Prediction}
+  \small
+  \begin{columns}[T]
+    \column{0.40\textwidth}
+    \begin{itemize}
+      \item 537\,M adults with diabetes globally (2021), projected 783\,M by 2045 \cite{idf2021}
+      \item \textbf{Type 1 diabetes}: pancreas produces \emph{no} insulin, lifelong management required
+      \item \textbf{Hypoglycemia} (BG $<$ 70\,mg/dL): immediate, life-threatening danger
+      \item Despite CGM, 20 to 40\% of T1D patients have impaired hypoglycemia awareness \cite{baxter2024iah}, $3$ to $6\times$ higher risk for severe events
+      \item International consensus: $<$4\% time below 70\,mg/dL ($\sim$1\,h per day) \cite{battelino2019}
+    \end{itemize}
+    \vspace{2pt}
+    \textbf{Goal:} predict hypoglycemia 60\,min ahead to enable \emph{preventive} action.
+
+    \column{0.60\textwidth}
+    \begin{center}
+      \includegraphics[width=\textwidth]{hypo_episode.png}
+    \end{center}
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+% Slide 3: Related Work (NEW)
+% =====================================================================
+\begin{frame}[t]{Related Work}
+  \begin{itemize}
+    \setlength{\itemsep}{12pt}
+    \item \textbf{Hypoglycemia Prediction:} Prior work uses LSTM and GAT models for event prediction based solely on CGM data \cite{huni2023}.
+    \item \textbf{The Time-Shift Gap:} Internal PRG experiments show that time shifts dominate errors (RMSE) even when forecasts are clinically plausible \cite{prg_internal}.
+    \item \textbf{My Focus:} Address training objectives and evaluation procedures, rather than building entirely new architectures.
+  \end{itemize}
+\end{frame}
+
+% =====================================================================
+% Slide 4: Setup & Scope
+% =====================================================================
+\begin{frame}[t]{Experimental Setup and Scope}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+    \textbf{Setup:}
+    \begin{itemize}
+      \item Lookback: 24 steps $=$ 2\,h of CGM history
+      \item Horizon: 12 steps ($5,\ldots,60$\,min)
+      \item \textbf{Evaluation target:} $h{=}11$ (60\,min ahead)
+      \item Dataset: T1DATA --- 36 Type\,1 patients \cite{garcia_tirado2023}
+      \item Patient-specific training, $60/20/20$ temporal split (following \cite{huni2023})
+    \end{itemize}
+    \vspace{2pt}
+    \begin{alertblock}{Univariate input}
+      Glucose only, no insulin, no meals, no activity data
+    \end{alertblock}
+
+    \column{0.40\textwidth}
+    \textbf{In scope:}
+    \begin{itemize}
+      \item Time-shift error analysis
+      \item LSTM vs.\ PatchTST
+      \item Three ablation objectives
+    \end{itemize}
+    \vspace{4pt}
+    \textbf{Out of scope:}
+    \begin{itemize}
+      \item Adding meal / insulin data
+      \item extensive model tuning beyond a baseline
+      \item Generalizing across different patient populations
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+% Slide 5: LSTM Concept
+% =====================================================================
+\begin{frame}[t]{Model 1: Long Short-Term Memory \cite{hochreiter1997lstm}}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+    \textbf{The Idea}
+    \begin{itemize}
+      \item Processes the 24 lookback steps \emph{strictly chronologically}
+      \item Maintains a \textbf{cell state}: an internal memory updated step by step
+      \item Three \textbf{gates} regulate information flow:
+        \begin{itemize}
+          \small
+          \item \textbf{Forget gate} decides which old trends to discard
+          \item \textbf{Input gate} controls how the new reading updates memory
+          \item \textbf{Output gate} regulates what is passed to the next step
+        \end{itemize}
+      \item Final hidden state $h_{24}$ $\to$ linear layer $\to$ forecast at $t{+}60$\,min
+    \end{itemize}
+
+    \column{0.40\textwidth}
+    % Hier wird der Block nach unten geschoben. Wert nach Belieben anpassen!
+    \vspace*{1cm}
+
+    \begin{block}{Setup in this thesis}
+      \begin{itemize}
+        \item 2 stacked LSTMs, hidden $=$ 256
+        \item Dropout $0.159$
+        \item AdamW, $\text{lr}=9.61\!\times\!10^{-4}$
+        \item Per-patient z-score
+        \item Loss: MSE
+      \end{itemize}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+% Slide 6 LSTM Architecture
+% =====================================================================
+\begin{frame}{LSTM Cell Architecture}
+    % [c] zentriert den Inhalt vertikal, so bleibt die rechte Spalte zentriert
+    \begin{columns}[c]
+
+        % LINKE SPALTE: LSTM-Zelle-Bild
+        \begin{column}{0.65\textwidth}
+            \centering
+            % Kleiner negativer vertikaler Abstand, um das Bild innerhalb der Spalte nach oben zu schieben
+            \vspace*{-15pt}
+            \includegraphics[width=\linewidth]{lstm_cell.png}
+        \end{column}
+
+        % RECHTE SPALTE: Legende
+        \begin{column}{0.40\textwidth}
+             \vspace{-1cm}
+            \centering
+            \includegraphics[width=\linewidth]{lstm_cell_legend.png}
+        \end{column}
+
+    \end{columns}
+\end{frame}
+
+% =====================================================================
+% Slide 7: PatchTST Concept
+% =====================================================================
+\begin{frame}[t]{Model 2: PatchTST \cite{nie2023patchtst}}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+    \textbf{The Idea}
+    \begin{itemize}
+      \item Abandons step-by-step processing
+      \item \textbf{Patching}: divides the 24-step window into 3 overlapping segments (length 12, stride 6)
+      \item Each patch acts like a "word token", similar to NLP \cite{vaswani2017attention}
+      \item \textbf{Self-attention}: every patch attends to every other patch in parallel
+      \item Captures \emph{global} context at once, not sequentially
+    \end{itemize}
+
+    \column{0.40\textwidth}
+    \begin{block}{Setup in this thesis}
+      \begin{itemize}
+        \item 3 Transformer blocks
+        \item 4 attention heads, $d_{\text{model}}{=}64$
+        \item Patches: length 12, stride 6
+        \item AdamW, $\text{lr}=1.21\!\times\!10^{-4}$
+        \item RevIN normalization \cite{kim2022revin}
+        \item Loss: MSE
+      \end{itemize}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+% Slide 8 PatchTST Architecture
+% =====================================================================
+\begin{frame}[t]{PatchTST Architecture}
+  \vspace*{-25pt}
+  \begin{figure}
+      \centering
+      \includegraphics[width=1.2\textwidth,height=0.85\textheight,keepaspectratio]{patchtst_arch_b.png}
+      \caption*{\tiny Source Nie et al. (2023) \cite{nie2023patchtst}}
+  \end{figure}
+\end{frame}
+
+% =====================================================================
+% Slide 9: Time-Shift Artifact (with plot)
+% =====================================================================
+\begin{frame}[t]{The Time-Shift Artifact}
+  \begin{columns}[T]
+    \column{0.40\textwidth}
+    \textbf{Observation}
+    \begin{itemize}
+      \item Both models reproduce the \emph{shape} of the glucose curve
+      \item ...but the prediction \textbf{arrives late}
+      \item LSTM mean lag: \textbf{51\,min}
+      \item PatchTST mean lag: \textbf{55\,min}
+    \end{itemize}
+    \vspace{6pt}
+    \textbf{Diagnostic metric: lag-RMSE}
+    \[
+      \min_{k \in [-12,12]} \mathrm{RMSE}(y,\,\hat{y}_{+k})
+    \]
+    \footnotesize RMSE \emph{after} optimal temporal alignment.\\
+    Shift penalty $=$ RMSE $-$ lag\_rmse.
+
+    \column{0.57\textwidth}
+    \begin{center}
+      \includegraphics[width=\textwidth]{timeshift_demo.png}
+    \end{center}
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+% Slide 10: Baseline Results
+% =====================================================================
+\begin{frame}[t]{Baseline Results}
+  % Negativer Abstand schiebt die Tabelle nach oben.
+  % Du kannst den Wert (z.B. -0.5cm oder -0.8cm) anpassen, bis es perfekt sitzt.
+  \vspace*{-0.5cm}
+
+  \begin{table}
+    \centering
+    \resizebox{0.85\linewidth}{!}{%
+    \begin{tabular}{lcc}
+      \toprule
+      \textbf{Metric} & \textbf{LSTM} & \textbf{PatchTST} \\
+      \midrule
+      RMSE (mg/dL)          & \textbf{36.09} & 39.27 \\
+      MAE (mg/dL)           & \textbf{27.12} & 29.00 \\
+      lag\_rmse (mg/dL)     & 21.65 & \textbf{14.21} \\
+      Shift penalty (mg/dL) & \textbf{14.44} & 25.06 \\
+      Mean lag (min)        & 51    & 55    \\
+      Hypo-F1               & 0.005 & \textbf{0.061} \\
+      \bottomrule
+    \end{tabular}}
+  \end{table}
+\end{frame}
+% =====================================================================
+% Slide 11: Research Question & Three Objectives
+% =====================================================================
+\begin{frame}[t]{Research Question \& Objectives}
+  % Schiebt die gesamte Box deutlich nach oben
+  \vspace*{-0.6cm}
+
+  \begin{alertblock}{Research Question}
+    \textbf{How can CGM forecasting models be trained and evaluated such that time shifts are reduced and handled explicitly?}
+  \end{alertblock}
+
+  % Reduziert den Abstand zwischen der Box und der Tabelle
+  \vspace{-4pt}
+
+  \begin{table}
+    \centering
+    % Nutzt footnotesize für eine kompaktere Darstellung
+    \footnotesize
+    % Zeilenabstand leicht reduziert (von 1.3 auf 1.15)
+    \renewcommand{\arraystretch}{1.15}
+    % Spaltenbreite erhöht auf 7.5cm, um Zeilenumbrüche zu minimieren
+    \begin{tabular}{cl p{7.5cm}}
+      \toprule
+      \textbf{Obj.} & \textbf{What changes} & \textbf{Hypothesis} \\
+      \midrule
+      1a & Bounded-lag loss ($D{=}3$) & Tolerating timing offsets reduces the shift penalty \\
+      1b & Soft-DTW loss ($\gamma{=}1$) & Differentiable elastic alignment relaxes mismatch \\
+      \midrule
+      2  & Joint multi-step MSE ($h{=}0\ldots11$) & Supervising every horizon step keeps prediction phase-aligned \\
+      \midrule
+      3a & $\tau$-sweep (tolerance analysis) & Quantify how forgiving forecast-based detection has to be \\
+      3b & Direct binary classifier (BCE) & A model trained on events directly should beat threshold-crossing \cite{huni2023} \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+\end{frame}
+
+% =====================================================================
+% Slide 12: Objective 1 Three Loss Functions
+% =====================================================================
+\begin{frame}[t,shrink=6]{Objective 1: Three Loss Functions Compared}
+  \begin{columns}[T]
+    \column{0.32\textwidth}
+    \textbf{Baseline MSE}
+    \[ \mathcal{L} = \mathrm{MSE}(\hat{y},\,y) \]
+    \begin{itemize}
+      \small
+      \item Penalises the target point directly
+      \item No notion of timing tolerance
+      \item Reference for comparison
+    \end{itemize}
+
+    \column{0.32\textwidth}
+    \textbf{1a Bounded-Lag}
+    \[ \mathcal{L} = \min_{\Delta \in [-D,D]}\,\mathrm{MSE}(\hat{y},\,y_{\text{shift}(\Delta)}) \]
+    \begin{itemize}
+      \small
+      \item $D{=}3$ ($\pm 15$\,min)
+      \item Picks the best shift per sample
+    \end{itemize}
+
+    \column{0.32\textwidth}
+    \textbf{1b Soft-DTW \cite{cuturi2017sdtw}}
+    \[ \mathcal{L} = \mathrm{softDTW}_{\gamma}(\hat{y},\,y) \]
+    \begin{itemize}
+      \small
+      \item Differentiable elastic alignment
+      \item Allows non-uniform warping
+      \item $\gamma{=}1$ (smooth-min sharpness)
+    \end{itemize}
+  \end{columns}
+  \vspace{2pt}
+  \begin{alertblock}{Hypothesis}
+    If MSE punishes the model for offsets too harshly, a forgiving loss should reduce the systematic shift.
+  \end{alertblock}
+\end{frame}
+
+% =====================================================================
+% Slide 13 Soft DTW (Optimiertes 2-Spalten Layout mit dynamischen Citations)
+% =====================================================================
+\begin{frame}[t]{Soft DTW Differentiable Sequence Alignment}
+  \vspace{-15pt}
+
+  \begin{columns}[T]
+
+    % Linke Spalte (75% der Breite) für die Formeln
+    \begin{column}{0.75\textwidth}
+
+      \textbf{Classical DTW Loss \cite{sakoe1978dtw}} \\[4pt]
+      \footnotesize
+      The goal is to find an optimal alignment path $A$ that minimizes the mapping cost
+      \[
+        \mathcal{L}_{DTW}(x, y) = \min_{A \in \mathcal{A}} \langle A, \Delta(x, y) \rangle
+      \]
+      This discrete minimum is not differentiable and prevents backpropagation
+
+      \vspace{15pt}
+
+      \normalsize\textbf{Soft Min Operator} \\[4pt]
+      \footnotesize
+      Differentiability is achieved through this smooth approximation
+      \[
+        \min\nolimits_{\gamma}^\ast \{a_1, \dots, a_k\} = -\gamma \log \sum_{i=1}^k e^{-a_i/\gamma}
+      \]
+
+      \vspace{-5pt}
+
+      \normalsize\textbf{Soft DTW Loss \cite{cuturi2017sdtw}} \\[4pt]
+      \footnotesize
+      The loss is smoothed by replacing the minimum with a log sum exp operator
+      \[
+        \mathcal{L}_{\gamma}(x, y) = -\gamma \log \sum_{A \in \mathcal{A}} e^{-\langle A, \Delta(x, y) \rangle / \gamma}
+      \]
+
+    \end{column}
+
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+% Slide 14: Soft-DTW Mechanics in Detail (Numerical Example)
+% =====================================================================
+\begin{frame}[t]{Soft-DTW Calculation: Step-by-Step}
+  \centering
+  \textbf{Input Sequences ($H{=}3$)} \\
+  Prediction $\hat{y} = [10, 10, 6]$ \quad vs. \quad Ground Truth $y = [10, 8, 6]$
+  \vspace{0.5em}
+
+  \begin{columns}[T]
+    \column{0.53\textwidth}
+    \centering
+    \textbf{Distance Matrix $D$} \\
+    $D_{i,j} = (\hat{y}_i - y_j)^2$
+    \[
+    D = \begin{pmatrix}
+    \mathbf{0} & 4 & 16 \\
+    0 & 4 & 16 \\
+    16 & 4 & \mathbf{0}
+    \end{pmatrix}
+    \]
+
+    \column{0.48\textwidth}
+    \centering
+    \textbf{DP-Table $R$} \\
+    $R_{i,j} = D_{i,j} + \mathrm{softmin}_{\gamma}(d,t,l)$
+    \[
+    R = \begin{pmatrix}
+    \mathbf{0} & \infty & \infty & \infty \\
+    \infty & 0 & 4 & 20 \\
+    \infty & 0 & 3.3 & 19 \\
+    \infty & 16 & 19.3 & \mathbf{3.3}
+    \end{pmatrix}
+    \]
+  \end{columns}
+
+  \vspace{-0.5em}
+
+  \begin{block}{Mathematical Operation (for $\gamma{=}1$)}
+    \centering
+    $\mathrm{softmin}(d,t,l) = -\ln(e^{-d} + e^{-t} + e^{-l})$ \\[0.3em]
+    \textbf{Final Loss $R_{3,3} \approx 3.3$}
+  \end{block}
+\end{frame}
+
+% =====================================================================
+% Slide 15: Objective 1 Results and Why It Fails
+% =====================================================================
+\begin{frame}[t]{Objective 1: Results}
+
+  % --- OBERER TEIL: Tabelle über die volle Breite ---
+  \begin{table}
+    \centering
+    \renewcommand{\arraystretch}{1.2} % Gibt den Tabellenzeilen mehr vertikale "Luft"
+    \resizebox{\linewidth}{!}{%
+    \begin{tabular}{llcccc}
+      \toprule
+      \textbf{Model} & \textbf{Loss} & \textbf{RMSE} & \textbf{lag\_rmse} & \textbf{Mean lag (min)} & \textbf{Hypo-F1} \\
+      \midrule
+      LSTM     & MSE (Baseline)        & \textbf{36.09} & \textbf{21.65} & 51 & 0.005 \\
+      LSTM     & Bounded-Lag $D{=}3$   & 36.14 & 25.25 & 49 & \textbf{0.014} \\
+      LSTM     & Soft-DTW              & 37.23 & 28.67 & 46 & \textbf{0.014} \\
+      \midrule
+      PatchTST & MSE (Baseline)        & \textbf{39.27} & \textbf{14.21} & 55 & 0.061 \\
+      PatchTST & Bounded-Lag $D{=}3$   & 39.30 & 16.70 & 55 & \textbf{0.067} \\
+      PatchTST & Soft-DTW              & 43.24 & 24.01 & 54 & 0.062 \\
+      \bottomrule
+    \end{tabular}}
+  \end{table}
+
+  \vspace{0pt} % Ein bisschen Abstand zur Tabelle lassen
+
+  % --- UNTERER TEIL: Alertblock und Take-away nebeneinander ---
+  \begin{columns}[T]
+
+    % Linke Spalte für den Alertblock
+    \column{0.48\textwidth}
+    \begin{alertblock}{Both losses worsen lag\_rmse}
+      Relaxing the timing penalty doesn't reduce the shift, it makes it more variable.
+    \end{alertblock}
+
+    % Rechte Spalte für das Take-away
+    \column{0.48\textwidth}
+    \vspace*{12pt} % <--- HIER: Zwingt den Text nach unten. Sternchen (*) ist Pflicht!
+    \textbf{Take-away:} \\[4pt] % Zeilenumbruch wie gewünscht
+    The shift is \emph{structural}. Changing the loss alone cannot create the missing causal signal.
+
+  \end{columns}
+
+\end{frame}
+% =====================================================================
+% Slide 16: Objective 2 Multi-step concept
+% =====================================================================
+\begin{frame}[t]{Objective 2: Joint Multi-Step MSE (MIMO)}
+  \textbf{Idea:} supervise all 12 future steps, not just $h{=}11$.
+  \vspace{8pt}
+  \begin{columns}[T]
+    \column{0.45\textwidth}
+    \textbf{Training objective}
+    \[ \mathcal{L} = \frac{1}{12}\sum_{h=0}^{11}\mathrm{MSE}(\hat{y}_h,\,y_h) \]
+    \begin{itemize}
+      \item Output head: $(B, 1) \to (B, 12)$
+      \item Same architecture, same data
+      \item All other settings identical to baseline
+    \end{itemize}
+
+    \column{0.50\textwidth}
+    \textbf{Why this might help}\\[4pt]
+    Supervising early steps ($h{=}1, 2, 3, \ldots$) forces the model to commit to a \emph{trajectory shape}, not just a 60-min endpoint. \\[4pt]
+    If a 5-min prediction is already late, the gradient signal corrects it \emph{immediately}, before the lag can compound over the horizon.
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+% Slide 17: Objective 2 Results
+% =====================================================================
+\begin{frame}[t,shrink=6]{Objective 2: Results}
+  \begin{table}
+    \centering
+    \resizebox{0.95\linewidth}{!}{%
+    \begin{tabular}{llccccc}
+      \toprule
+      \textbf{Model} & \textbf{Method} & \textbf{RMSE} & \textbf{lag\_rmse} & \textbf{Mean lag (min)} & \textbf{Shift penalty} & \textbf{Hypo-F1} \\
+      \midrule
+      LSTM     & Baseline              & 36.09 & 21.65 & 51 & \textbf{14.44} & 0.005 \\
+      LSTM     & \textbf{Multi-step}   & \textbf{35.59} & \textbf{20.74} & 50 & 14.85 & \textbf{0.010} \\
+      \midrule
+      PatchTST & Baseline              & 39.27 & \textbf{14.21} & 55 & 25.06 & 0.061 \\
+      PatchTST & \textbf{Multi-step}   & \textbf{39.05} & 14.53 & 55 & \textbf{24.52} & \textbf{0.072} \\
+      \bottomrule
+    \end{tabular}}
+  \end{table}
+  \begin{alertblock}{Why does the shift still persist?}
+    For all three loss variants tested (MSE, Bounded-Lag, Soft-DTW), the same fundamental limit remains: the lookback contains no information about upcoming meals or insulin. Glucose alone carries not enough information by itself for this specific task.
+  \end{alertblock}
+\end{frame}
+
+% =====================================================================
+% Slide 18: Objective 3 Rethinking
+% =====================================================================
+\begin{frame}[t]{Objective 3: Rethinking the Task}
+  \textbf{Clinical question:} Will hypoglycemia occur in the next 60\,min? (binary)
+  \vspace{8pt}
+  \begin{block}{The mismatch}
+    MSE optimizes pointwise accuracy.\\
+    Event detection accuracy is measured \emph{indirectly} (via threshold crossings on $\hat{y}$).\\
+    MSE-trained models are \textbf{not calibrated for event detection}.
+  \end{block}
+  \vspace{6pt}
+  \begin{itemize}
+    \item \textbf{3a $\tau$-sweep:} how forgiving does the tolerance have to be before forecast-based detection works?
+    \item \textbf{3b Direct classifier:} train a binary model directly on the event label, following \cite{huni2023}
+  \end{itemize}
+\end{frame}
+
+% =====================================================================
+% Slide 19: Objective 3a tau-Sweep
+% =====================================================================
+\begin{frame}[t]{Objective 3a: Forecast-Based Detection}
+  \framesubtitle{Performance Across Tolerances $\tau$}
+
+    % Falls das Bild unten aus der Folie rutscht, kannst du hier
+    % einen negativen Wert einsetzen, z.B. \vspace*{-15pt}
+    \vspace*{-10pt}
+
+    % Die makebox zentriert das Bild relativ zur Textbreite,
+    % ignoriert aber die eigentlichen Ränder.
+    \makebox[\textwidth][c]{
+      % Mit 1.15 machst du es 15% grösser als die normale Textbreite.
+      % Du kannst den Wert beliebig anpassen (z.B. 1.1 oder 1.2).
+      \includegraphics[width=1.10\textwidth]{tau_sweep.png}
+    }
+
+\end{frame}
+
+% =====================================================================
+% Slide 20: Direct Classifier Concept
+% =====================================================================
+\begin{frame}[t]{Objective 3b: Direct Binary Classifier}
+  \textbf{Task:} $p(\text{hypoglycemia within 60 min}) \in [0, 1]$
+  \vspace{6pt}
+  \begin{columns}[T]
+    \column{0.50\textwidth}
+    \textbf{Architecture}
+    \begin{itemize}
+      \item Same LSTM / PatchTST backbone as before
+      \item Same hyperparameters as baseline
+      \item Output: single sigmoid scalar
+      \item Label: $1$ if $\min(y_{t+1:t+12}) < 70$\,mg/dL
+    \end{itemize}
+
+    \column{0.48\textwidth}
+    \textbf{Loss: Binary Cross-Entropy with Logits}
+    \[ \mathcal{L} = -w_{+} \cdot y\,\log\sigma(z) - (1{-}y)\log(1{-}\sigma(z)) \]
+    \begin{itemize}
+      \small
+      \item $w_{+} = n_{\text{neg}}/n_{\text{pos}}$ counters class imbalance (hypos are rare)
+      \item Decision threshold $0.5$
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+% Slide 21: Direct Classifier Results
+% =====================================================================
+\begin{frame}[t,shrink=5]{Objective 3b: Classifier Results}
+  \begin{table}
+    \centering
+    \resizebox{\linewidth}{!}{%
+    \begin{tabular}{llcccc}
+      \toprule
+      \textbf{Model} & \textbf{Approach} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{F2} \\
+      \midrule
+      LSTM & Forecast-derived             & 0.010 & 0.004 & 0.005 & 0.004 \\
+      LSTM & Direct Classifier & \textbf{0.237} & \textbf{0.693} & \textbf{0.334} & \textbf{0.463} \\
+      \midrule
+      PatchTST & Forecast-derived         & 0.048 & 0.089 & 0.061 & 0.074 \\
+      PatchTST & Direct Classifier        & \textbf{0.054} & \textbf{0.615} & \textbf{0.095} &  \textbf{0.178} \\
+      \bottomrule
+    \end{tabular}}
+  \end{table}
+\end{frame}
+
+
+% =====================================================================
+% Slide 22: Output Saturation — the mechanism (Maximales Bildlayout)
+% =====================================================================
+\begin{frame}[t]{Why? PatchTST is Overconfident}
+  \begin{columns}[T]
+
+    % Linke Spalte: Maximale Breite für die Visualisierung
+    \begin{column}{0.72\textwidth}
+      \vspace*{-25pt} % Schiebt das Bild weit nach oben
+      \begin{center}
+        \includegraphics[width=\textwidth,height=0.75\textheight,keepaspectratio]{classifier_predictions.png}
+      \end{center}
+
+      \vfill % Schiebt den folgenden Block ganz nach unten
+
+      \vspace*{-8pt} % Schließt die Lücke zwischen Bild und Text
+      {\scriptsize
+      LSTM: 2{,}610 TP / 7{,}981 FP / 868 FN / 3{,}478 true events\\
+      PatchTST: 2{,}243 TP / 36{,}794 FP / 1{,}235 FN / 3{,}478 true events}
+
+    \end{column}
+
+    % Rechte Spalte: Kompakte Mechanismenbeschreibung
+    \begin{column}{0.26\textwidth}
+      \textbf{The mechanism}
+      \vspace{4pt}
+      \begin{itemize}
+        \scriptsize
+        \item The classification head on top of PatchTST produces very large logits
+        \item These values are passed through the sigmoid activation and probabilities collapse to $\approx 0$ or $\approx 1$
+        \item The standard decision threshold of 0.5 becomes irrelevant
+        \item LSTM produces smoothly varying probabilities because the recurrent state bounds the internal values
+      \end{itemize}
+
+    \end{column}
+
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+% Slide 23: Summary
+% =====================================================================
+\begin{frame}[t]{Summary: All Methods}
+  \begin{table}
+    \centering
+    \resizebox{0.95\linewidth}{!}{%
+    \begin{tabular}{llccccc}
+      \toprule
+      \textbf{Model} & \textbf{Method} & \textbf{RMSE} & \textbf{lag\_rmse} & \textbf{Mean lag (min)} & \textbf{Hypo-F1} & \textbf{Hypo-F2} \\
+      \midrule
+      LSTM     & MSE Baseline                & 36.09 & 21.65 & 51  & 0.005 & 0.004 \\
+      LSTM     & Bounded-Lag                 & 36.14 & 25.25 & 49  & 0.014 & 0.013 \\
+      LSTM     & Soft-DTW                    & 37.23 & 28.67 & 46  & 0.014 & 0.012 \\
+      LSTM     & \textbf{Multi-step}         & \textbf{35.59} & \textbf{20.74} & 50  & 0.010 & 0.009 \\
+      LSTM     & \textbf{Direct Classifier}  & ---   & ---   & --- & \textbf{0.334} & \textbf{0.463} \\
+      \midrule
+      PatchTST & MSE Baseline                & 39.27 & \textbf{14.21} & 55  & 0.061 & 0.074 \\
+      PatchTST & Bounded-Lag                 & 39.30 & 16.70 & 55  & 0.067 & 0.080 \\
+      PatchTST & Soft-DTW                    & 43.24 & 24.01 & 54  & 0.062 & 0.075 \\
+      PatchTST & \textbf{Multi-step}         & \textbf{39.05} & 14.53 & 55  & 0.072 & 0.090 \\
+      PatchTST & Direct Classifier           & ---   & ---   & --- & \textbf{0.095} & \textbf{0.178} \\
+      \bottomrule
+    \end{tabular}}
+  \end{table}
+\end{frame}
+
+% =====================================================================
+% Slide 24: Conclusions
+% =====================================================================
+\begin{frame}[t]{Conclusions}
+  \vspace{-10pt}
+
+  \begin{enumerate}
+    \setlength{\itemsep}{18pt} % Etwas mehr Platz, da es jetzt nur noch 3 Punkte sind
+
+    \item \textbf{Time-Shift is a Fundamental Limit} \\[2pt]
+    { Without future causal data (e.g., meals, insulin), models inherently propagate past values. Alternative loss functions cannot resolve this structural delay.\par}
+
+    \item \textbf{Classification Outperforms Regression for Alerts} \\[2pt]
+    { Pointwise regression fails at predicting isolated threshold crossings. Reliable hypoglycemia event detection requires task-specific direct binary classification.\par}
+
+    \item \textbf{Complex Architectures Require Calibration} \\[2pt]
+    { Modern models like PatchTST exhibit severe overconfidence in this domain. Targeted calibration is essential for safe clinical application.\par}
+
+  \end{enumerate}
+\end{frame}
+% =====================================================================
+% Slide 25: Future Work
+% =====================================================================
+\begin{frame}[t,shrink=7]{Future Work}
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+    \textbf{Short-term:}
+    \begin{itemize}
+      \item Threshold optimization for the LSTM classifier (we used the default $0.5$)
+      \item \textbf{Calibration} for PatchTST: temperature scaling \cite{guo2017calibration}
+      \item \textbf{Slope-aware losses} that explicitly penalise the wrong direction or magnitude of glucose change. The DILATE loss \cite{leguen2019dilate} combines a shape term and a temporal term. It might force the model to first match \emph{how fast} glucose is changing.
+    \end{itemize}
+
+    \column{0.48\textwidth}
+    \textbf{Long-term:}
+    \begin{itemize}
+      \item \textbf{Multi-modal input} (insulin records, announced meals)
+      \item Population-level pretraining with patient-specific fine-tuning
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+% Slide 26: Discussion
+% =====================================================================
+\begin{frame}[t]{Discussion Questions}
+  \begin{block}{Q1: Rate-of-change input}
+    Could a model trained on $\Delta G/\Delta t$ instead of raw glucose avoid the time-shift artifact?
+  \end{block}
+  \vspace{12pt}
+  \begin{block}{Q2: Clinical threshold calibration}
+    How would you calibrate the trade-off between false alarms and missed events for a real deployment?
+  \end{block}
+  \vspace{18pt}
+  \centering\large\textbf{Thank you.}
+\end{frame}
+
+% =====================================================================
+% Slide 27: References
+% =====================================================================
+\begin{frame}[t,allowframebreaks]{References}
+  \printbibliography[heading=none]
+\end{frame}
+
+\end{document}

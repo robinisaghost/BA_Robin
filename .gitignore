@@ -42,3 +42,11 @@ thesis/*.lof
 thesis/*.lot
 thesis/main.pdf
 
+# docs LaTeX build artefacts
+docs/*.aux
+docs/*.log
+
+# Local tooling / template scaffold (not thesis content)
+.claude/
+BA_thesis/
+
