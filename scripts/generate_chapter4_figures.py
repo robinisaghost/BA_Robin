@@ -30,8 +30,21 @@ plt.rcParams.update({
     "ytick.labelsize": 8,
     "legend.fontsize": 8,
     "figure.dpi": 150,
+    # seaborn-darkgrid theme (shared across all thesis data figures)
+    "figure.facecolor": "white",
+    "axes.facecolor": "#EAEAF2",
+    "axes.edgecolor": "white",
+    "axes.linewidth": 0.0,
+    "axes.grid": True,
+    "axes.axisbelow": True,
+    "grid.color": "white",
+    "grid.linewidth": 1.0,
+    "xtick.color": "#555555",
+    "ytick.color": "#555555",
     "axes.spines.top": False,
     "axes.spines.right": False,
+    "axes.spines.left": False,
+    "axes.spines.bottom": False,
 })
 
 # Seaborn-darkgrid trajectory style, shared with the appendix patient panels.

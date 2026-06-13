@@ -51,6 +51,24 @@ COLOR_TRUE_EVENT = "#2E8B57"  # green for true hypo events
 HYPO_THRESHOLD = 70.0
 SAMPLING_MIN = 5  # 5-minute CGM sampling
 
+# seaborn-darkgrid theme (shared across all thesis data figures)
+plt.rcParams.update({
+    "figure.facecolor": "white",
+    "axes.facecolor": "#EAEAF2",
+    "axes.edgecolor": "white",
+    "axes.linewidth": 0.0,
+    "axes.grid": True,
+    "axes.axisbelow": True,
+    "grid.color": "white",
+    "grid.linewidth": 1.0,
+    "xtick.color": "#555555",
+    "ytick.color": "#555555",
+    "axes.spines.top": False,
+    "axes.spines.right": False,
+    "axes.spines.left": False,
+    "axes.spines.bottom": False,
+})
+
 
 # ---------------------------------------------------------------------------
 # Helpers

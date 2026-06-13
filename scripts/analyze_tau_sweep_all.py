@@ -18,6 +18,24 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from ba_baseline.metrics.metrics import event_metrics
 
+# seaborn-darkgrid theme (shared across all thesis data figures)
+plt.rcParams.update({
+    "figure.facecolor": "white",
+    "axes.facecolor": "#EAEAF2",
+    "axes.edgecolor": "white",
+    "axes.linewidth": 0.0,
+    "axes.grid": True,
+    "axes.axisbelow": True,
+    "grid.color": "white",
+    "grid.linewidth": 1.0,
+    "xtick.color": "#555555",
+    "ytick.color": "#555555",
+    "axes.spines.top": False,
+    "axes.spines.right": False,
+    "axes.spines.left": False,
+    "axes.spines.bottom": False,
+})
+
 THRESHOLD = 70.0
 TAU_RANGE  = list(range(0, 13))
 TAU_MINS   = [t * 5 for t in TAU_RANGE]   # in minutes
