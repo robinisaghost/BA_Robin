@@ -64,7 +64,7 @@ def make_class_imbalance():
     pids_sorted = [pids[i] for i in order]
     pos_s = pos_pct[order]
 
-    fig, axes = plt.subplots(1, 2, figsize=(10, 3.5),
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.3),
                               gridspec_kw={"width_ratios": [3, 1]})
 
     # Left panel: per-patient bar

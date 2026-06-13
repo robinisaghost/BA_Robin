@@ -11,7 +11,7 @@ Fig.~\ref{fig:exp:baseline_curves} illustrates this effect for a representative 
 
 \begin{figure}[tbp]
     \centering
-    \includegraphics[width=0.9\textwidth]{patient_85102.png}
+    \includegraphics[width=\textwidth]{patient_85102.png}
     \caption[Baseline 60min prediction]{Baseline 60-minute forecasting trajectories for patient 85102 over a representative 10-hour window containing a hypoglycaemia episode. LSTM (left) and PatchTST (right) are shown side by side. The bold black line is the ground truth CGM signal and the blue line the model prediction; the dashed line marks the 70~mg/dL hypoglycaemia threshold.}
     \label{fig:exp:baseline_curves}
 \end{figure}
@@ -207,7 +207,7 @@ The precision difference between the two classifiers is made visible in Fig.~\re
 
 \begin{figure}[tbp]
     \centering
-    \includegraphics[width=0.9\textwidth]{classifier_predictions.png}
+    \includegraphics[width=\textwidth]{classifier_predictions.png}
     \caption{Output traces of the LSTM (top) and PatchTST (bottom) direct event classifiers for a representative patient segment. The predicted event probability is plotted against time; the shaded regions indicate windows where the ground truth label is positive. The absolute confusion counts across the full cohort are shown in Fig.~\ref{fig:app:confusion_counts}.}
     \label{fig:exp:classifier_traces}
 \end{figure}

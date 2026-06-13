@@ -370,7 +370,7 @@ def make_baseline_trajectory_comparison():
     t    = np.arange(N_WINDOW) * 5
     y_lo = min(true_w.min(), pred_lstm_w.min(), pred_ptst_w.min()) - 8
 
-    fig, axes = plt.subplots(1, 2, figsize=(8.5, 3.0), sharey=True, sharex=True)
+    fig, axes = plt.subplots(1, 2, figsize=(8.5, 3.6), sharey=True, sharex=True)
 
     for ax, pred, title in zip(axes,
                                 [pred_lstm_w, pred_ptst_w],
