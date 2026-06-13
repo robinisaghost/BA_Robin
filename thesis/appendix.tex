@@ -5,6 +5,13 @@
 % ================================================================
 This appendix contains supplementary figures and numerical tables that support the findings presented in Chapter~\ref{ch:experiments}.
 
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=\textwidth]{appendix_patient_panels.png}
+    \caption[Per-patient forecasting trajectories across training variants]{Per-patient 60-minute forecasting trajectories for all four training variants (MSE, Bounded-Lag, Soft-DTW, Multi-step), shown for both architectures (LSTM, left column; PatchTST, right column) over a representative 10-hour test window. Each row is one patient, selected to span distinct glycaemic regimes: a sharp single hypoglycaemia event (85102), a volatile window with multiple deep events (85116), a gradual single descent (85215), and a window containing no event (85217). The ground truth is the bold black curve and the dashed grey line marks the 70~mg/dL hypoglycaemia threshold; colours and line styles are fixed per variant across all panels, as given in the shared legend. The panels show the per-patient variation behind the cohort-mean metrics of Sections~\ref{sec:exp:obj1} and~\ref{sec:exp:obj2}: the amplitude departure of Soft-DTW under PatchTST (Section~\ref{sec:exp:obj1}) is visible, for example, in patient 85116, whereas on the event-free window (85217) all variants track the trajectory closely at the characteristic temporal offset.}
+    \label{fig:app:patient_panels}
+\end{figure}
+
 \begin{figure}[tbp]
     \centering
     \includegraphics[width=0.85\textwidth]{confusion_counts.png}

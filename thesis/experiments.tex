@@ -101,7 +101,7 @@ Architecture & Loss & RMSE & RMSE$^*$ & Lag (min) & MAE & Precision & Recall & F
 \end{tabular}}
 \end{table}
 
-Across both strategies, Tab.~\ref{tab:exp:obj1} reveals a consistent pattern: in every architecture--loss combination, RMSE$^*$ rises above the MSE baseline even as the mean lag falls, so the partial temporal realignment is bought at a cost to lag-adjusted trajectory accuracy that grows with the aggressiveness of the tolerance, and neither strategy closes the detection gap observed at baseline.
+Across both strategies, Tab.~\ref{tab:exp:obj1} reveals a consistent pattern: in every architecture--loss combination, RMSE$^*$ rises above the MSE baseline even as the mean lag falls, so the partial realignment is bought at a cost to lag-adjusted accuracy that grows with the tolerance, and neither strategy closes the detection gap (per-patient trajectories for all variants and both architectures are shown in Fig.~\ref{fig:app:patient_panels}, Appendix~\ref{appendix:detailed_metrics}).
 
 % ================================================================
 \section{Objective 2: Multi-Step Forecasting} \label{sec:exp:obj2}
