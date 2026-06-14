@@ -57,53 +57,31 @@ def make_class_imbalance():
     pos_counts = np.array(pos_counts)
     neg_counts = np.array(neg_counts)
     total      = pos_counts + neg_counts
-    pos_pct    = 100 * pos_counts / total
+    pos_pct    = np.sort(100 * pos_counts / total)
+    mean_pct   = pos_counts.sum() / total.sum() * 100
 
-    # Sort by positive percentage
-    order = np.argsort(pos_pct)
-    pids_sorted = [pids[i] for i in order]
-    pos_s = pos_pct[order]
-
-    fig, axes = plt.subplots(1, 2, figsize=(6.5, 3.8),
-                              gridspec_kw={"width_ratios": [3, 1]})
-
-    # Left panel: per-patient bar (full-width bars so the small positive
-    # portions form a continuous, clearly visible band)
-    x = np.arange(len(pids_sorted))
-    axes[0].bar(x, pos_s, width=1.0, color="#C44E52", label="Positive (hypo event)")
-    axes[0].bar(x, 100 - pos_s, bottom=pos_s, width=1.0, color="#4878CF", alpha=0.45,
-                label="Negative (no hypo event)")
-    # Each bar is one of the 36 patients; the individual indices carry no
-    # information, so the axis is described by its label instead of per-bar ticks.
-    axes[0].set_xticks([])
-    axes[0].set_xlim(-0.7, len(pids_sorted) - 0.3)
-    axes[0].set_ylabel("Percentage of windows (%)")
-    axes[0].set_xlabel("Patients (each bar one patient, sorted by positive rate)")
-    axes[0].set_ylim(0, 100)
-    axes[0].set_title("Class distribution per patient")
-    axes[0].axhline(pos_counts.sum() / total.sum() * 100,
-                     color="black", linewidth=1.0, linestyle="--",
-                     label=f"Cohort mean: {pos_counts.sum()/total.sum()*100:.1f}%")
-    axes[0].legend(loc="upper left")
-
-    # Right panel: cohort aggregate
-    total_pos = pos_counts.sum()
-    total_neg = neg_counts.sum()
-    axes[1].bar(["Negative", "Positive"], [total_neg, total_pos],
-                color=["#4878CF", "#C44E52"], alpha=0.85, edgecolor="white")
-    axes[1].set_ylabel("Number of windows")
-    axes[1].set_title("Cohort aggregate")
-    for i, (label, val) in enumerate(zip(["Negative", "Positive"], [total_neg, total_pos])):
-        axes[1].text(i, val + 200, f"{val:,}", ha="center", va="bottom", fontsize=10)
-
-    fig.suptitle("Class imbalance in the T1DATA hypoglycaemia detection task",
-                 y=1.02, fontsize=12)
+    # Single full-width panel: the per-patient positive rate as red bars, so
+    # individual patients stay distinguishable and the (small) positive rates
+    # are clearly visible. The aggregate counts go in the caption instead.
+    fig, ax = plt.subplots(figsize=(6.3, 2.9))
+    x = np.arange(len(pos_pct))
+    ax.bar(x, pos_pct, width=0.8, color="#C44E52",
+           label="Positive (hypoglycaemia) windows")
+    ax.axhline(mean_pct, color="black", linewidth=1.2, linestyle="--",
+               label=f"Cohort mean: {mean_pct:.1f}%")
+    ax.set_xticks([])
+    ax.set_xlim(-0.7, len(pos_pct) - 0.3)
+    ax.set_ylim(0, pos_pct.max() * 1.18)
+    ax.set_ylabel("Positive windows (%)")
+    ax.set_xlabel("Patients (each bar one patient, sorted by positive rate)")
+    ax.set_title("Per-patient rate of positive (hypoglycaemia) windows")
+    ax.legend(loc="upper left")
     fig.tight_layout()
     fig.savefig(f"{OUT_DIR}/class_imbalance.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
 
-    ratio = total_neg / total_pos
-    print(f"  Total positive: {total_pos:,} | Total negative: {total_neg:,} | Ratio: {ratio:.1f}:1")
+    ratio = neg_counts.sum() / pos_counts.sum()
+    print(f"  Total positive: {pos_counts.sum():,} | Total negative: {neg_counts.sum():,} | Ratio: {ratio:.1f}:1")
 
 
 # ═══════════════════════════════════════════════════════════════════════════

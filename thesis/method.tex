@@ -42,7 +42,7 @@ For the event detection task, each lookback window is assigned the binary event 
 \begin{figure}[tbp]
     \centering
     \includegraphics[width=\textwidth]{class_imbalance.png}
-    \caption{Class distribution of the hypoglycaemia detection task across the 36-patient T1DATA cohort. \textit{Left:} stacked bars show the percentage of positive (red, glucose falls below 70~mg/dL within the next 60~min) and negative (blue) windows per patient, sorted by ascending positive rate; the dashed line marks the cohort mean of 5.7\%. \textit{Right:} absolute window counts aggregated across all patients (57{,}680 negative vs.\ 3{,}462 positive).}
+    \caption{Per-patient rate of positive windows (glucose falls below 70~mg/dL within the next 60~min) across the 36-patient T1DATA cohort, with one bar per patient sorted by ascending rate; the dashed line marks the cohort mean of 5.7\%. The rate varies from below 1\% to about 19\% between patients. Aggregated over the whole cohort the task is severely imbalanced: only 3{,}462 of 61{,}142 windows are positive, a negative-to-positive ratio of roughly 16.7:1.}
     \label{fig:method:class_imbalance}
 \end{figure}
 
