@@ -46,7 +46,9 @@ fig, axes = plt.subplots(1, 3, figsize=(6.6, 2.5))
 # ── (a) MSE: same-time-step correspondences (vertical links) ────────────────
 t = np.linspace(0, 4 * np.pi, 90)
 shape_true = np.sin(t)
-shape_pred = np.sin(t * 0.85 - 0.8)
+# prediction is the same shape but delayed (shifted to the right / too late),
+# the characteristic behaviour of the MSE-trained models
+shape_pred = np.sin(t - 1.8)
 
 ax = axes[0]
 peaks = argrelextrema(shape_true, np.greater, order=8)[0]
@@ -70,24 +72,30 @@ pk_t = argrelextrema(shape_true, np.greater, order=8)[0]
 pk_p = argrelextrema(shape_pred, np.greater, order=8)[0]
 tr_t = argrelextrema(shape_true, np.less, order=8)[0]
 tr_p = argrelextrema(shape_pred, np.less, order=8)[0]
-zc_t = np.where(np.diff(np.sign(shape_true)))[0]
-zc_p = np.where(np.diff(np.sign(shape_pred)))[0]
+# downward zero crossings (sign + -> -) for a clear mid-level feature
+dc_t = np.where((shape_true[:-1] > 0) & (shape_true[1:] <= 0))[0]
+dc_p = np.where((shape_pred[:-1] > 0) & (shape_pred[1:] <= 0))[0]
 
 
-def nearest(i, cand):
-    return cand[np.argmin(np.abs(cand - i))]
+def delayed(i, cand):
+    """Matching feature on the prediction, i.e. the nearest one to the right
+    (the prediction lags, so its counterpart of a true feature comes later)."""
+    right = cand[cand >= i]
+    return right[0] if len(right) else cand[-1]
 
 
+# connect each ground-truth feature to its delayed counterpart on the
+# prediction, at the upper (peak), middle (zero crossing) and lower (trough)
+# part of the panel so the tolerated lag is clearly separated and readable
 links_b = [
-    (pk_t[0],               nearest(pk_t[0], pk_p)),                # upper
-    (zc_t[len(zc_t) // 2],  nearest(zc_t[len(zc_t) // 2], zc_p)),   # middle
-    (tr_t[-1],              nearest(tr_t[-1], tr_p)),               # lower
+    (pk_t[0], delayed(pk_t[0], pk_p)),   # upper
+    (dc_t[0], delayed(dc_t[0], dc_p)),   # middle
+    (tr_t[0], delayed(tr_t[0], tr_p)),   # lower
 ]
 for a, b in links_b:
     yv = (shape_true[a] + shape_pred[b]) / 2
     ax.plot([t[a], t[b]], [yv, yv], color=COL_LINK, linestyle="--",
             linewidth=1.8, alpha=0.95, zorder=5)
-    ax.plot([t[a], t[b]], [yv, yv], "o", color=COL_LINK, markersize=3.5, zorder=6)
 style(ax, "(b) Bounded-Lag ($D{=}3$)")
 
 # ── (c) Soft-DTW: optimal warping-path correspondences ──────────────────────
