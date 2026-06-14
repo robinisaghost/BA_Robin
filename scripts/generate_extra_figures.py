@@ -16,12 +16,12 @@ OUT_DIR = "thesis/img"
 
 plt.rcParams.update({
     "font.family": "serif",
-    "font.size": 10,
-    "axes.titlesize": 10,
-    "axes.labelsize": 9,
-    "xtick.labelsize": 8,
-    "ytick.labelsize": 8,
-    "legend.fontsize": 8,
+    "font.size": 11,
+    "axes.titlesize": 12,
+    "axes.labelsize": 11,
+    "xtick.labelsize": 10,
+    "ytick.labelsize": 10,
+    "legend.fontsize": 10,
     "figure.dpi": 150,
     "axes.spines.top": False,
     "axes.spines.right": False,
@@ -72,17 +72,18 @@ def make_class_imbalance():
     axes[0].bar(x, pos_s, color="#C44E52", alpha=0.8, label="Positive (hypo event)")
     axes[0].bar(x, 100 - pos_s, bottom=pos_s, color="#4878CF", alpha=0.5,
                 label="Negative (no hypo event)")
-    axes[0].set_xticks(x)
-    axes[0].set_xticklabels([str(i + 1) for i in range(len(pids_sorted))], rotation=90, fontsize=7)
+    # Each bar is one of the 36 patients; the individual indices carry no
+    # information, so the axis is described by its label instead of per-bar ticks.
+    axes[0].set_xticks([])
+    axes[0].set_xlim(-0.7, len(pids_sorted) - 0.3)
     axes[0].set_ylabel("Percentage of windows (%)")
-    axes[0].set_xlabel("Patient (sorted by positive rate)")
+    axes[0].set_xlabel("Patients (each bar one patient, sorted by positive rate)")
     axes[0].set_ylim(0, 100)
-    axes[0].legend(loc="upper left")
     axes[0].set_title("Class distribution per patient")
     axes[0].axhline(pos_counts.sum() / total.sum() * 100,
                      color="black", linewidth=1.0, linestyle="--",
                      label=f"Cohort mean: {pos_counts.sum()/total.sum()*100:.1f}%")
-    axes[0].legend(loc="upper left", fontsize=7.5)
+    axes[0].legend(loc="upper left")
 
     # Right panel: cohort aggregate
     total_pos = pos_counts.sum()
@@ -92,10 +93,10 @@ def make_class_imbalance():
     axes[1].set_ylabel("Number of windows")
     axes[1].set_title("Cohort aggregate")
     for i, (label, val) in enumerate(zip(["Negative", "Positive"], [total_neg, total_pos])):
-        axes[1].text(i, val + 200, f"{val:,}", ha="center", va="bottom", fontsize=8)
+        axes[1].text(i, val + 200, f"{val:,}", ha="center", va="bottom", fontsize=10)
 
     fig.suptitle("Class imbalance in the T1DATA hypoglycaemia detection task",
-                 y=1.02, fontsize=9)
+                 y=1.02, fontsize=12)
     fig.tight_layout()
     fig.savefig(f"{OUT_DIR}/class_imbalance.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
