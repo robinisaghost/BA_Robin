@@ -238,7 +238,7 @@ def make_obj1_all_predictions():
             ax.plot(t, pred, label=label, color=VAR_COLOR[label],
                     linewidth=1.4, zorder=3)
 
-        ax.set_xlabel("Time (minutes, relative)")
+        ax.set_xlabel("Time (minutes)")
         ax.set_ylim(y_lo, y_hi)
         ax.set_title(arch)
         style_trajectory_axis(ax, t, major=120, minor=30)
@@ -295,7 +295,7 @@ def make_multistep_vs_baseline_trace():
             ax.plot(t, pred, label=label, color=VAR_COLOR[label],
                     linewidth=1.4, zorder=3)
 
-        ax.set_xlabel("Time (minutes, relative)")
+        ax.set_xlabel("Time (minutes)")
         ax.set_ylim(y_lo, y_hi)
         ax.set_title(arch)
         style_trajectory_axis(ax, t, major=120, minor=30)
@@ -381,7 +381,7 @@ def make_baseline_trajectory_comparison():
         ax.plot(t, pred, color=VAR_COLOR["Prediction"], linewidth=1.4,
                 label="Prediction", zorder=3)
         ax.set_title(title)
-        ax.set_xlabel("Time (minutes, relative)")
+        ax.set_xlabel("Time (minutes)")
         ax.set_ylim(y_lo, max(true_w.max(), pred.max()) + 12)
         style_trajectory_axis(ax, t, major=120, minor=30)
 
