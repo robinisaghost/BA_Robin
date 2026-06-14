@@ -68,21 +68,18 @@ Mean Squared Error is the standard objective for regression tasks and the defaul
 \end{equation}
 MSE is differentiable, computationally efficient, and penalises large deviations heavily due to the squaring operation, making it a natural default for regression tasks.
 
-In the CGM forecasting setting, however, the pointwise structure of Equation~\ref{eq:mse_loss}, which compares each prediction $\hat{y}_t$ only with the true value at the same index, has a decisive consequence: a displaced but shape-correct curve is penalised as heavily as a structurally wrong one (Fig.~\ref{fig:loss_mse}). On the strongly autocorrelated CGM signal (Section~\ref{sec:method:setup:cgm}), a model that carries recent history forward already attains a small pointwise error~\citep{wolff2025cgpm}, so gradient descent on MSE is drawn toward this lagged solution rather than genuine anticipation. This interaction between the autocorrelated signal and the alignment-blind loss is the mathematical origin of the systematic prediction delay described in Chapter~\ref{ch:introduction}.
+In the CGM forecasting setting, however, the pointwise structure of Equation~\ref{eq:mse_loss}, which compares each prediction $\hat{y}_t$ only with the true value at the same index, has a decisive consequence: a displaced but shape-correct curve is penalised as heavily as a structurally wrong one (Fig.~\ref{fig:bg:losses}a). On the strongly autocorrelated CGM signal (Section~\ref{sec:method:setup:cgm}), a model that carries recent history forward already attains a small pointwise error~\citep{wolff2025cgpm}, so gradient descent on MSE is drawn toward this lagged solution rather than genuine anticipation. This interaction between the autocorrelated signal and the alignment-blind loss is the mathematical origin of the systematic prediction delay described in Chapter~\ref{ch:introduction}.
 
 \begin{figure}[tbp]
 \centering
-\subfigure[MSE]{\includegraphics[width=0.33\textwidth]{loss_mse.png}\label{fig:loss_mse}}
-\hfill
-\subfigure[Bounded Lag ($D{=}3$)]{\includegraphics[width=0.33\textwidth]{loss_bounded_lag.png}\label{fig:loss_bl}}
-\hfill
-\subfigure[Soft-DTW ($\gamma{=}1.0$)]{\includegraphics[width=0.33\textwidth]{loss_dtw_alignment.png}\label{fig:loss_dtw}}
+\includegraphics[width=\textwidth]{loss_geometry.png}
 \caption[Geometric interpretation of the three forecasting losses]{Geometric interpretation of the three forecasting losses. In all panels the black curve is the ground truth, the blue curve the prediction, and the orange lines the correspondences each loss forms between them. (a)~MSE compares the curves at the same time step, so a shape-correct but displaced prediction is penalised as heavily as a structurally wrong one. (b)~Bounded Lag links each predicted feature to the nearest true feature within $\pm D$ steps, incurring no penalty for offsets in that range. (c)~Soft-DTW forms an optimal many-to-one alignment, reducing the penalty for predictions that are temporally displaced but structurally similar to the target.}
+\label{fig:bg:losses}
 \end{figure}
 
 \subsection{Offset-Aware Losses} \label{sec:bg:losses:offset}
 
-Objective~1 replaces MSE with a loss that tolerates small timing offsets, so that a prediction is no longer penalised merely for being a few steps early or late. Two such losses are evaluated, differing in how much temporal freedom they allow: the Bounded-Lag loss applies a fixed local tolerance, whereas Soft-DTW aligns the two sequences by warping the time axis. Both are illustrated alongside MSE in Fig.~\ref{fig:loss_mse}.
+Objective~1 replaces MSE with a loss that tolerates small timing offsets, so that a prediction is no longer penalised merely for being a few steps early or late. Two such losses are evaluated, differing in how much temporal freedom they allow: the Bounded-Lag loss applies a fixed local tolerance, whereas Soft-DTW aligns the two sequences by warping the time axis. Both are illustrated alongside MSE in Fig.~\ref{fig:bg:losses}.
 
 \subsubsection{Bounded-Lag Loss} \label{sec:bg:losses:bl}
 
@@ -91,7 +88,7 @@ The Bounded Lag loss~\citep{prg_glucose_proposal} addresses the temporal rigidit
     \mathcal{L}_\text{BL}(\hat{\mathbf{y}},\, \mathbf{y}) = \frac{1}{n}\sum_{t=1}^{n}\;\min_{|k| \leq D}\;\bigl(\hat{y}_t - y_{t+k}\bigr)^2
     \label{eq:bl_loss}
 \end{equation}
-A prediction correct in value but shifted by up to $D$ steps thus incurs no penalty for that offset, as the orange horizontal links in Fig.~\ref{fig:loss_bl} show. This study sets $D = 3$ steps ($\pm$15~minutes), equal to the event-detection tolerance $\tau$ of Section~\ref{sec:bg:metrics}, so a prediction close enough to count as a correct detection at evaluation time is also treated as correct during training, weakening the MSE incentive to copy recent history. The modification is deliberately conservative, however: its fixed local window forgives small timing errors but cannot realign a prediction displaced by more than $D$ steps, which is the motivation for the second offset-aware loss.
+A prediction correct in value but shifted by up to $D$ steps thus incurs no penalty for that offset, as the orange horizontal links in Fig.~\ref{fig:bg:losses}b show. This study sets $D = 3$ steps ($\pm$15~minutes), equal to the event-detection tolerance $\tau$ of Section~\ref{sec:bg:metrics}, so a prediction close enough to count as a correct detection at evaluation time is also treated as correct during training, weakening the MSE incentive to copy recent history. The modification is deliberately conservative, however: its fixed local window forgives small timing errors but cannot realign a prediction displaced by more than $D$ steps, which is the motivation for the second offset-aware loss.
 
 
 \subsubsection{Soft-DTW: Differentiable Dynamic Time Warping} \label{sec:bg:losses:sdtw}
@@ -108,7 +105,7 @@ The soft minimum is the log-sum-exp of the alignment costs and is smooth everywh
 
 The elastic time alignment inherited from DTW makes Soft-DTW the most direct of the three responses to the prediction delay and the central object of interest in Objective~1. Its gradient does not merely ask each predicted point to move closer in value to the true value at the same index; it asks the predicted trajectory to align with the true one in shape and in time, pushing a lagging prediction to advance toward the matching true features and thereby acting on exactly the temporal displacement that MSE leaves unpenalised. And unlike the Bounded-Lag loss, whose fixed window neutralises the penalty only within $\pm D$ steps, the warping path places no fixed bound on the offset it can absorb.
 
-Fig.~\ref{fig:loss_dtw} shows the alignment Soft-DTW forms with a temporally displaced target, matching corresponding shape features such as peak to peak and trough to trough even when they occur at different times. This flexibility is also its principal drawback: by warping time freely, Soft-DTW can reward a prediction whose shape matches the target under warping while its step-by-step correspondence remains poor. For PatchTST the alignment is moreover computed on RevIN-normalised inputs (Section~\ref{sec:bg:models:patchtst}), in a scale-free space; the resulting effect on amplitude accuracy is visible in Section~\ref{sec:exp:obj1}.
+Fig.~\ref{fig:bg:losses}c shows the alignment Soft-DTW forms with a temporally displaced target, matching corresponding shape features such as peak to peak and trough to trough even when they occur at different times. This flexibility is also its principal drawback: by warping time freely, Soft-DTW can reward a prediction whose shape matches the target under warping while its step-by-step correspondence remains poor. For PatchTST the alignment is moreover computed on RevIN-normalised inputs (Section~\ref{sec:bg:models:patchtst}), in a scale-free space; the resulting effect on amplitude accuracy is visible in Section~\ref{sec:exp:obj1}.
 
 
 \subsection{Weighted Binary Cross-Entropy} \label{sec:bg:losses:bce}
