@@ -53,11 +53,13 @@ CONFIGS = [
 
 IMG_DIR = Path("thesis/img")
 
+# Solid lines in the Okabe-Ito colourblind-safe palette, matching the variant
+# colours used in the trajectory figures (4.1/4.3/4.4).
 STYLES = {
-    "MSE":         dict(color="#1565C0", linestyle="-",  linewidth=1.6),
-    "Bounded-Lag": dict(color="#E65100", linestyle="--", linewidth=1.6),
-    "Soft-DTW":    dict(color="#00695C", linestyle="-.", linewidth=1.6),
-    "Multi-step":  dict(color="#6A1B9A", linestyle=":",  linewidth=2.0),
+    "MSE":         dict(color="#0072B2", linestyle="-", linewidth=1.8),
+    "Bounded-Lag": dict(color="#E69F00", linestyle="-", linewidth=1.8),
+    "Soft-DTW":    dict(color="#009E73", linestyle="-", linewidth=1.8),
+    "Multi-step":  dict(color="#CC79A7", linestyle="-", linewidth=1.8),
 }
 
 
@@ -125,7 +127,9 @@ def make_appendix_figure(all_results: dict, arch: str, fname: str):
     # Stack the three metrics vertically so each spans the full text width: this
     # gives a wide x-axis where the per-method behaviour and the 5-minute tau
     # steps are clearly visible. The metric is named on the y-axis (no titles).
-    fig, axes = plt.subplots(3, 1, figsize=(6.3, 4.4), sharex=True)
+    # sharex=False so the tau values are labelled on every panel, not just the
+    # bottom one (improves readability of each metric in isolation).
+    fig, axes = plt.subplots(3, 1, figsize=(6.3, 4.8), sharex=False)
 
     for ax, (metric_label, metric_key) in zip(axes, metrics):
         for suffix, style in STYLES.items():
