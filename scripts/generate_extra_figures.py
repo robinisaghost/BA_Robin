@@ -64,13 +64,14 @@ def make_class_imbalance():
     pids_sorted = [pids[i] for i in order]
     pos_s = pos_pct[order]
 
-    fig, axes = plt.subplots(1, 2, figsize=(6.5, 2.8),
+    fig, axes = plt.subplots(1, 2, figsize=(6.5, 3.8),
                               gridspec_kw={"width_ratios": [3, 1]})
 
-    # Left panel: per-patient bar
+    # Left panel: per-patient bar (full-width bars so the small positive
+    # portions form a continuous, clearly visible band)
     x = np.arange(len(pids_sorted))
-    axes[0].bar(x, pos_s, color="#C44E52", alpha=0.8, label="Positive (hypo event)")
-    axes[0].bar(x, 100 - pos_s, bottom=pos_s, color="#4878CF", alpha=0.5,
+    axes[0].bar(x, pos_s, width=1.0, color="#C44E52", label="Positive (hypo event)")
+    axes[0].bar(x, 100 - pos_s, bottom=pos_s, width=1.0, color="#4878CF", alpha=0.45,
                 label="Negative (no hypo event)")
     # Each bar is one of the 36 patients; the individual indices carry no
     # information, so the axis is described by its label instead of per-bar ticks.
