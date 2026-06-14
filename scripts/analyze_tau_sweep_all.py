@@ -115,9 +115,14 @@ def make_figure45(all_results: dict):
 
 
 def make_appendix_figure(all_results: dict, arch: str, fname: str):
-    """Appendix: 1x3 panel (Precision, Recall, F2) for one architecture, all strategies."""
+    """Appendix: 1x3 panel (Precision, Recall, F2) for one architecture, all strategies.
+
+    The figure size is kept close to the LaTeX text width (it is included at
+    \\textwidth) so the fonts are not shrunk on the page; font sizes are set
+    explicitly for comfortable print reading.
+    """
     metrics = [("Precision", "precision"), ("Recall", "recall"), ("F2", "f2")]
-    fig, axes = plt.subplots(1, 3, figsize=(11, 4.5), sharey=False)
+    fig, axes = plt.subplots(1, 3, figsize=(6.4, 2.9), sharey=False)
 
     for ax, (metric_label, metric_key) in zip(axes, metrics):
         for suffix, style in STYLES.items():
@@ -126,18 +131,17 @@ def make_appendix_figure(all_results: dict, arch: str, fname: str):
                 continue
             vals = [all_results[key][t][metric_key] for t in TAU_RANGE]
             ax.plot(TAU_MINS, vals, label=suffix, **style)
-        ax.set_xlabel("Tolerance $\\tau$ (minutes)")
-        ax.set_ylabel(metric_label)
-        ax.set_title(metric_label)
-        ax.set_xticks(TAU_MINS)
-        ax.tick_params(axis='x', labelsize=7)
+        ax.set_xlabel("Tolerance $\\tau$ (min)", fontsize=11)
+        ax.set_ylabel(metric_label, fontsize=11)
+        ax.set_title(metric_label, fontsize=12)
+        ax.set_xticks([0, 20, 40, 60])
+        ax.tick_params(labelsize=10)
         ax.grid(True, alpha=0.3)
 
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=8,
-               bbox_to_anchor=(0.5, -0.12), frameon=True)
-    fig.suptitle(rf"{arch}: detection metrics vs. tolerance $\tau$", fontsize=9, y=1.02)
-    fig.tight_layout()
+    fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=10,
+               bbox_to_anchor=(0.5, -0.06), frameon=True)
+    fig.tight_layout(rect=(0, 0.04, 1, 1))
     fig.savefig(IMG_DIR / fname, dpi=200, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved {fname}")
