@@ -23,12 +23,12 @@ from ba_baseline.metrics.metrics import best_lag_rmse
 # ── shared style ─────────────────────────────────────────────────────────────
 plt.rcParams.update({
     "font.family": "serif",
-    "font.size": 10,
-    "axes.titlesize": 10,
-    "axes.labelsize": 9,
-    "xtick.labelsize": 8,
-    "ytick.labelsize": 8,
-    "legend.fontsize": 8,
+    "font.size": 11,
+    "axes.titlesize": 12,
+    "axes.labelsize": 11,
+    "xtick.labelsize": 10,
+    "ytick.labelsize": 10,
+    "legend.fontsize": 10,
     "figure.dpi": 150,
     # seaborn-darkgrid theme (shared across all thesis data figures)
     "figure.facecolor": "white",
@@ -224,7 +224,7 @@ def make_obj1_all_predictions():
         }),
     ]
 
-    fig, axes = plt.subplots(1, 2, figsize=(8.5, 3.8), sharey=False, sharex=True)
+    fig, axes = plt.subplots(1, 2, figsize=(6.3, 2.8), sharey=False, sharex=True)
 
     for ax, (arch, preds) in zip(axes, arch_preds):
         all_vals = [true_w] + list(preds.values())
@@ -241,7 +241,7 @@ def make_obj1_all_predictions():
         ax.set_xlabel("Time (minutes, relative)")
         ax.set_ylim(y_lo, y_hi)
         ax.set_title(arch)
-        style_trajectory_axis(ax, t)
+        style_trajectory_axis(ax, t, major=120, minor=30)
 
     axes[0].set_ylabel("Blood glucose (mg/dL)")
 
@@ -281,7 +281,7 @@ def make_multistep_vs_baseline_trace():
         }),
     ]
 
-    fig, axes = plt.subplots(1, 2, figsize=(8.5, 3.8), sharey=False, sharex=True)
+    fig, axes = plt.subplots(1, 2, figsize=(6.3, 2.8), sharey=False, sharex=True)
 
     for ax, (arch, preds) in zip(axes, arch_preds):
         all_vals = [true_w] + list(preds.values())
@@ -298,7 +298,7 @@ def make_multistep_vs_baseline_trace():
         ax.set_xlabel("Time (minutes, relative)")
         ax.set_ylim(y_lo, y_hi)
         ax.set_title(arch)
-        style_trajectory_axis(ax, t)
+        style_trajectory_axis(ax, t, major=120, minor=30)
 
     axes[0].set_ylabel("Blood glucose (mg/dL)")
 
@@ -370,7 +370,7 @@ def make_baseline_trajectory_comparison():
     t    = np.arange(N_WINDOW) * 5
     y_lo = min(true_w.min(), pred_lstm_w.min(), pred_ptst_w.min()) - 8
 
-    fig, axes = plt.subplots(1, 2, figsize=(8.5, 3.6), sharey=True, sharex=True)
+    fig, axes = plt.subplots(1, 2, figsize=(6.3, 2.7), sharey=True, sharex=True)
 
     for ax, pred, title in zip(axes,
                                 [pred_lstm_w, pred_ptst_w],
@@ -383,7 +383,7 @@ def make_baseline_trajectory_comparison():
         ax.set_title(title)
         ax.set_xlabel("Time (minutes, relative)")
         ax.set_ylim(y_lo, max(true_w.max(), pred.max()) + 12)
-        style_trajectory_axis(ax, t)
+        style_trajectory_axis(ax, t, major=120, minor=30)
 
     axes[0].set_ylabel("Blood glucose (mg/dL)")
 
@@ -420,7 +420,7 @@ def make_timeshift_demo():
     s, e = hypo_window(y_true, win_size=288)
     t = np.arange(e - s) * 5
 
-    fig, axes = plt.subplots(2, 1, figsize=(9, 5.2), sharex=True)
+    fig, axes = plt.subplots(2, 1, figsize=(6.3, 3.6), sharex=True)
     for ax, pred, title in zip(axes, [y_lstm, y_pt], ["LSTM", "PatchTST"]):
         ax.axhline(HYPO_LINE, color=THRESHOLD_COLOR, linewidth=1.2,
                    linestyle=(0, (5, 3)), label="70 mg/dL threshold", zorder=2)

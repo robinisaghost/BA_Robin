@@ -37,7 +37,7 @@ def setup_plot(title):
 y_mse_true = shape_true
 y_mse_pred = shape_pred
 
-fig, ax = plt.subplots(figsize=(8, 6.5))
+fig, ax = plt.subplots(figsize=(3.0, 2.5))
 ax.plot(t, y_mse_true, color="black",    linewidth=2.5, label="True ($y$)")
 ax.plot(t, y_mse_pred, color="tab:blue", linewidth=2.5, label="Predicted ($\\hat{y}$)")
 ax.set_title("MSE Loss", pad=15, fontsize=14)
@@ -71,7 +71,7 @@ print("Erfolgreich generiert: loss_mse.png")
 y_bl_true = shape_true
 y_bl_pred = shape_pred
 
-fig, ax = plt.subplots(figsize=(8, 6.5))
+fig, ax = plt.subplots(figsize=(3.0, 2.5))
 ax.plot(t, y_bl_true, color="black",    linewidth=2.5, label="True ($y$)")
 ax.plot(t, y_bl_pred, color="tab:blue", linewidth=2.5, label="Predicted ($\\hat{y}$)")
 ax.set_title("Bounded-Lag Loss", pad=15, fontsize=14)
@@ -173,7 +173,7 @@ u = np.linspace(0, 1, n)
 t2_angle = (u + 0.28 * np.sin(np.pi * u)) * 4 * np.pi
 sig2 = 2.0 * np.sin(t2_angle) - 0.6
 
-fig, ax = plt.subplots(figsize=(8, 6.5))
+fig, ax = plt.subplots(figsize=(3.0, 2.5))
 ax.plot(x, sig1, color="black",    linewidth=2.5, label="True ($y$)")
 ax.plot(x, sig2, color="tab:blue", linewidth=2.5, label="Predicted ($\\hat{y}$)")
 

@@ -535,7 +535,7 @@ def plot_classifier_predictions(
     from matplotlib.patches import Patch
     from matplotlib.lines import Line2D
 
-    fig, axes = plt.subplots(2, 1, figsize=(10, 5.5), sharex=True)
+    fig, axes = plt.subplots(2, 1, figsize=(6.3, 3.5), sharex=True)
 
     for ax, prob, label, color in [
         (axes[0], lstm_prob, "LSTM", COLOR_LSTM),
