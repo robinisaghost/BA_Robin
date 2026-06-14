@@ -165,7 +165,7 @@ def make_lag_distribution():
     data   = [lags_lstm, lags_ptst]
     colors = ["#4878CF", "#DD8452"]
 
-    fig, ax = plt.subplots(figsize=(4.5, 3.8))
+    fig, ax = plt.subplots(figsize=(3.6, 3.0))
 
     bp = ax.boxplot(data, patch_artist=True, widths=0.45,
                     medianprops=dict(color="black", linewidth=1.8),
@@ -246,10 +246,9 @@ def make_obj1_all_predictions():
     axes[0].set_ylabel("Blood glucose (mg/dL)")
 
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower center", ncol=5, fontsize=8,
-               bbox_to_anchor=(0.5, -0.12), frameon=True)
+    fig.legend(handles, labels, loc="lower center", ncol=5, fontsize=9,
+               bbox_to_anchor=(0.5, -0.14), frameon=True)
 
-    fig.suptitle("Objective 1: Offset-Aware Loss Functions", y=1.02, fontsize=10)
     fig.tight_layout()
     fig.savefig(f"{OUT_DIR}/obj1_all_predictions.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
@@ -303,10 +302,9 @@ def make_multistep_vs_baseline_trace():
     axes[0].set_ylabel("Blood glucose (mg/dL)")
 
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=8,
-               bbox_to_anchor=(0.5, -0.12), frameon=True)
+    fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=9,
+               bbox_to_anchor=(0.5, -0.14), frameon=True)
 
-    fig.suptitle("Single-step vs. Multi-step supervision", y=1.02, fontsize=9)
     fig.tight_layout()
     fig.savefig(f"{OUT_DIR}/multistep_vs_baseline_trace.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
@@ -329,7 +327,7 @@ def make_lead_time_distribution():
     models    = ["lstm_event", "patchtst_event"]
     labels    = ["LSTM", "PatchTST"]
 
-    fig, ax = plt.subplots(figsize=(7.5, 3.2))
+    fig, ax = plt.subplots(figsize=(6.6, 2.9))
 
     for i, (model, label, color, off) in enumerate(zip(models, labels, colors, offsets)):
         info   = data[model]
@@ -388,10 +386,9 @@ def make_baseline_trajectory_comparison():
     axes[0].set_ylabel("Blood glucose (mg/dL)")
 
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower center", ncol=3, fontsize=8,
-               bbox_to_anchor=(0.5, -0.12), frameon=True)
+    fig.legend(handles, labels, loc="lower center", ncol=3, fontsize=9,
+               bbox_to_anchor=(0.5, -0.14), frameon=True)
 
-    fig.suptitle("Baseline 60min prediction", y=1.02, fontsize=9)
     fig.tight_layout()
     fname = f"patient_{pid}.png"
     fig.savefig(f"{OUT_DIR}/{fname}", dpi=200, bbox_inches="tight")

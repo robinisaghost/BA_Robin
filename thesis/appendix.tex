@@ -37,12 +37,13 @@ This appendix contains supplementary figures and numerical tables that support t
     \label{fig:app:pr_paradox}
 \end{figure}
 
+\begin{landscape}
 \begin{table}[tbp]
 \centering
 \small
 \caption[$\tau$-sweep numerical breakdown: LSTM]{Cohort-mean Precision, Recall, F1, and F2 of the forecast-derived hypoglycaemia detector for all four LSTM training strategies as a function of the tolerance window $\tau$. The corresponding curves are shown in Fig.~\ref{fig:exp:tau_sweep_lstm}.}
 \label{tab:app:tau_sweep_lstm}
-\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lrrrrrrrrrrrrrrrr}
 \toprule
 & \multicolumn{4}{c}{MSE} & \multicolumn{4}{c}{Bounded-Lag} & \multicolumn{4}{c}{Soft-DTW} & \multicolumn{4}{c}{Multi-step} \\
@@ -58,15 +59,17 @@ $\tau$ (min) & P & R & F1 & F2 & P & R & F1 & F2 & P & R & F1 & F2 & P & R & F1 
 55  & 0.182 & 0.061 & 0.086 & 0.069 & 0.079 & 0.031 & 0.041 & 0.034 & 0.159 & 0.042 & 0.062 & 0.047 & 0.179 & 0.065 & 0.085 & 0.071 \\
 60  & 0.231 & 0.082 & 0.113 & 0.092 & 0.112 & 0.041 & 0.055 & 0.046 & 0.192 & 0.057 & 0.082 & 0.065 & 0.193 & 0.076 & 0.097 & 0.082 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
+\end{landscape}
 
+\begin{landscape}
 \begin{table}[tbp]
 \centering
 \small
 \caption[$\tau$-sweep numerical breakdown: PatchTST]{Cohort-mean Precision, Recall, F1, and F2 of the forecast-derived hypoglycaemia detector for all four PatchTST training strategies as a function of the tolerance window $\tau$. The corresponding curves are shown in Fig.~\ref{fig:exp:tau_sweep_patchtst}.}
 \label{tab:app:tau_sweep_patchtst}
-\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lrrrrrrrrrrrrrrrr}
 \toprule
 & \multicolumn{4}{c}{MSE} & \multicolumn{4}{c}{Bounded-Lag} & \multicolumn{4}{c}{Soft-DTW} & \multicolumn{4}{c}{Multi-step} \\
@@ -82,9 +85,8 @@ $\tau$ (min) & P & R & F1 & F2 & P & R & F1 & F2 & P & R & F1 & F2 & P & R & F1 
 55  & 0.341 & 0.598 & 0.416 & 0.501 & 0.319 & 0.608 & 0.397 & 0.488 & 0.237 & 0.477 & 0.262 & 0.334 & 0.351 & 0.616 & 0.422 & 0.507 \\
 60  & 0.476 & 0.744 & 0.551 & 0.640 & 0.425 & 0.743 & 0.511 & 0.614 & 0.312 & 0.545 & 0.323 & 0.396 & 0.457 & 0.769 & 0.544 & 0.645 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
-
-
+\end{landscape}
 
 \end{appendix}

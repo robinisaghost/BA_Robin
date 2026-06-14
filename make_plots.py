@@ -371,7 +371,7 @@ def plot_pr_paradox(out_path):
         ("PatchTST Direct Classifier", 0.054, 0.615, "s", COLOR_PATCHTST, True),
     ]
 
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(6.3, 4.6))
 
     R_grid = np.linspace(0.005, 0.999, 400)
     for f1_val in [0.05, 0.1, 0.2, 0.3, 0.4, 0.5]:
@@ -515,7 +515,7 @@ def plot_classifier_predictions(
     test_lstm = lstm_prob[test_start:]
     test_pt = pt_prob[test_start:]
 
-    WIN = min(300, len(test_true))
+    WIN = min(480, len(test_true))
     event_idx = np.where(test_true > 0.5)[0]
     if len(event_idx) > 0:
         center = int(event_idx[len(event_idx) // 2])
@@ -569,40 +569,25 @@ def plot_classifier_predictions(
             0.5, color="#666666", linestyle="--", linewidth=1.2, alpha=0.8, zorder=2
         )
 
-        legend_handles = [
-            Patch(
-                facecolor=COLOR_TRUE_EVENT,
-                alpha=0.3,
-                edgecolor="none",
-                label="True hypo event",
-            ),
-            Line2D(
-                [], [], color=color, linewidth=2.0, label=f"{label} Direct Classifier"
-            ),
-            Line2D(
-                [],
-                [],
-                color="#666666",
-                linestyle="--",
-                linewidth=1.2,
-                label="Decision threshold (0.5)",
-            ),
-        ]
-        leg = ax.legend(
-            handles=legend_handles, loc="upper right", fontsize=9, framealpha=0.95,
-            title=label,
-        )
-        leg.get_title().set_fontsize(11)
-        leg.get_title().set_fontweight("bold")
-        leg.get_title().set_color(color)
-
+        ax.set_title(label, loc="left", fontsize=12, fontweight="bold", color=color)
         ax.set_ylim(-0.05, 1.05)
         ax.set_ylabel("Event probability")
         ax.grid(True, alpha=0.3)
 
     axes[1].set_xlabel("Time [min]")
 
-    plt.tight_layout()
+    # single shared legend below both panels (keeps the panels uncovered)
+    shared = [
+        Patch(facecolor=COLOR_TRUE_EVENT, alpha=0.45, edgecolor="none",
+              label="True hypo event"),
+        Line2D([], [], color=COLOR_LSTM, linewidth=1.5, label="LSTM classifier"),
+        Line2D([], [], color=COLOR_PATCHTST, linewidth=1.5, label="PatchTST classifier"),
+        Line2D([], [], color="#666666", linestyle="--", linewidth=1.2,
+               label="Decision threshold (0.5)"),
+    ]
+    fig.legend(handles=shared, loc="lower center", ncol=4, fontsize=9,
+               frameon=False, bbox_to_anchor=(0.5, -0.02))
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
     plt.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close()
     print(f"  [ok]   {out_path}")
@@ -669,7 +654,7 @@ def plot_hypo_episode(lstm_npz_path, patient_id, out_path, win_size=72):
             cross_idx = i
             break
 
-    fig, ax = plt.subplots(figsize=(8.5, 5))
+    fig, ax = plt.subplots(figsize=(5.6, 3.3))
 
     ax.plot(t, y, color=COLOR_TRUE, linewidth=2.2, label="CGM glucose (true)")
     ax.axhline(

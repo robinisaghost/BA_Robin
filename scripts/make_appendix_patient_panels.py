@@ -100,7 +100,7 @@ def make_page(patients, out_path):
     panels = [(pid, arch_lab, arch_stem)
               for pid in patients for arch_lab, arch_stem in ARCHS]
     n = len(panels)
-    fig, axes = plt.subplots(n, 1, figsize=(6.9, 7.9))
+    fig, axes = plt.subplots(n, 1, figsize=(6.1, 7.4))
 
     for ax, (pid, arch_lab, arch_stem) in zip(axes, panels):
         gt_ref = test_portion(load_trace("lstm", "60min", pid, "true"))
@@ -142,11 +142,12 @@ def make_page(patients, out_path):
 def main():
     plt.rcParams.update({
         "font.family": "serif",
-        "font.size": 9,
-        "axes.titlesize": 10,
-        "axes.labelsize": 9,
-        "xtick.labelsize": 8,
-        "ytick.labelsize": 8,
+        "font.size": 11,
+        "axes.titlesize": 12,
+        "axes.labelsize": 11,
+        "xtick.labelsize": 10,
+        "ytick.labelsize": 10,
+        "legend.fontsize": 11,
         "figure.dpi": 200,
         # seaborn-darkgrid-style aesthetic
         "figure.facecolor": "white",
