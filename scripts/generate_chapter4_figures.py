@@ -248,8 +248,8 @@ def make_obj1_all_predictions():
     axes[0].set_ylabel("Blood glucose (mg/dL)")
 
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower center", ncol=5, fontsize=9,
-               bbox_to_anchor=(0.5, -0.14), frameon=True)
+    fig.legend(handles, labels, loc="lower center", ncol=3, fontsize=9,
+               bbox_to_anchor=(0.5, -0.20), frameon=True)
 
     fig.tight_layout()
     fig.savefig(f"{OUT_DIR}/obj1_all_predictions.png", dpi=200, bbox_inches="tight")
