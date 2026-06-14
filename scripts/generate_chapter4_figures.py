@@ -165,12 +165,12 @@ def make_lag_distribution():
     data   = [lags_lstm, lags_ptst]
     colors = ["#4878CF", "#DD8452"]
 
-    fig, ax = plt.subplots(figsize=(3.6, 3.0))
+    fig, ax = plt.subplots(figsize=(4.4, 3.7))
 
     bp = ax.boxplot(data, patch_artist=True, widths=0.45,
-                    medianprops=dict(color="black", linewidth=1.8),
-                    whiskerprops=dict(linewidth=1.2),
-                    capprops=dict(linewidth=1.2),
+                    medianprops=dict(color="black", linewidth=2.0),
+                    whiskerprops=dict(linewidth=1.4),
+                    capprops=dict(linewidth=1.4),
                     flierprops=dict(marker=""))
 
     for patch, color in zip(bp["boxes"], colors):
@@ -180,14 +180,16 @@ def make_lag_distribution():
     rng = np.random.default_rng(42)
     for i, (lags, color) in enumerate(zip(data, colors), start=1):
         jitter = rng.uniform(-0.12, 0.12, size=len(lags))
-        ax.scatter(i + jitter, lags, color=color, s=18, alpha=0.85,
+        ax.scatter(i + jitter, lags, color=color, s=24, alpha=0.85,
                    zorder=3, edgecolors="white", linewidths=0.4)
 
     ax.set_xticks([1, 2])
-    ax.set_xticklabels(labels)
-    ax.set_ylabel("Prediction delay $\\Delta^*$ (minutes)")
+    ax.set_xticklabels(labels, fontsize=13)
+    ax.set_ylabel("Prediction delay $\\Delta^*$ (minutes)", fontsize=13)
+    ax.tick_params(axis="y", labelsize=12)
     ax.set_ylim(-2, 68)
-    ax.set_title("Per-patient prediction delay $\\Delta^*$ across the cohort", pad=6)
+    ax.set_title("Per-patient prediction delay $\\Delta^*$ across the cohort",
+                 fontsize=13, pad=8)
     fig.tight_layout()
     fig.savefig(f"{OUT_DIR}/lag_distribution.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
