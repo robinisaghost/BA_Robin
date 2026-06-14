@@ -158,19 +158,19 @@ The tolerance sweep evaluates how forecast-derived event detection changes as th
 
 For LSTM, Fig.~\ref{fig:exp:tau_sweep_lstm} shows the Precision, Recall, and F2 curves across the full $\tau$ range for all four training strategies. Recall and F2 rise only shallowly and approximately linearly as $\tau$ widens, with no steep inflection that would indicate a reservoir of temporally displaced detections being recovered, while precision stays low and even declines. The four strategies overlap closely: neither the Soft-DTW LSTM, despite the largest lag reduction (Section~\ref{sec:exp:obj1}), nor the Multi-step LSTM, despite the best trajectory accuracy (Section~\ref{sec:exp:obj2}), diverges from the others. This shallow behaviour is consistent with a model that produces few predicted threshold crossings regardless of timing tolerance, rather than one whose detections are present but systematically displaced.
 
-\begin{figure}[tbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{tau_sweep_appendix_lstm.png}
-    \caption{Cohort-mean Precision, Recall, and F2 as a function of the tolerance window $\tau$ for all four LSTM training strategies (MSE, Bounded-Lag, Soft-DTW, Multi-step). Each panel shows one metric; line colours and styles correspond to the training objective as indicated in the legend. Detailed numerical values are in Tab.~\ref{tab:app:tau_sweep_lstm}.}
+    \caption{Cohort-mean Precision, Recall, and F2 as a function of the tolerance window $\tau$ for all four LSTM training strategies (MSE, Bounded-Lag, Soft-DTW, Multi-step). Each panel shows one metric; line colours correspond to the training objective as indicated in the legend. Detailed numerical values are in Tab.~\ref{tab:app:tau_sweep_lstm}.}
     \label{fig:exp:tau_sweep_lstm}
 \end{figure}
 
 The PatchTST sweep (Fig.~\ref{fig:exp:tau_sweep_patchtst}) presents a different picture: the Recall and F2 curves rise steeply as $\tau$ widens toward 60~minutes, evidence that predicted crossings exist near true events but fall outside the narrow fixed-$\tau$ window. Precision declines as the broader window admits more false alarms alongside the recovered true positives; F2 nonetheless rises because the recall gain dominates under the F2 weighting. As in the LSTM sweep, the four training strategies cluster closely, so none of them produces a systematic shift in when PatchTST crosses the threshold.
 
-\begin{figure}[tbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{tau_sweep_appendix_patchtst.png}
-    \caption{Cohort-mean Precision, Recall, and F2 as a function of the tolerance window $\tau$ for all four PatchTST training strategies (MSE, Bounded-Lag, Soft-DTW, Multi-step). Each panel shows one metric; line colours and styles correspond to the training objective as indicated in the legend. Detailed numerical values are in Tab.~\ref{tab:app:tau_sweep_patchtst}.}
+    \caption{Cohort-mean Precision, Recall, and F2 as a function of the tolerance window $\tau$ for all four PatchTST training strategies (MSE, Bounded-Lag, Soft-DTW, Multi-step). Each panel shows one metric; line colours correspond to the training objective as indicated in the legend. Detailed numerical values are in Tab.~\ref{tab:app:tau_sweep_patchtst}.}
     \label{fig:exp:tau_sweep_patchtst}
 \end{figure}
 
