@@ -122,7 +122,10 @@ def make_appendix_figure(all_results: dict, arch: str, fname: str):
     explicitly for comfortable print reading.
     """
     metrics = [("Precision", "precision"), ("Recall", "recall"), ("F2", "f2")]
-    fig, axes = plt.subplots(1, 3, figsize=(6.4, 2.9), sharey=False)
+    # Stack the three metrics vertically so each spans the full text width: this
+    # gives a wide x-axis where the per-method behaviour and the 5-minute tau
+    # steps are clearly visible. The metric is named on the y-axis (no titles).
+    fig, axes = plt.subplots(3, 1, figsize=(6.3, 4.4), sharex=True)
 
     for ax, (metric_label, metric_key) in zip(axes, metrics):
         for suffix, style in STYLES.items():
@@ -131,17 +134,16 @@ def make_appendix_figure(all_results: dict, arch: str, fname: str):
                 continue
             vals = [all_results[key][t][metric_key] for t in TAU_RANGE]
             ax.plot(TAU_MINS, vals, label=suffix, **style)
-        ax.set_xlabel("Tolerance $\\tau$ (min)", fontsize=11)
         ax.set_ylabel(metric_label, fontsize=11)
-        ax.set_title(metric_label, fontsize=12)
-        ax.set_xticks([0, 20, 40, 60])
-        ax.tick_params(labelsize=10)
+        ax.set_xticks(TAU_MINS)  # 5-minute steps (0, 5, ..., 60)
+        ax.tick_params(labelsize=9)
         ax.grid(True, alpha=0.3)
 
+    axes[-1].set_xlabel("Tolerance $\\tau$ (minutes)", fontsize=11)
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=10,
-               bbox_to_anchor=(0.5, -0.06), frameon=True)
-    fig.tight_layout(rect=(0, 0.04, 1, 1))
+               bbox_to_anchor=(0.5, -0.02), frameon=True)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
     fig.savefig(IMG_DIR / fname, dpi=200, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved {fname}")
