@@ -124,7 +124,7 @@ while i > 0 and j > 0:
         j -= 1
 for i1, i2 in path:
     ax.plot([x[i1], x[i2]], [sig1[i1], sig2[i2]], color=COL_LINK,
-            linewidth=0.7, alpha=0.45)
+            linestyle=(0, (4, 2)), linewidth=0.8, alpha=0.5)
 ax.plot(x, sig1, color=COL_TRUE, linewidth=1.5)
 ax.plot(x, sig2, color=COL_PRED, linewidth=1.5)
 style(ax, "(c) Soft-DTW ($\\gamma{=}1.0$)")
