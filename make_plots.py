@@ -535,7 +535,7 @@ def plot_classifier_predictions(
     from matplotlib.patches import Patch
     from matplotlib.lines import Line2D
 
-    fig, axes = plt.subplots(2, 1, figsize=(6.3, 3.5), sharex=True)
+    fig, axes = plt.subplots(2, 1, figsize=(6.3, 4.4), sharex=True)
 
     for ax, prob, label, color in [
         (axes[0], lstm_prob, "LSTM", COLOR_LSTM),
@@ -569,12 +569,13 @@ def plot_classifier_predictions(
             0.5, color="#666666", linestyle="--", linewidth=1.2, alpha=0.8, zorder=2
         )
 
-        ax.set_title(label, loc="left", fontsize=12, fontweight="bold", color=color)
+        ax.set_title(label, loc="left", fontsize=14, fontweight="bold", color=color)
         ax.set_ylim(-0.05, 1.05)
-        ax.set_ylabel("Event probability")
+        ax.set_ylabel("Event probability", fontsize=13)
+        ax.tick_params(axis="both", labelsize=12)
         ax.grid(True, alpha=0.3)
 
-    axes[1].set_xlabel("Time [min]")
+    axes[1].set_xlabel("Time [min]", fontsize=13)
 
     # single shared legend below both panels (keeps the panels uncovered)
     shared = [
@@ -585,9 +586,10 @@ def plot_classifier_predictions(
         Line2D([], [], color="#666666", linestyle="--", linewidth=1.2,
                label="Decision threshold (0.5)"),
     ]
-    fig.legend(handles=shared, loc="lower center", ncol=4, fontsize=9,
-               frameon=False, bbox_to_anchor=(0.5, -0.02))
-    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    fig.legend(handles=shared, loc="lower center", ncol=2, fontsize=12,
+               frameon=False, bbox_to_anchor=(0.5, -0.04), columnspacing=2.5,
+               handlelength=2.2)
+    fig.tight_layout(rect=(0, 0.10, 1, 1))
     plt.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close()
     print(f"  [ok]   {out_path}")
