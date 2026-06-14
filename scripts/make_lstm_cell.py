@@ -21,9 +21,9 @@ TAN_F, TAN_E = "#BBC9F2", "#3B5BA5"
 GATE = "#C0392B"
 LW = 1.8
 
-fig, ax = plt.subplots(figsize=(7.8, 7.4))
+fig, ax = plt.subplots(figsize=(7.8, 5.3))
 ax.set_xlim(-0.2, 14.2)
-ax.set_ylim(-5.4, 10.4)
+ax.set_ylim(-2.0, 10.4)
 ax.axis("off")
 
 ax.add_patch(FancyBboxPatch((1.9, 1.7), 10.8, 7.2,
@@ -124,27 +124,6 @@ ax.text(x_drop, -0.07, "Linear\nhead", fontsize=13, ha="center", va="center", zo
 arrow((x_drop, -0.6), (x_drop, -1.35))
 ax.text(x_drop, -1.7, r"$\hat{y}\;\,(t+60\,\mathrm{min})$", fontsize=14,
         ha="center", va="top")
-
-# ── legend ──────────────────────────────────────────────────────────────────
-LFS = 16
-ax.add_patch(FancyBboxPatch((0.05, -5.15), 13.2, 3.65,
-             boxstyle="round,pad=0.05,rounding_size=0.15",
-             facecolor="white", edgecolor="#999999", linewidth=1.1, zorder=5))
-
-
-def leg_act(xy, label, ff, ee, text, lab_fs):
-    ax.add_patch(Circle(xy, 0.44, facecolor=ff, edgecolor=ee, linewidth=1.7, zorder=6))
-    ax.text(xy[0], xy[1], label, fontsize=lab_fs, ha="center", va="center", zorder=7)
-    ax.text(xy[0] + 0.7, xy[1], text, fontsize=LFS, ha="left", va="center", zorder=7)
-
-
-leg_act((0.9, -2.1), r"$\sigma$", SIG_F, SIG_E, "sigmoid", 15)
-leg_act((0.9, -3.6), "tanh", TAN_F, TAN_E, "hyperbolic tangent", 11)
-ax.text(6.4, -2.1, r"$C_t$ : cell state", fontsize=LFS, ha="left", va="center", zorder=7)
-ax.text(6.4, -3.6, r"$h_t$ : hidden state", fontsize=LFS, ha="left", va="center", zorder=7)
-ax.text(9.7, -1.85, r"$F$ : forget gate", fontsize=LFS, ha="left", va="center", color=GATE, zorder=7)
-ax.text(9.7, -3.1, r"$I$ : input gate", fontsize=LFS, ha="left", va="center", color=GATE, zorder=7)
-ax.text(9.7, -4.35, r"$O$ : output gate", fontsize=LFS, ha="left", va="center", color=GATE, zorder=7)
 
 fig.tight_layout()
 fig.savefig("thesis/img/lstm_cell.png", dpi=300, bbox_inches="tight")

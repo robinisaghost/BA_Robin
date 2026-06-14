@@ -20,7 +20,7 @@ Fig.~\ref{fig:bg:lstm_arch} shows how these operations are assembled into the re
 \begin{figure}[tbp]
     \centering
     \includegraphics[width=0.72\textwidth]{lstm_cell.png}
-    \caption[Architecture of the LSTM model]{Architecture of the LSTM model used as the recurrent baseline. The input is a 24-step lookback window representing 120~minutes of CGM data. Based on \citet{hochreiter1997lstm}; figure structure adapted from \citet{phi2018lstm}.}
+    \caption[Architecture of the LSTM model]{Architecture of the LSTM model used as the recurrent baseline. The additive cell-state highway $C_{t-1}\rightarrow C_t$ is regulated by the forget (F), input (I) and output (O) gates; $\sigma$ and $\tanh$ denote the sigmoid and hyperbolic-tangent activations, $h_t$ is the hidden state and $x_t$ the input. The input is a 24-step lookback window representing 120~minutes of CGM data, and the final hidden state feeds a linear head to the 60-minute prediction. Based on \citet{hochreiter1997lstm}; structure of the conventional cell diagram following \citet{phi2018lstm}.}
     \label{fig:bg:lstm_arch}
 \end{figure}
 
