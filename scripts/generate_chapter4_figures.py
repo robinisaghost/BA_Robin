@@ -233,10 +233,10 @@ def make_obj1_all_predictions():
 
         ax.axhline(HYPO_LINE, color=THRESHOLD_COLOR, linewidth=1.2,
                    linestyle=(0, (5, 3)), label="70 mg/dL threshold", zorder=2)
-        ax.plot(t, true_w, color="black", linewidth=2.0, label="Ground truth", zorder=4)
+        ax.plot(t, true_w, color="black", linewidth=1.5, label="Ground truth", zorder=4)
         for label, pred in preds.items():
             ax.plot(t, pred, label=label, color=VAR_COLOR[label],
-                    linewidth=1.4, zorder=3)
+                    linewidth=1.0, zorder=3)
 
         ax.set_xlabel("Time (minutes)")
         ax.set_ylim(y_lo, y_hi)
@@ -290,10 +290,10 @@ def make_multistep_vs_baseline_trace():
 
         ax.axhline(HYPO_LINE, color=THRESHOLD_COLOR, linewidth=1.2,
                    linestyle=(0, (5, 3)), label="70 mg/dL threshold", zorder=2)
-        ax.plot(t, true_w, color="black", linewidth=2.0, label="Ground truth", zorder=4)
+        ax.plot(t, true_w, color="black", linewidth=1.5, label="Ground truth", zorder=4)
         for label, pred in preds.items():
             ax.plot(t, pred, label=label, color=VAR_COLOR[label],
-                    linewidth=1.4, zorder=3)
+                    linewidth=1.0, zorder=3)
 
         ax.set_xlabel("Time (minutes)")
         ax.set_ylim(y_lo, y_hi)
@@ -377,8 +377,8 @@ def make_baseline_trajectory_comparison():
                                 ["LSTM", "PatchTST"]):
         ax.axhline(HYPO_LINE, color=THRESHOLD_COLOR, linewidth=1.2,
                    linestyle=(0, (5, 3)), label="70 mg/dL threshold", zorder=2)
-        ax.plot(t, true_w, color="black", linewidth=2.0, label="Ground truth", zorder=4)
-        ax.plot(t, pred, color=VAR_COLOR["Prediction"], linewidth=1.4,
+        ax.plot(t, true_w, color="black", linewidth=1.5, label="Ground truth", zorder=4)
+        ax.plot(t, pred, color=VAR_COLOR["Prediction"], linewidth=1.0,
                 label="Prediction", zorder=3)
         ax.set_title(title)
         ax.set_xlabel("Time (minutes)")
@@ -424,9 +424,9 @@ def make_timeshift_demo():
     for ax, pred, title in zip(axes, [y_lstm, y_pt], ["LSTM", "PatchTST"]):
         ax.axhline(HYPO_LINE, color=THRESHOLD_COLOR, linewidth=1.2,
                    linestyle=(0, (5, 3)), label="70 mg/dL threshold", zorder=2)
-        ax.plot(t, y_true[s:e], color="black", linewidth=2.0,
+        ax.plot(t, y_true[s:e], color="black", linewidth=1.5,
                 label="Ground truth", zorder=4)
-        ax.plot(t, pred[s:e], color=VAR_COLOR["Prediction"], linewidth=1.4,
+        ax.plot(t, pred[s:e], color=VAR_COLOR["Prediction"], linewidth=1.0,
                 label="Prediction", zorder=3)
         ax.set_ylabel("Glucose [mg/dL]")
         ax.set_title(title, loc="left", fontweight="bold")

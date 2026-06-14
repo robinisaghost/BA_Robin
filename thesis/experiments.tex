@@ -34,15 +34,15 @@ The event detection columns of Tab.~\ref{tab:exp:baseline} ($\tau = 15$~minutes)
 \small
 \caption{Baseline single-step forecasting performance under standard MSE training. RMSE$^*$ is the lag-adjusted RMSE after the optimal per-patient temporal shift $\Delta^*$. Mean Lag is the average absolute shift in minutes ($|\Delta^*| \times 5$~min). RMSE, RMSE$^*$, and MAE are in mg/dL; event-detection metrics are derived by thresholding the 60-min prediction at 70~mg/dL with $\tau = 15$~min. Means over 36 patients.}
 \label{tab:exp:baseline}
-\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{5pt}
 \begin{tabular}{lrrrrrrrr}
 \toprule
-Model & RMSE & RMSE$^*$ & Lag (min) & MAE & Precision & Recall & F1 & F2 \\
+Model & RMSE & RMSE$^*$ & Lag & MAE & Precision & Recall & F1 & F2 \\
 \midrule
 LSTM\,MSE      & 36.09 & 21.65 & 51.2 & 27.12 & 0.010 & 0.004 & 0.005 & 0.004 \\
 PatchTST\,MSE  & 39.27 & 14.21 & 55.3 & 29.00 & 0.048 & 0.089 & 0.061 & 0.074 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 % ================================================================
@@ -83,25 +83,25 @@ The Bounded-Lag loss produced no such asymmetry, since both architectures showed
 \small
 \caption{Effect of offset-aware loss functions on forecasting accuracy and mean prediction delay. RMSE$^*$ is the lag-adjusted RMSE after the optimal per-patient temporal shift $\Delta^*$. Lag is the average absolute shift in minutes ($|\Delta^*| \times 5$~min). RMSE, RMSE$^*$, and MAE are in mg/dL; event-detection metrics are derived by thresholding each 60-min prediction at 70~mg/dL with $\tau = 15$~min. Bold values mark the best result per column across all configurations. Means over 36 patients.}
 \label{tab:exp:obj1}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{llrrrrrrrr}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrrrrrr}
 \toprule
-Architecture & Loss & RMSE & RMSE$^*$ & Lag (min) & MAE & Precision & Recall & F1 & F2 \\
+Loss & RMSE & RMSE$^*$ & Lag & MAE & Precision & Recall & F1 & F2 \\
 \midrule
-\multicolumn{10}{l}{\textit{LSTM}} \\[2pt]
- & MSE (baseline) & \textbf{36.09} & 21.65          & 51.2          & \textbf{27.12} & 0.010 & 0.004 & 0.005 & 0.004 \\
- & Bounded-Lag    & 36.14          & 25.25          & 48.6          & 27.57          & 0.017 & 0.012 & 0.014 & 0.013 \\
- & Soft-DTW       & 37.23          & 28.67          & \textbf{46.0} & 28.76          & 0.039 & 0.009 & 0.014 & 0.010 \\
+\multicolumn{9}{l}{\textit{LSTM}} \\[2pt]
+MSE (baseline) & \textbf{36.09} & 21.65          & 51.2          & \textbf{27.12} & 0.010 & 0.004 & 0.005 & 0.004 \\
+Bounded-Lag    & 36.14          & 25.25          & 48.6          & 27.57          & 0.017 & 0.012 & 0.014 & 0.013 \\
+Soft-DTW       & 37.23          & 28.67          & \textbf{46.0} & 28.76          & 0.039 & 0.009 & 0.014 & 0.010 \\
 \midrule
-\multicolumn{10}{l}{\textit{PatchTST}} \\[2pt]
- & MSE (baseline) & 39.27 & \textbf{14.21} & 55.3 & 29.00 & 0.048          & 0.089          & 0.061          & 0.074          \\
- & Bounded-Lag    & 39.30 & 16.70          & 54.6 & 29.03 & 0.055          & 0.095          & \textbf{0.066} & 0.080          \\
- & Soft-DTW       & 43.24 & 24.01          & 54.4 & 32.25 & \textbf{0.056} & \textbf{0.129} & 0.062          & \textbf{0.084} \\
+\multicolumn{9}{l}{\textit{PatchTST}} \\[2pt]
+MSE (baseline) & 39.27 & \textbf{14.21} & 55.3 & 29.00 & 0.048          & 0.089          & 0.061          & 0.074          \\
+Bounded-Lag    & 39.30 & 16.70          & 54.6 & 29.03 & 0.055          & 0.095          & \textbf{0.066} & 0.080          \\
+Soft-DTW       & 43.24 & 24.01          & 54.4 & 32.25 & \textbf{0.056} & \textbf{0.129} & 0.062          & \textbf{0.084} \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
-Across both strategies, Tab.~\ref{tab:exp:obj1} reveals a consistent pattern: in every architecture--loss combination, RMSE$^*$ rises above the MSE baseline even as the mean lag falls, so the partial realignment is bought at a cost to lag-adjusted accuracy that grows with the tolerance, and neither strategy closes the detection gap (per-patient trajectories for all variants and both architectures are shown in Figs.~\ref{fig:app:patient_panels} and~\ref{fig:app:patient_panels2}, Appendix~\ref{appendix:detailed_metrics}).
+Across both strategies, Tab.~\ref{tab:exp:obj1} reveals a consistent pattern: in every architecture and loss combination, RMSE$^*$ rises above the MSE baseline even as the mean lag falls, so the partial realignment is bought at a cost to lag-adjusted accuracy that grows with the tolerance, and neither strategy closes the detection gap (per-patient trajectories for all variants and both architectures are shown in Figs.~\ref{fig:app:patient_panels} and~\ref{fig:app:patient_panels2}, Appendix~\ref{appendix:detailed_metrics}).
 
 % ================================================================
 \section{Objective 2: Multi-Step Forecasting} \label{sec:exp:obj2}
@@ -129,20 +129,20 @@ The event detection columns of Tab.~\ref{tab:exp:obj2} show a small increase in 
 \small
 \caption{Effect of multi-step sequence supervision on forecasting accuracy and mean prediction delay. RMSE$^*$ is the lag-adjusted RMSE after the optimal per-patient temporal shift $\Delta^*$. RMSE, RMSE$^*$, and MAE are in mg/dL; event-detection metrics are derived by thresholding each 60-min prediction at 70~mg/dL with $\tau = 15$~min. Bold values mark the best result per column across all configurations. Means over 36 patients.}
 \label{tab:exp:obj2}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{llrrrrrrrr}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrrrrrr}
 \toprule
-Architecture & Supervision & RMSE & RMSE$^*$ & Lag (min) & MAE & Precision & Recall & F1 & F2 \\
+Supervision & RMSE & RMSE$^*$ & Lag & MAE & Precision & Recall & F1 & F2 \\
 \midrule
-\multicolumn{10}{l}{\textit{LSTM}} \\[2pt]
- & Single-step (baseline) & 36.09 & 21.65          & 51.2          & 27.12 & 0.010 & 0.004 & 0.005 & 0.004 \\
- & Multi-step             & \textbf{35.59} & \textbf{20.74} & \textbf{50.1} & \textbf{26.80} & 0.011 & 0.009 & 0.010 & 0.010 \\
+\multicolumn{9}{l}{\textit{LSTM}} \\[2pt]
+Single-step (baseline) & 36.09 & 21.65          & 51.2          & 27.12 & 0.010 & 0.004 & 0.005 & 0.004 \\
+Multi-step             & \textbf{35.59} & \textbf{20.74} & \textbf{50.1} & \textbf{26.80} & 0.011 & 0.009 & 0.010 & 0.010 \\
 \midrule
-\multicolumn{10}{l}{\textit{PatchTST}} \\[2pt]
- & Single-step (baseline) & 39.27 & \textbf{14.21} & 55.3 & 29.00 & 0.048 & 0.089          & 0.061          & 0.074          \\
- & Multi-step             & 39.05 & 14.53          & 54.6 & 28.84 & \textbf{0.060} & \textbf{0.103} & \textbf{0.072} & \textbf{0.085} \\
+\multicolumn{9}{l}{\textit{PatchTST}} \\[2pt]
+Single-step (baseline) & 39.27 & \textbf{14.21} & 55.3 & 29.00 & 0.048 & 0.089          & 0.061          & 0.074          \\
+Multi-step             & 39.05 & 14.53          & 54.6 & 28.84 & \textbf{0.060} & \textbf{0.103} & \textbf{0.072} & \textbf{0.085} \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 % ================================================================

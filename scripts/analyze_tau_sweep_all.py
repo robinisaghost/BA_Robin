@@ -56,10 +56,10 @@ IMG_DIR = Path("thesis/img")
 # Solid lines in the Okabe-Ito colourblind-safe palette, matching the variant
 # colours used in the trajectory figures (4.1/4.3/4.4).
 STYLES = {
-    "MSE":         dict(color="#0072B2", linestyle="-", linewidth=1.8),
-    "Bounded-Lag": dict(color="#E69F00", linestyle="-", linewidth=1.8),
-    "Soft-DTW":    dict(color="#009E73", linestyle="-", linewidth=1.8),
-    "Multi-step":  dict(color="#CC79A7", linestyle="-", linewidth=1.8),
+    "MSE":         dict(color="#0072B2", linestyle="-", linewidth=1.3),
+    "Bounded-Lag": dict(color="#E69F00", linestyle="-", linewidth=1.3),
+    "Soft-DTW":    dict(color="#009E73", linestyle="-", linewidth=1.3),
+    "Multi-step":  dict(color="#CC79A7", linestyle="-", linewidth=1.3),
 }
 
 

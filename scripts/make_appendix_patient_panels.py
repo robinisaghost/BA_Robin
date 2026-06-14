@@ -34,7 +34,7 @@ WIN = 120  # 120 steps x 5 min = 10-hour display window
 # Two pages, two patients each (LSTM + PatchTST panels per patient).
 GROUPS = [["85102", "85116"], ["85215", "85217"]]
 
-TRUE_STYLE = dict(color="#000000", linestyle="-", linewidth=2.0, zorder=6)
+TRUE_STYLE = dict(color="#000000", linestyle="-", linewidth=1.5, zorder=6)
 VARIANTS = [
     # label,            file-stem,      colour (Okabe-Ito, solid)
     ("MSE (baseline)",  "60min",        "#0072B2"),
@@ -86,7 +86,7 @@ def load_trace(arch_stem, var_stem, pid, key):
 
 
 def legend_handles():
-    h = [Line2D([0], [0], color="#000000", linestyle="-", linewidth=2.0,
+    h = [Line2D([0], [0], color="#000000", linestyle="-", linewidth=1.5,
                 label="Ground truth")]
     h += [Line2D([0], [0], color=c, linestyle="-", linewidth=1.6, label=lab)
           for lab, _, c in VARIANTS]
@@ -113,7 +113,7 @@ def make_page(patients, out_path):
             pred = test_portion(load_trace(arch_stem, var_stem, pid, "pred"))
             m = min(len(pred), e) - s
             ax.plot(t[:m], pred[s:s + m], color=color, linestyle="-",
-                    linewidth=1.4, alpha=0.95)
+                    linewidth=1.0, alpha=0.95)
 
         ax.axhline(HYPO_THRESHOLD, color=THRESHOLD_COLOR, linestyle=(0, (5, 3)),
                    linewidth=1.2, zorder=2)

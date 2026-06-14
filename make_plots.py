@@ -515,7 +515,7 @@ def plot_classifier_predictions(
     test_lstm = lstm_prob[test_start:]
     test_pt = pt_prob[test_start:]
 
-    WIN = min(600, len(test_true))
+    WIN = min(300, len(test_true))
     event_idx = np.where(test_true > 0.5)[0]
     if len(event_idx) > 0:
         center = int(event_idx[len(event_idx) // 2])
@@ -562,7 +562,7 @@ def plot_classifier_predictions(
 
         # Probability curve with shading underneath
         ax.fill_between(t, 0, prob, color=color, alpha=0.18, zorder=2)
-        ax.plot(t, prob, color=color, linewidth=2.0, zorder=3)
+        ax.plot(t, prob, color=color, linewidth=1.0, zorder=3)
 
         # Decision threshold
         ax.axhline(
