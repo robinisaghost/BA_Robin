@@ -59,17 +59,35 @@ ax.plot(t, shape_pred, color=COL_PRED, linewidth=2.0)
 style(ax, "(a) MSE", ylabel=True)
 
 # ── (b) Bounded-Lag: nearest-feature correspondences (horizontal links) ─────
+# Show one tolerated shift each in the upper (peak), middle (zero crossing) and
+# lower (trough) part of the panel, so the dashed links are clearly separated
+# and easy to read.
 ax = axes[1]
-pt = argrelextrema(shape_true, np.greater, order=8)[0]
-pp = argrelextrema(shape_pred, np.greater, order=8)[0]
-tt = argrelextrema(shape_true, np.less, order=8)[0]
-tp = argrelextrema(shape_pred, np.less, order=8)[0]
-for a, b in list(zip(pt, pp)) + list(zip(tt, tp)):
-    yv = (shape_true[a] + shape_pred[b]) / 2
-    ax.plot([t[a], t[b]], [yv, yv], color=COL_LINK, linestyle="--",
-            linewidth=1.6, alpha=0.9)
 ax.plot(t, shape_true, color=COL_TRUE, linewidth=2.0)
 ax.plot(t, shape_pred, color=COL_PRED, linewidth=2.0)
+
+pk_t = argrelextrema(shape_true, np.greater, order=8)[0]
+pk_p = argrelextrema(shape_pred, np.greater, order=8)[0]
+tr_t = argrelextrema(shape_true, np.less, order=8)[0]
+tr_p = argrelextrema(shape_pred, np.less, order=8)[0]
+zc_t = np.where(np.diff(np.sign(shape_true)))[0]
+zc_p = np.where(np.diff(np.sign(shape_pred)))[0]
+
+
+def nearest(i, cand):
+    return cand[np.argmin(np.abs(cand - i))]
+
+
+links_b = [
+    (pk_t[0],               nearest(pk_t[0], pk_p)),                # upper
+    (zc_t[len(zc_t) // 2],  nearest(zc_t[len(zc_t) // 2], zc_p)),   # middle
+    (tr_t[-1],              nearest(tr_t[-1], tr_p)),               # lower
+]
+for a, b in links_b:
+    yv = (shape_true[a] + shape_pred[b]) / 2
+    ax.plot([t[a], t[b]], [yv, yv], color=COL_LINK, linestyle="--",
+            linewidth=1.8, alpha=0.95, zorder=5)
+    ax.plot([t[a], t[b]], [yv, yv], "o", color=COL_LINK, markersize=3.5, zorder=6)
 style(ax, "(b) Bounded-Lag ($D{=}3$)")
 
 # ── (c) Soft-DTW: optimal warping-path correspondences ──────────────────────
